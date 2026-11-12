@@ -40,7 +40,7 @@ const server = http.createServer(async (req, res) => {
   const hasToolResult = last.role === 'tool' || messages.some((message) => message.role === 'tool');
   res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
   if (hasToolResult) {
-    sse(res, chunk({ role: 'assistant', content: '3D 任务已完成，模型已经准备好，可以在工具卡片里旋转查看，也可以继续让我做拆件或拓扑。' }));
+    sse(res, chunk({ role: 'assistant', content: '3D 任务已完成，未执行额外处理。结果已显示在对话中。' }));
     sse(res, { ...chunk({}), choices: [{ index: 0, delta: {}, finish_reason: 'stop' }] });
     res.write('data: [DONE]\n\n');
     return res.end();
@@ -61,5 +61,6 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, HOST, () => console.log(`mock LLM listening on http://${HOST}:${PORT}`));
+
 
 

@@ -1,9 +1,9 @@
 {
   "name": "dsh-tripo-support",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
-  "description": "Tripo, DashScope/qianwenai and Tencent Hunyuan3D async 3D providers for DeepSeek Harness, with in-chat 3D preview.",
+  "description": "Tripo, Meshy, Hyper3D, DashScope/qianwenai and Tencent Hunyuan3D async 3D providers for DeepSeek Harness, with in-chat 3D preview.",
   "license": "MIT",
   "author": "OMEN111111",
   "repository": {
@@ -39,5 +39,9 @@
         "@deepseek-ai/dsh-client-locale"
       ]
     }
+  },
+  "engines": {
+    "node": ">=22.19.0",
+    "dsh": ">=0.2.2-rc.1 <0.3.0"
   }
 }

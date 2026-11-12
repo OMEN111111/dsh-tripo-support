@@ -72,13 +72,17 @@ textarea.dsh-3d-input{height:auto;min-height:52px;padding:7px 8px;resize:vertica
 .dsh-3d-menu-error{margin:4px 2px;padding:6px 8px;border-radius:7px;background:rgba(239,68,68,.08);color:#ef4444;font-size:11.5px;line-height:1.4;word-break:break-all}
 .dsh-3d-preview-wrap{border:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.24));border-radius:10px;overflow:hidden;background:#15171c}
 .dsh-3d-preview-src{padding:6px 9px;font-size:11px;color:rgba(255,255,255,.65);background:#15171c;word-break:break-all}
-.dsh-3d-tool{display:grid;gap:8px;padding:2px}
+.dsh-3d-chat-result{display:grid;gap:8px;margin:8px 0;padding:10px 11px;border:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.24));border-radius:10px;background:var(--dsw-alias-bg-layer-1,#fff)}
+.dsh-3d-chat-result-head{display:flex;gap:7px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--dsw-alias-label-secondary,#6b7280)}
+.dsh-3d-chat-result-title{font-weight:600;color:var(--dsw-alias-label-primary,#111827)}
+.dsh-3d-chat-result-dot{width:7px;height:7px;border-radius:50%;background:var(--dsw-alias-brand-primary,#4c78ff)}
+.dsh-3d-chat-result-error{color:var(--dsw-alias-state-error-primary,#ef4444);font-size:11.5px;word-break:break-all}.dsh-3d-tool{display:grid;gap:8px;padding:2px}
 .dsh-3d-tool-head{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px}
 .dsh-3d-tool-chip{display:inline-flex;align-items:center;padding:1px 6px;border:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.24));border-radius:4px;color:var(--dsw-alias-label-secondary,#6b7280);font-size:10.5px}
 `;
 
-    const protocolLabel = (protocol) => protocol === 'dashscope' ? 'DashScope 3D' : protocol === 'tencent' ? '混元3D' : 'Tripo v3';
-    const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencentcloudapi.com' : protocol === 'dashscope' ? 'https://cn-beijing.maas.qianwenaiapi.com/api/v1/services/aigc/video-generation/3d-generation' : 'https://openapi.tripo3d.ai/v3';
+const protocolLabel = (protocol) => protocol === 'dashscope' ? 'DashScope 3D' : protocol === 'tencent' ? 'HY3D' : protocol === 'meshy' ? 'Meshy' : protocol === 'hyper' ? 'Hyper3D' : 'Tripo v3';
+const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencentcloudapi.com' : protocol === 'dashscope' ? 'https://cn-beijing.maas.qianwenaiapi.com/api/v1/services/aigc/video-generation/3d-generation' : protocol === 'meshy' ? 'https://api.meshy.ai' : protocol === 'hyper' ? 'https://api.hyper3d.com/api/v2' : 'https://openapi.tripo3d.ai/v3';
 
     async function api(path, body) {
       const response = await fetch(API + path, { method: body === undefined ? 'GET' : 'POST', credentials: 'same-origin', headers: body === undefined ? undefined : { 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
@@ -135,7 +139,8 @@ textarea.dsh-3d-input{height:auto;min-height:52px;padding:7px 8px;resize:vertica
           h('span', { className: 'dsh-3d-badge' }, provider.custom ? '第三方' : '官方'),
           h('span', { className: 'dsh-3d-spacer' }),
           h('button', { className: 'dsh-3d-btn', type: 'button', onClick: () => setEditing(!editing) }, editing ? '取消' : '配置'),
-          provider.custom ? h('button', { className: 'dsh-3d-btn', type: 'button', onClick: remove }, '删除') : null),
+          provider.custom && !provider.preset ? h('button', { className: 'dsh-3d-btn', type: 'button', onClick: remove }, '删除') : null,
+        ),
         editing ? h('div', { className: 'dsh-3d-form' },
           provider.protocol === 'tencent'
             ? h('div', { className: 'dsh-3d-grid' },
@@ -151,7 +156,8 @@ textarea.dsh-3d-input{height:auto;min-height:52px;padding:7px 8px;resize:vertica
             h(Field, { label: 'Base URL' }, h('input', { className: 'dsh-3d-input', value: draft.baseURL, onChange: (e) => set({ baseURL: e.target.value }), spellCheck: false })),
             provider.protocol === 'tencent' ? h(Field, { label: 'Region' }, h('input', { className: 'dsh-3d-input', value: draft.region, onChange: (e) => set({ region: e.target.value }), spellCheck: false })) : null,
             h(Field, { label: '模型 ID（逗号分隔）' }, h('input', { className: 'dsh-3d-input', value: draft.models, onChange: (e) => set({ models: e.target.value }), spellCheck: false })),
-            h(Field, { label: 'Webhook Secret（可选）' }, h('input', { className: 'dsh-3d-input', type: 'password', autoComplete: 'new-password', value: key.webhookSecret, onChange: (e) => setKey({ ...key, webhookSecret: e.target.value }), placeholder: 'whsec_…' }))) : null
+            provider.protocol === 'tripo' ? h(Field, { label: 'Webhook Secret（可选）' }, h('input', { className: 'dsh-3d-input', type: 'password', autoComplete: 'new-password', value: key.webhookSecret, onChange: (e) => setKey({ ...key, webhookSecret: e.target.value }), placeholder: 'whsec_…' })) : null
+          ) : null
         ) : null);
     }
 
@@ -168,7 +174,7 @@ textarea.dsh-3d-input{height:auto;min-height:52px;padding:7px 8px;resize:vertica
         h('div', { className: 'dsh-3d-form' },
           h('div', { className: 'dsh-3d-grid' },
             h(Field, { label: '名称' }, h('input', { className: 'dsh-3d-input', value: draft.label, onChange: (e) => set({ label: e.target.value }), placeholder: '例如 第三方 Tripo' })),
-            h(Field, { label: '协议' }, h('select', { className: 'dsh-3d-input', value: draft.protocol, onChange: (e) => set({ protocol: e.target.value, baseURL: defaultBase(e.target.value) }) }, h('option', { value: 'tripo' }, 'Tripo v3'), h('option', { value: 'dashscope' }, 'DashScope 3D'), h('option', { value: 'tencent' }, '腾讯混元3D'))),
+            h(Field, { label: '协议' }, h('select', { className: 'dsh-3d-input', value: draft.protocol, onChange: (e) => set({ protocol: e.target.value, baseURL: defaultBase(e.target.value) }) }, h('option', { value: 'tripo' }, 'Tripo v3'), h('option', { value: 'meshy' }, 'Meshy'), h('option', { value: 'hyper' }, 'Hyper3D Rodin'), h('option', { value: 'dashscope' }, 'DashScope 3D'), h('option', { value: 'tencent' }, 'HY3D'))),
             h(Field, { label: 'Base URL' }, h('input', { className: 'dsh-3d-input', value: draft.baseURL, onChange: (e) => set({ baseURL: e.target.value }), spellCheck: false }))),
           h(Field, { label: '模型 ID（逗号分隔）' }, h('input', { className: 'dsh-3d-input', value: draft.models, onChange: (e) => set({ models: e.target.value }), placeholder: 'v3.1-20260211 或 Tripo/Tripo-H3.1' })),
           draft.protocol === 'tencent'
@@ -223,8 +229,7 @@ textarea.dsh-3d-input{height:auto;min-height:52px;padding:7px 8px;resize:vertica
             },
               h('span', { className: `dsh-3d-dot${provider.configured ? ' dsh-3d-dot-ok' : ''}` }),
               h('span', { className: 'dsh-3d-menu-text' },
-                h('span', { className: 'dsh-3d-menu-name' }, provider.label),
-              h('span', { className: 'dsh-3d-menu-sub' }, `${provider.custom ? '第三方' : '官方'}${provider.configured ? '' : ' · 未配置密钥'}`)),
+                h('span', { className: 'dsh-3d-menu-name' }, provider.label)),
               active ? h('span', { className: 'dsh-3d-menu-check' }, '✓') : null),
             expanded && provider.models.length ? h('div', { className: 'dsh-3d-menu-models' },
               provider.models.map((model) => h('button', {
@@ -343,6 +348,45 @@ textarea.dsh-3d-input{height:auto;min-height:52px;padding:7px 8px;resize:vertica
         h('div', { className: 'dsh-3d-preview-src' }, src));
     }
 
+    function ChatResultNode(props) {
+      const initial = props.node?.data?.result || null;
+      const [result, setResult] = React.useState(initial);
+      const [status, setStatus] = React.useState(initial?.status || '');
+      React.useEffect(() => {
+        if (!initial) return;
+        setResult(initial);
+        setStatus(initial.status || '');
+      }, [initial]);
+      React.useEffect(() => {
+        if (!result?.taskId || !result?.provider) return;
+        if (['success', 'failed', 'cancelled', 'unknown', 'timeout'].includes(status)) return;
+        let cancelled = false;
+        const timer = setInterval(async () => {
+          try {
+            const data = await api(`/task?provider=${encodeURIComponent(result.provider)}&taskId=${encodeURIComponent(result.taskId)}&operation=${encodeURIComponent(result.operation || '')}`);
+            if (cancelled) return;
+            setStatus(data.result.status);
+            setResult((current) => ({ ...current, ...data.result, previewUrl: data.result.previewUrl || current?.previewUrl }));
+            if (['success', 'failed', 'cancelled', 'unknown'].includes(data.result.status)) clearInterval(timer);
+          } catch { /* keep polling; the tool view also reports errors */ }
+        }, 2500);
+        return () => { cancelled = true; clearInterval(timer); };
+      }, [result?.taskId, result?.provider, result?.operation, status]);
+      if (!result) return null;
+      const preview = result.previewUrl || result.preview;
+      return h('div', { className: 'dsh-3d-chat-result' },
+        h('div', { className: 'dsh-3d-chat-result-head' },
+          h('span', { className: 'dsh-3d-chat-result-dot' }),
+          h('span', { className: 'dsh-3d-chat-result-title' }, '3D 结果'),
+          h('span', { className: 'dsh-3d-tool-chip' }, result.providerLabel || result.provider || ''),
+          result.operation ? h('span', { className: 'dsh-3d-tool-chip' }, result.operation) : null,
+          result.model ? h('span', { className: 'dsh-3d-muted' }, result.model) : null,
+          status || result.status ? h('span', { className: 'dsh-3d-muted' }, status || result.status) : null),
+        preview ? h(ModelPreview, { src: preview, height: 360, mediaType: result.mediaType }) : h('div', { className: 'dsh-3d-muted' }, status === 'failed' ? '任务失败' : '正在生成 3D 模型…'),
+        result.error ? h('div', { className: 'dsh-3d-chat-result-error' }, result.error) : null,
+        result.localFile ? h('div', { className: 'dsh-3d-muted' }, `已保存：${String(result.localFile).split(/[\\\\/]/).pop()}`) : null);
+    }
+
     function readResult(block) {
       const queue = [block];
       const seen = new Set();
@@ -385,8 +429,50 @@ textarea.dsh-3d-input{height:auto;min-height:52px;padding:7px 8px;resize:vertica
           h('span', { className: 'dsh-3d-tool-chip' }, result.operation || ''),
           h('span', { className: 'dsh-3d-tool-chip' }, status || result.status || ''),
           result.taskId ? h('span', { className: 'dsh-3d-muted' }, result.taskId) : null),
-        preview ? h(ModelPreview, { src: preview, height: 320, mediaType: result.mediaType }) : h('div', { className: 'dsh-3d-muted' }, '任务完成后会在这里显示 3D 预览。'),
-        result.localFile ? h('div', { className: 'dsh-3d-muted', style: { wordBreak: 'break-all' } }, result.localFile) : null);
+        preview ? h('div', { className: 'dsh-3d-muted' }, '3D 预览已显示在对话中。') : null,
+        result.localFile ? h('div', { className: 'dsh-3d-muted' }, `已保存：${String(result.localFile).split(/[\\\\/]/).pop()}`) : null);
+    }
+
+    const RESULT_NODE_KIND = 'dsh-tripo-result';
+
+    function resultMeta(value) {
+      if (!value || typeof value !== 'object' || value.kind !== 'dsh-tripo-support') return null;
+      if (!value.taskId && !value.previewUrl && !value.localFile) return null;
+      return value;
+    }
+
+    function create3DResultDefinition() {
+      return {
+        kind: RESULT_NODE_KIND,
+        target: 'chat',
+        match: (event) => {
+          if (event.type !== 'tool/result') return null;
+          const turn = event.data?.turn;
+          if (typeof turn !== 'number' || !Number.isSafeInteger(turn) || turn < 0) return null;
+          if (!resultMeta(event.data?.meta)) return null;
+          return { id: `result:${event.seq}`, role: 'start' };
+        },
+        start: (_context, match) => {
+          const turn = match.event.data?.turn;
+          const result = resultMeta(match.event.data?.meta);
+          if (typeof turn !== 'number' || !result) throw new Error('dsh-tripo-result requires a 3D tool result');
+          return { turn, result, seq: match.event.seq };
+        },
+        update: (context) => context.state,
+        buildViewNode: (context) => {
+          if (!context.state?.result) return null;
+          return {
+            key: context.key,
+            kind: RESULT_NODE_KIND,
+            id: context.id,
+            target: 'chat',
+            anchorSeq: context.state.seq,
+            location: { kind: 'session' },
+            visibility: 'visible',
+            data: { turn: context.state.turn, result: context.state.result },
+          };
+        },
+      };
     }
 
     return {
@@ -418,10 +504,23 @@ textarea.dsh-3d-input{height:auto;min-height:52px;padding:7px 8px;resize:vertica
         for (const key of ['create_3d_task', 'run_3d_operation', 'generate_3d', 'wait_3d_task']) {
           ctx.slots.inject('tool.call.toolview', () => ctx.slots.register({ name: 'tool.call.toolview', key }, ToolPreview));
         }
+        ctx.inject(['uiConversation'], (owner) => {
+          const uiConversation = owner.uiConversation || owner.get?.('uiConversation');
+          if (!uiConversation?.events?.register) return;
+          owner.effect(() => uiConversation.events.register(create3DResultDefinition()), 'dsh-tripo-support: chat result node');
+          owner.slots.inject('conversation.chat.node', () => owner.slots.register({ name: 'conversation.chat.node', key: RESULT_NODE_KIND }, ChatResultNode));
+        });
       },
     };
   },
 });
+
+
+
+
+
+
+
 
 
 

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "description": "Manage Tripo, qianwenai (DashScope), Tencent Hunyuan3D and third-party async 3D services under Settings → 3D generation, and pick a model from the composer 3D pill.",
-    "title": "3D generation (Tripo / Hunyuan3D / DashScope)"
+    "title": "3D generation (Tripo / Meshy / Hyper3D / HY3D)",
+    "description": "Manage Tripo, Meshy, Hyper3D, Tencent Hunyuan3D and third-party async 3D services under Settings → 3D generation, and pick a provider/model from the composer 3D pill."
   }
 }

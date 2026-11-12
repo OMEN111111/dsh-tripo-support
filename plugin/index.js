@@ -8,9 +8,11 @@ import {
   OPERATIONS,
   PROTOCOL_LABELS,
   buildCreateRequest,
+  buildDownloadRequest,
   buildQueryRequest,
   buildTestRequest,
   parseCreateResponse,
+  parseDownloadResponse,
   parseTaskResponse,
   parseTestResponse,
 } from './lib/protocols.js';
@@ -79,6 +81,21 @@ export function apply(ctx, config = {}) {
   const providers = new ProviderStore({ file: join(root, 'state.json'), credentials });
   const tasks = new TaskStore({ file: join(root, 'tasks.json'), previewFile: join(root, 'previews.json') });
 
+  ctx.inject(['systemPrompt'], (scoped) => {
+    scoped.effect(() => scoped.systemPrompt.section({
+      name: 'dsh-tripo-support/3d-policy',
+      order: 46,
+      text: [
+        '3D generation policy (dsh-tripo-support):',
+        '- Do only what the user explicitly asked for. If the user asks to generate a model, create exactly one 3D generation task and stop; do not add texture, retopology, rigging, segmentation, conversion, DCC/procedural modeling, or any other step unless the user explicitly requests that separate step.',
+        '- If the user asks for a material/texture, topology, rigging or another post-process, perform only that operation on the referenced model; do not also regenerate or remesh it.',
+        '- Never retry automatically. If the result is unsatisfactory, report what was produced and stop; ask the user whether to retry and what to change.',
+        '- Never switch provider, model, or operation silently. If the requested operation needs another model in the same provider (for example qwenai Tripo texture/rig/topology models), explain the choice and ask; only after explicit user approval call select_3d_model.',
+        '- Report every task result to the user, including failures, before doing anything else.',
+      ].join('\n'),
+    }), 'dsh-tripo-support: 3D policy');
+  });
+
   const outputDir = () => (config.workspaceDir ? String(config.workspaceDir) : join(root, 'output'));
 
   const providerOrThrow = async (id) => {
@@ -117,9 +134,9 @@ export function apply(ctx, config = {}) {
     const secrets = await providers.secrets(provider);
     if (provider.protocol === 'tencent') ensure(secrets.secretId && secrets.secretKey, `${provider.label} 还没有配置 SecretId / SecretKey`);
     else ensure(secrets.apiKey, `${provider.label} 还没有配置 API Key`);
-    const request = buildCreateRequest(provider, operation, args, secrets);
+    const request = await buildCreateRequest(provider, operation, args, secrets);
     const { response, json } = await fetchJson(request.url, { method: request.method, headers: request.headers, body: request.body, signal });
-    if (!response.ok && response.status !== 200) {
+    if (response.status >= 400) {
       // Tencent returns HTTP 200 with an error envelope; other protocols use HTTP status.
       if (!json.Response && !json.output) throw new Error(`${provider.label} 创建任务失败：HTTP ${response.status}`);
     }
@@ -129,7 +146,8 @@ export function apply(ctx, config = {}) {
       providerLabel: provider.label,
       protocol: provider.protocol,
       operation,
-      model: args.model || provider.defaultModel,
+      model: request.model || args.model || provider.defaultModel,
+      downloadTaskId: created.downloadTaskId,
       taskId: created.taskId,
       status: created.status,
       progress: created.progress ?? 0,
@@ -150,7 +168,13 @@ export function apply(ctx, config = {}) {
     else ensure(secrets.apiKey, `${provider.label} 还没有配置 API Key`);
     const request = buildQueryRequest(provider, taskId, op, secrets);
     const { json } = await fetchJson(request.url, { method: request.method, headers: request.headers, body: request.body, signal });
-    const parsed = parseTaskResponse(request.protocol, json);
+    let parsed = parseTaskResponse(request.protocol, json);
+    if (provider.protocol === 'hyper' && parsed.status === 'success' && record?.downloadTaskId) {
+      const downloadRequest = buildDownloadRequest(provider, record.downloadTaskId, secrets);
+      const { json: downloadJson } = await fetchJson(downloadRequest.url, { method: downloadRequest.method, headers: downloadRequest.headers, body: downloadRequest.body, signal });
+      const downloaded = parseDownloadResponse(downloadRequest.protocol, downloadJson);
+      parsed = { ...parsed, modelUrl: downloaded.modelUrl, results: downloaded.results };
+    }
     let saved;
     let preview;
     if (parsed.status === 'success' && download && parsed.modelUrl) {
@@ -209,7 +233,7 @@ export function apply(ctx, config = {}) {
     if (provider.protocol === 'tencent' && operation === 'convert') {
       const secrets = await providers.secrets(provider);
       ensure(secrets.secretId && secrets.secretKey, `${provider.label} 还没有配置 SecretId / SecretKey`);
-      const request = buildCreateRequest(provider, operation, args, secrets);
+      const request = await buildCreateRequest(provider, operation, args, secrets);
       const { json } = await fetchJson(request.url, { method: request.method, headers: request.headers, body: request.body, signal });
       const response = json.Response || {};
       if (response.Error) throw new Error(`${response.Error.Code}: ${response.Error.Message}`);
@@ -223,7 +247,7 @@ export function apply(ctx, config = {}) {
       provider: providerId,
       providerLabel: created.provider.label,
       operation,
-      model: args.model || created.provider.defaultModel,
+      model: created.record.model || args.model || created.provider.defaultModel,
       taskId: created.created.taskId,
     };
     if (!wait) return { ...base, status: created.created.status, progress: 0 };
@@ -263,7 +287,7 @@ export function apply(ctx, config = {}) {
   // Tool definitions -------------------------------------------------------
   ctx.tools.register({
     name: 'list_3d_providers',
-    description: 'List configured 3D generation services (Tripo official, qianwenai/DashScope, Tencent Hunyuan3D official, or custom compatible relays), the models each exposes, supported operations, and whether credentials are configured. Call this before a 3D operation when unsure what is available.',
+    description: 'List configured 3D services (Tripo, Meshy, Hyper3D, Tencent Hunyuan3D, qianwenai and custom relays), their models, operations and credential status. Call once before choosing a provider.',
     parameters: { type: 'object', properties: {} },
     output: {
       schema: {
@@ -277,7 +301,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => value,
+      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
     },
     async execute() {
       const snapshot = await status();
@@ -301,7 +325,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => value,
+      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
     },
     async execute() {
       const list = tasks.list().slice(-50).reverse().map((task) => ({ provider: task.providerId, providerLabel: task.providerLabel, operation: task.operation, model: task.model, taskId: task.taskId, status: task.status, file: task.file, previewId: task.previewId, updatedAt: task.updatedAt }));
@@ -316,7 +340,7 @@ export function apply(ctx, config = {}) {
     output: {
       schema: { type: 'object', properties: { summary: { type: 'string' }, tasks: { type: 'array', items: { type: 'object', additionalProperties: true } }, missed: { type: 'array', items: { type: 'string' } } }, required: ['summary', 'tasks'], additionalProperties: true },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => value,
+      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
     },
     async execute(args) {
       const providerId = String(args.provider || 'tripo-official');
@@ -334,8 +358,40 @@ export function apply(ctx, config = {}) {
   });
 
   ctx.tools.register({
+    name: 'select_3d_model',
+    description: 'Change the active 3D provider/model for the composer pill. Call this only after the user explicitly agrees to switch; never switch silently. Use it when an operation needs a different model in the same provider (for example qwenai Tripo texture/rig/topology models).',
+    parameters: {
+      type: 'object',
+      properties: {
+        provider: { type: 'string', description: 'Provider id.' },
+        model: { type: 'string', description: 'Model id from list_3d_providers.' },
+        userApproved: { type: 'boolean', description: 'Set true only after the user explicitly approved this switch.' },
+        reason: { type: 'string', description: 'One short sentence shown to the user explaining the switch.' },
+      },
+      required: ['provider', 'model', 'userApproved'],
+    },
+    output: {
+      schema: {
+        type: 'object',
+        properties: { summary: { type: 'string' }, provider: { type: 'string' }, model: { type: 'string' } },
+        required: ['summary', 'provider', 'model'],
+        additionalProperties: true,
+      },
+      render: (_args, value) => [{ type: 'text', text: value.summary }],
+      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support-selection', ...value }),
+    },
+    async execute(args) {
+      ensure(args.userApproved === true, '切换 3D 模型需要用户明确同意');
+      const provider = await providerOrThrow(String(args.provider));
+      ensure(provider.models.includes(String(args.model)), `${provider.label} 不包含模型 ${args.model}`);
+      const selection = await providers.setSelection({ providerId: provider.id, model: String(args.model) });
+      return { summary: `已切换 3D 模型：${provider.label} · ${selection.model}${args.reason ? `（${args.reason}）` : ''}`, provider: provider.id, model: selection.model };
+    },
+  });
+
+  ctx.tools.register({
     name: 'create_3d_task',
-    description: 'Create an asynchronous 3D task on a configured service. Returns a task id immediately so the conversation can show progress. Use get_3d_task or wait_3d_task for the result. Supports generation, texture, segmentation, retopology, conversion, rigging and animation operations.',
+    description: 'Create exactly one asynchronous 3D task for the user request. Do not retry, do not add texture/retopology/rigging or any follow-up operation unless the user explicitly asked for it. Returns a task id and stops so the result can be reported to the user.',
     parameters: {
       type: 'object',
       properties: {
@@ -388,7 +444,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => value,
+      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
     },
     async execute(args, exec) {
       const outputDirectory = await sessionOutputDir(ctx, exec, outputDir());
@@ -402,7 +458,7 @@ export function apply(ctx, config = {}) {
         summary: `已创建 ${created.provider.label} 的 ${args.operation} 任务：${created.created.taskId}（${created.created.status}）`,
         provider: created.provider.id,
         operation: args.operation,
-        model: args.model || created.provider.defaultModel,
+        model: created.record.model || args.model || created.provider.defaultModel,
         taskId: created.created.taskId,
         status: created.created.status,
         outputDirectory,
@@ -439,7 +495,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => value,
+      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
     },
     async execute(args, exec) {
       const result = await queryTask({
@@ -483,7 +539,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => value,
+      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
     },
     async execute(args, exec) {
       const result = await waitTask({
@@ -502,7 +558,7 @@ export function apply(ctx, config = {}) {
 
   ctx.tools.register({
     name: 'run_3d_operation',
-    description: 'Create, wait for, and download one complete 3D operation (generation, texture, segmentation, retopology, conversion, rigging, animation, and more). Use this for a one-shot task; use create_3d_task when you need to show live progress first.',
+    description: 'Perform exactly one 3D operation (generation, texture, segmentation, retopology, conversion, rigging, animation) and download the result. Do not chain or retry operations; report the result and ask before any follow-up.',
     parameters: {
       type: 'object',
       properties: {
@@ -558,7 +614,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => value,
+      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
     },
     timeoutMs: 600000,
     async execute(args, exec) {
@@ -576,7 +632,7 @@ export function apply(ctx, config = {}) {
 
   ctx.tools.register({
     name: 'generate_3d',
-    description: 'Convenience 3D generation: create, wait for, and download a text-to-3D, image-to-3D, or multiview-to-3D task on the selected provider/model. For post-processing (texture, segmentation, retopology, rigging, etc.) use run_3d_operation.',
+    description: 'Generate exactly one 3D model from text or images and stop. Do not auto-texture, retopologize, rig, retry or invoke DCC tools unless the user explicitly asks for that separate operation.',
     parameters: {
       type: 'object',
       properties: {
@@ -606,7 +662,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => value,
+      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
     },
     timeoutMs: 600000,
     async execute(args, exec) {
@@ -738,6 +794,16 @@ async function sessionOutputDir(ctx, exec, fallback) {
   }
   return fallback;
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

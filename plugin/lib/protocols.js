@@ -1,9 +1,11 @@
 /**
  * Protocol adapters and operation catalog for dsh-tripo-support.
  *
- * Three wire protocols are supported:
- *  - tripo: Tripo official v3 (Bearer key, /v3/... paths)
- *  - dashscope: Alibaba Bailian / qianwenai async 3D endpoint
+ * Five wire protocols are supported:
+ *  - tripo: Tripo v3 (Bearer key, /v3/... paths)
+ *  - meshy: Meshy /openapi/v2 tasks (Bearer key)
+ *  - hyper: Hyper3D Rodin /api/v2 multipart tasks (Bearer key)
+ *  - dashscope: Alibaba Bailian / qianwenai async 3D endpoint (third-party preset)
  *    (Bearer key, /api/v1/services/aigc/video-generation/3d-generation,
  *     then GET /api/v1/tasks/{id})
  *  - tencent: Tencent Cloud TI-3D (SecretId/SecretKey, TC3-HMAC-SHA256)
@@ -15,6 +17,8 @@
 
 export const PROTOCOL_LABELS = {
   tripo: 'Tripo v3',
+  meshy: 'Meshy',
+  hyper: 'Hyper3D Rodin',
   dashscope: 'DashScope 3D（百炼 / qianwenai）',
   tencent: '腾讯混元3D（TI-3D）',
 };
@@ -60,10 +64,20 @@ const TENCENT_OPERATIONS = [
   'text_to_3d', 'image_to_3d', 'texture', 'reduce_face', 'part', 'uv', 'motion',
   'auto_rig', 'profile_to_3d', 'convert',
 ];
+const MESHY_OPERATIONS = [
+  'text_to_3d', 'image_to_3d', 'multiview_to_3d', 'texture', 'retopology', 'uv', 'convert', 'auto_rig',
+];
+
+const HYPER_OPERATIONS = [
+  'text_to_3d', 'image_to_3d',
+];
+
 
 export function operationsFor(protocol) {
   if (protocol === 'tencent') return TENCENT_OPERATIONS;
   if (protocol === 'dashscope') return DASHSCOPE_OPERATIONS;
+  if (protocol === 'meshy') return MESHY_OPERATIONS;
+  if (protocol === 'hyper') return HYPER_OPERATIONS;
   return TRIPO_OPERATIONS;
 }
 
@@ -83,11 +97,13 @@ const DASHSCOPE_MODELS = [
   'Tripo/Tripo-ImageToSplat',
 ];
 const TENCENT_MODELS = ['3.1-pro', '3.0-pro', 'rapid'];
+const MESHY_MODELS = ['meshy-7.1', 'meshy-6', 'meshy-6-lite', 'meshy-t2.5', 'meshy-t2'];
+const HYPER_MODELS = ['Gen-2.5-Medium', 'Gen-2.5-High', 'Gen-2.5-Low', 'Gen-2.5-Extreme-Low', 'Gen-2.5-Extreme-High'];
 
 export const DEFAULT_PROVIDERS = {
   'tripo-official': {
     id: 'tripo-official',
-    label: 'Tripo 官方',
+    label: 'Tripo',
     protocol: 'tripo',
     auth: 'bearer',
     baseURL: 'https://openapi.tripo3d.ai/v3',
@@ -97,7 +113,9 @@ export const DEFAULT_PROVIDERS = {
   },
   'qwenai-dashscope': {
     id: 'qwenai-dashscope',
-    label: 'qwenai / 百炼 3D',
+    label: 'qwenai',
+    custom: true,
+    preset: true,
     protocol: 'dashscope',
     auth: 'bearer',
     baseURL: 'https://cn-beijing.maas.qianwenaiapi.com/api/v1/services/aigc/video-generation/3d-generation',
@@ -105,9 +123,29 @@ export const DEFAULT_PROVIDERS = {
     defaultModel: 'Tripo/Tripo-H3.1',
     apiKeyRef: 'DASHSCOPE_API_KEY',
   },
+  'meshy-official': {
+    id: 'meshy-official',
+    label: 'Meshy',
+    protocol: 'meshy',
+    auth: 'bearer',
+    baseURL: 'https://api.meshy.ai',
+    models: MESHY_MODELS,
+    defaultModel: 'meshy-7.1',
+    apiKeyRef: 'MESHY_API_KEY',
+  },
+  'hyper3d-official': {
+    id: 'hyper3d-official',
+    label: 'Hyper3D',
+    protocol: 'hyper',
+    auth: 'bearer',
+    baseURL: 'https://api.hyper3d.com/api/v2',
+    models: HYPER_MODELS,
+    defaultModel: 'Gen-2.5-Medium',
+    apiKeyRef: 'HYPER3D_API_KEY',
+  },
   'hy3d-official': {
     id: 'hy3d-official',
-    label: '腾讯混元3D 官方',
+    label: 'HY3D',
     protocol: 'tencent',
     auth: 'tc3',
     baseURL: 'https://ai3d.tencentcloudapi.com',
@@ -120,7 +158,7 @@ export const DEFAULT_PROVIDERS = {
 };
 
 export function normalizeProvider(id, input) {
-  const protocol = input.protocol === 'dashscope' || input.protocol === 'tencent' ? input.protocol : 'tripo';
+  const protocol = ['dashscope', 'tencent', 'meshy', 'hyper'].includes(input.protocol) ? input.protocol : 'tripo';
   const p = {
     ...input,
     id,
@@ -132,7 +170,7 @@ export function normalizeProvider(id, input) {
     defaultModel: String(input.defaultModel || ''),
   };
   if (!p.models.length) {
-    p.models = protocol === 'tencent' ? [...TENCENT_MODELS] : protocol === 'dashscope' ? [...DASHSCOPE_MODELS] : [...TRIPO_MODELS];
+    p.models = protocol === 'tencent' ? [...TENCENT_MODELS] : protocol === 'dashscope' ? [...DASHSCOPE_MODELS] : protocol === 'meshy' ? [...MESHY_MODELS] : protocol === 'hyper' ? [...HYPER_MODELS] : [...TRIPO_MODELS];
   }
   if (!p.models.includes(p.defaultModel)) p.defaultModel = p.models[0] || '';
   if (protocol === 'tencent') {
@@ -356,12 +394,83 @@ function hmac(key, value) {
   return createHmac('sha256', key).update(value).digest();
 }
 
-export function buildCreateRequest(provider, operation, args, secrets) {
+const MESHY_ENDPOINTS = {
+  text_to_3d: '/openapi/v2/text-to-3d',
+  image_to_3d: '/openapi/v2/image-to-3d',
+  multiview_to_3d: '/openapi/v2/multi-image-to-3d',
+  texture: '/openapi/v2/retexture',
+  retopology: '/openapi/v2/remesh',
+  uv: '/openapi/v2/uv-unwrap',
+  convert: '/openapi/v2/convert',
+  auto_rig: '/openapi/v2/rigging',
+};
+
+function meshyBody(operation, a) {
+  const extra = a.parameters && typeof a.parameters === 'object' ? a.parameters : {};
+  if (operation === 'text_to_3d') return clean({ mode: 'preview', prompt: a.prompt, ai_model: a.model, target_formats: ['glb'], ...extra });
+  if (operation === 'image_to_3d') return clean({ image_url: a.imageUrl, ai_model: a.model, should_texture: false, ...extra });
+  if (operation === 'multiview_to_3d') return clean({ image_urls: a.imageUrls, ai_model: a.model, should_texture: false, ...extra });
+  if (operation === 'texture') return clean({ input_task_id: a.sourceTaskId, text_style_prompt: a.texturePrompt, ai_model: a.model, ...extra });
+  if (operation === 'retopology') return clean({ input_task_id: a.sourceTaskId, target_polycount: a.faceLimit, topology: a.quad ? 'quad' : 'triangle', ...extra });
+  if (operation === 'uv') return clean({ input_task_id: a.sourceTaskId, ...extra });
+  if (operation === 'convert') return clean({ input_task_id: a.sourceTaskId, target_format: a.format || 'glb', ...extra });
+  if (operation === 'auto_rig') return clean({ input_task_id: a.sourceTaskId, ...extra });
+  throw new Error(`Meshy 协议不支持操作 ${operation}`);
+}
+
+function hyperTier(a, provider) {
+  return String(a.model || provider.defaultModel || 'Gen-2.5-Medium');
+}
+
+export async function buildCreateRequest(provider, operation, args, secrets) {
   const a = { ...args, model: args.model || provider.defaultModel };
+  if (provider.protocol === 'meshy') {
+    const path = MESHY_ENDPOINTS[operation];
+    if (!path) throw new Error(`Meshy 协议不支持操作 ${operation}`);
+    return {
+      url: `${provider.baseURL.replace(/\/+$/, '')}${path}`,
+      method: 'POST',
+      headers: { Authorization: `Bearer ${secrets.apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(meshyBody(operation, a)),
+      protocol: 'meshy',
+      model: a.model,
+    };
+  }
+  if (provider.protocol === 'hyper') {
+    if (operation !== 'text_to_3d' && operation !== 'image_to_3d') throw new Error(`Hyper3D 协议暂不支持操作 ${operation}`);
+    const form = new FormData();
+    form.set('tier', hyperTier(a, provider));
+    form.set('prompt', a.prompt || '');
+    form.set('mesh_mode', a.parameters?.mesh_mode || 'Raw');
+    form.set('material', a.parameters?.material || 'None');
+    form.set('geometry_file_format', 'glb');
+    if (a.parameters && typeof a.parameters === 'object') {
+      for (const [key, value] of Object.entries(a.parameters)) {
+        if (value === undefined || value === null || value === '') continue;
+        form.set(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
+      }
+    }
+    if (a.imageUrl) {
+      const image = await fetch(a.imageUrl);
+      if (!image.ok) throw new Error(`Hyper3D 读取参考图失败：HTTP ${image.status}`);
+      form.set('images', new Blob([await image.arrayBuffer()]), 'input.png');
+    } else if (a.imageBase64) {
+      const base64 = String(a.imageBase64).replace(/^data:[^;]+;base64,/, '');
+      form.set('images', new Blob([Buffer.from(base64, 'base64')]), 'input.png');
+    }
+    return {
+      url: `${provider.baseURL.replace(/\/+$/, '')}/rodin`,
+      method: 'POST',
+      headers: { Authorization: `Bearer ${secrets.apiKey}` },
+      body: form,
+      protocol: 'hyper',
+      model: hyperTier(a, provider),
+    };
+  }
   if (provider.protocol === 'tencent') {
     const { action, body } = tencentSubmit(operation, a, provider);
     const signed = tc3Headers(provider, action, body, secrets);
-    return { url: provider.baseURL, method: 'POST', headers: signed.headers, body: signed.body, action, protocol: 'tencent' };
+    return { url: provider.baseURL, method: 'POST', headers: signed.headers, body: signed.body, action, protocol: 'tencent', model: a.model };
   }
   if (provider.protocol === 'dashscope') {
     const model = dashscopeModel(provider, operation, a.model);
@@ -391,6 +500,25 @@ export function buildCreateRequest(provider, operation, args, secrets) {
 }
 
 export function buildQueryRequest(provider, taskId, operation, secrets) {
+  if (provider.protocol === 'meshy') {
+    const path = MESHY_ENDPOINTS[operation];
+    if (!path) throw new Error(`Meshy 操作 ${operation} 没有查询接口`);
+    return {
+      url: `${provider.baseURL.replace(/\/+$/, '')}${path}/${encodeURIComponent(taskId)}`,
+      method: 'GET',
+      headers: { Authorization: `Bearer ${secrets.apiKey}` },
+      protocol: 'meshy',
+    };
+  }
+  if (provider.protocol === 'hyper') {
+    return {
+      url: `${provider.baseURL.replace(/\/+$/, '')}/status`,
+      method: 'POST',
+      headers: { Authorization: `Bearer ${secrets.apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription_key: taskId }),
+      protocol: 'hyper',
+    };
+  }
   if (provider.protocol === 'tencent') {
     const [, queryAction] = TENCENT_ACTION[operation] || [];
     if (!queryAction) throw new Error(`混元3D 操作 ${operation} 没有查询接口`);
@@ -415,6 +543,18 @@ export function buildQueryRequest(provider, taskId, operation, secrets) {
 }
 
 export function parseCreateResponse(protocol, json) {
+  if (protocol === 'meshy') {
+    if (json.error) throw new Error(json.error.message || json.error);
+    const taskId = json.result || json.id;
+    if (!taskId) throw new Error('Meshy 没有返回 task id');
+    return { taskId, status: 'queued', progress: 0, raw: json };
+  }
+  if (protocol === 'hyper') {
+    if (json.error) throw new Error(json.error);
+    const taskId = json.jobs?.subscription_key;
+    if (!taskId) throw new Error('Hyper3D 没有返回 subscription_key');
+    return { taskId, downloadTaskId: json.uuid, status: 'queued', progress: 0, raw: json };
+  }
   if (protocol === 'tencent') {
     const response = json.Response || {};
     if (response.Error) throw new Error(`${response.Error.Code}: ${response.Error.Message}`);
@@ -436,16 +576,47 @@ export function parseCreateResponse(protocol, json) {
 
 export function normalizeStatus(status) {
   const s = String(status || '').toUpperCase();
-  if (s === 'SUCCEEDED' || s === 'SUCCESS' || s === 'DONE') return 'success';
+  if (s === 'SUCCEEDED' || s === 'SUCCESS' || s === 'DONE' || s === 'COMPLETED') return 'success';
   if (s === 'FAILED' || s === 'FAIL') return 'failed';
   if (s === 'CANCELED' || s === 'CANCELLED') return 'cancelled';
-  if (s === 'PENDING' || s === 'QUEUED' || s === 'WAIT') return 'queued';
-  if (s === 'RUNNING' || s === 'RUN') return 'running';
+  if (s === 'PENDING' || s === 'QUEUED' || s === 'WAIT' || s === 'WAITING') return 'queued';
+  if (s === 'RUNNING' || s === 'RUN' || s === 'GENERATING' || s === 'IN_PROGRESS') return 'running';
   if (s === 'UNKNOWN') return 'unknown';
   return 'queued';
 }
 
 export function parseTaskResponse(protocol, json) {
+  if (protocol === 'meshy') {
+    if (json.error) throw new Error(json.error.message || json.error);
+    const status = normalizeStatus(json.status);
+    const urls = json.model_urls || {};
+    return {
+      status,
+      progress: json.progress,
+      modelUrl: urls.glb || urls.fbx || urls.obj || urls.usdz,
+      previewUrl: json.thumbnail_url || json.render_urls?.[0],
+      results: json.model_urls || {},
+      error: status === 'failed' ? (json.task_error?.message || json.task_error || json.error) : undefined,
+      raw: json,
+    };
+  }
+  if (protocol === 'hyper') {
+    if (json.error) throw new Error(json.error);
+    const jobs = Array.isArray(json.jobs) ? json.jobs : [];
+    const states = jobs.map((job) => String(job.status || '').toLowerCase());
+    const failed = states.some((state) => state === 'failed');
+    const success = jobs.length > 0 && states.every((state) => state === 'done');
+    const status = failed ? 'failed' : success ? 'success' : states.some((state) => state === 'generating') ? 'running' : 'queued';
+    return {
+      status,
+      progress: success ? 100 : undefined,
+      modelUrl: undefined,
+      previewUrl: undefined,
+      results: jobs,
+      error: failed ? (json.message || 'Hyper3D job failed') : undefined,
+      raw: json,
+    };
+  }
   if (protocol === 'tencent') {
     const response = json.Response || {};
     if (response.Error) throw new Error(`${response.Error.Code}: ${response.Error.Message}`);
@@ -493,7 +664,32 @@ export function parseTaskResponse(protocol, json) {
   };
 }
 
+export function buildDownloadRequest(provider, downloadTaskId, secrets) {
+  if (provider.protocol !== 'hyper') throw new Error('该协议不需要单独下载步骤');
+  return {
+    url: `${provider.baseURL.replace(/\/+$/, '')}/download`,
+    method: 'POST',
+    headers: { Authorization: `Bearer ${secrets.apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ task_uuid: downloadTaskId }),
+    protocol: 'hyper',
+  };
+}
+
+export function parseDownloadResponse(protocol, json) {
+  if (json.error) throw new Error(json.error);
+  if (protocol !== 'hyper') return { modelUrl: undefined, results: json };
+  const list = Array.isArray(json.list) ? json.list : [];
+  const preferred = list.find((item) => /\.glb$/i.test(item.name || '')) || list[0];
+  return { modelUrl: preferred?.url, results: list };
+}
+
 export function buildTestRequest(provider, secrets) {
+  if (provider.protocol === 'meshy') {
+    return { url: `${provider.baseURL.replace(/\/+$/, '')}/openapi/v1/balance`, method: 'GET', headers: { Authorization: `Bearer ${secrets.apiKey}` }, protocol: 'meshy' };
+  }
+  if (provider.protocol === 'hyper') {
+    return { url: `${provider.baseURL.replace(/\/+$/, '')}/check_balance`, method: 'GET', headers: { Authorization: `Bearer ${secrets.apiKey}` }, protocol: 'hyper' };
+  }
   if (provider.protocol === 'tencent') {
     const signed = tc3Headers(provider, 'QueryHunyuanTo3DProJob', { JobId: '0' }, secrets);
     return { url: provider.baseURL, method: 'POST', headers: signed.headers, body: signed.body, protocol: 'tencent' };
@@ -507,6 +703,11 @@ export function buildTestRequest(provider, secrets) {
 }
 
 export function parseTestResponse(protocol, status, json) {
+  if (protocol === 'meshy' || protocol === 'hyper') {
+    if (status === 401 || status === 403) throw new Error(json.message || json.error || `HTTP ${status}`);
+    if (json.error && !/NO_SUCH_TASK/i.test(String(json.error))) throw new Error(String(json.error));
+    return { ok: true, message: json.balance !== undefined ? `已连通，余额 ${json.balance}` : `已连通（HTTP ${status}）` };
+  }
   if (protocol === 'tencent') {
     const error = json.Response?.Error;
     if (error && /AuthFailure|Unauthorized|InvalidCredential|Signature/i.test(error.Code || '')) {
@@ -522,6 +723,17 @@ export function parseTestResponse(protocol, status, json) {
   if (status === 200 && json.code === 0) return { ok: true, message: `已连通，余额 ${json.data?.balance ?? '未知'}` };
   return { ok: true, message: `已连通（HTTP ${status}）` };
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -29,7 +29,12 @@ export class ProviderStore {
     if (raw?.providers && typeof raw.providers === 'object') {
       for (const [id, provider] of Object.entries(raw.providers)) {
         if (!provider || typeof provider !== 'object') continue;
-        state.providers[id] = normalizeProvider(id, provider);
+        const preset = state.providers[id];
+        state.providers[id] = normalizeProvider(id, {
+          ...preset,
+          ...provider,
+          ...(preset ? { label: preset.label, custom: preset.custom, preset: preset.preset } : {}),
+        });
       }
     }
     if (state.selection && !state.providers[state.selection.providerId]) state.selection = null;
@@ -80,7 +85,8 @@ export class ProviderStore {
       defaultModel: provider.defaultModel,
       operations: operationsFor(provider.protocol).map((id) => id),
       configured: await this.configured(provider),
-      custom: !DEFAULT_PROVIDERS[provider.id],
+      custom: provider.custom === true || !DEFAULT_PROVIDERS[provider.id],
+      preset: provider.preset === true,
     };
   }
 
@@ -188,6 +194,7 @@ export class ProviderStore {
     if (defaultModel !== undefined) provider.defaultModel = String(defaultModel);
     if (!provider.models.includes(provider.defaultModel)) provider.defaultModel = provider.models[0] || '';
     if (provider.protocol === 'dashscope') provider.queryURL = provider.queryURL || '';
+    if (state.selection?.providerId === providerId && !provider.models.includes(state.selection.model)) state.selection = { providerId, model: provider.defaultModel };
     this.state = state;
     await this.save();
     return this.public(provider);
@@ -198,11 +205,16 @@ export class ProviderStore {
     if (!state.providers[providerId]) throw new Error(`未知的 3D 服务：${providerId}`);
     if (DEFAULT_PROVIDERS[providerId]) throw new Error('内置服务不能删除，只能清空密钥');
     delete state.providers[providerId];
+    if (state.selection?.providerId === providerId) state.selection = null;
     this.state = state;
     await this.save();
     return { ok: true };
   }
 }
+
+
+
+
 
 
 

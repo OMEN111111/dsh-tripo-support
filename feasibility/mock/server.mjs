@@ -19,6 +19,10 @@ const TRIPO_RELAY_KEY = 'thirdparty-key';
 const DASHSCOPE_KEY = 'test-dashscope-key';
 const HY3D_SECRET_ID = 'test-hy3d-secret-id';
 const HY3D_SECRET_KEY = 'test-hy3d-secret-key';
+const MESHY_KEY = 'test-meshy-key';
+const HYPER_KEY = 'test-hyper-key';
+const meshyTasks = new Map();
+const hyperTasks = new Map();
 const STARTED = Date.now();
 
 const tasks = new Map();
@@ -346,6 +350,66 @@ async function handleHy3d(req, res) {  if (req.method !== 'POST') return sendJso
   return sendJson(res, 200, { Response: { Error: { Code: 'InvalidAction', Message: `Unsupported action ${action}` }, RequestId: randomUUID() } });
 }
 
+async function handleMeshy(req, res, url) {
+  if (url.pathname === '/openapi/v1/balance') {
+    if (req.headers.authorization !== `Bearer ${MESHY_KEY}`) return sendJson(res, 401, { error: { message: 'Unauthorized' } });
+    return sendJson(res, 200, { balance: 100 });
+  }
+  if (req.headers.authorization !== `Bearer ${MESHY_KEY}`) return sendJson(res, 401, { error: { message: 'Unauthorized' } });
+  const create = url.pathname.match(/^\/openapi\/v2\/(text-to-3d|image-to-3d|multi-image-to-3d|retexture|remesh|uv-unwrap|convert|rigging)$/);
+  if (create && req.method === 'POST') {
+    await readBody(req);
+    const id = randomUUID();
+    meshyTasks.set(id, { id, createdAt: Date.now(), path: create[1] });
+    return sendJson(res, 202, { result: id });
+  }
+  const query = url.pathname.match(/^\/openapi\/v2\/(?:text-to-3d|image-to-3d|multi-image-to-3d|retexture|remesh|uv-unwrap|convert|rigging)\/([^/]+)$/);
+  if (query && req.method === 'GET') {
+    const task = meshyTasks.get(query[1]);
+    if (!task) return sendJson(res, 404, { error: { message: 'task not found' } });
+    const state = dashStatusFor(task);
+    const origin = `http://${req.headers.host || `${HOST}:${PORT}`}`;
+    return sendJson(res, 200, {
+      id: task.id,
+      status: state.status === 'SUCCEEDED' ? 'SUCCEEDED' : state.status === 'RUNNING' ? 'IN_PROGRESS' : 'PENDING',
+      progress: state.progress,
+      model_urls: state.status === 'SUCCEEDED' ? { glb: `${origin}/files/example.glb` } : {},
+      thumbnail_url: state.status === 'SUCCEEDED' ? `${origin}/files/${task.id}.png` : undefined,
+    });
+  }
+  return sendJson(res, 404, { error: { message: `no meshy route ${req.method} ${url.pathname}` } });
+}
+
+async function handleHyper(req, res, url) {
+  if (url.pathname === '/api/v2/check_balance') {
+    if (req.headers.authorization !== `Bearer ${HYPER_KEY}`) return sendJson(res, 401, { error: 'Unauthorized' });
+    return sendJson(res, 200, { balance: 100 });
+  }
+  if (req.headers.authorization !== `Bearer ${HYPER_KEY}`) return sendJson(res, 401, { error: 'Unauthorized' });
+  if (url.pathname === '/api/v2/rodin' && req.method === 'POST') {
+    await readBody(req);
+    const uuid = randomUUID();
+    const key = randomUUID();
+    hyperTasks.set(key, { uuid, createdAt: Date.now(), key });
+    return sendJson(res, 201, { message: 'Submitted.', uuid, jobs: { uuids: [randomUUID()], subscription_key: key }, consumed: 0.5 });
+  }
+  if (url.pathname === '/api/v2/status' && req.method === 'POST') {
+    const body = JSON.parse((await readBody(req)) || '{}');
+    const task = hyperTasks.get(String(body.subscription_key || ''));
+    if (!task) return sendJson(res, 201, { error: 'NO_SUCH_TASK' });
+    const elapsed = Date.now() - task.createdAt;
+    return sendJson(res, 201, { jobs: [{ uuid: task.uuid, status: elapsed > 2500 ? 'Done' : elapsed > 800 ? 'Generating' : 'Waiting' }] });
+  }
+  if (url.pathname === '/api/v2/download' && req.method === 'POST') {
+    const body = JSON.parse((await readBody(req)) || '{}');
+    const task = [...hyperTasks.values()].find((item) => item.uuid === body.task_uuid);
+    if (!task) return sendJson(res, 201, { error: 'NO_SUCH_TASK' });
+    const origin = `http://${req.headers.host || `${HOST}:${PORT}`}`;
+    return sendJson(res, 201, { list: [{ name: 'model.glb', url: `${origin}/files/example.glb` }] });
+  }
+  return sendJson(res, 404, { error: `no hyper route ${req.method} ${url.pathname}` });
+}
+
 const server = http.createServer(async (req, res) => {
   const started = Date.now();
   const url = new URL(req.url || '/', `http://${req.headers.host || `${HOST}:${PORT}`}`);
@@ -390,6 +454,12 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname.startsWith('/api/v1/')) {
       return await handleDashscope(req, res, url);
     }
+    if (url.pathname.startsWith('/openapi/')) {
+      return await handleMeshy(req, res, url);
+    }
+    if (url.pathname.startsWith('/api/v2/')) {
+      return await handleHyper(req, res, url);
+    }
     if (url.pathname.startsWith('/relay/tripo/')) {
       const rest = new URL(url.pathname.slice('/relay/tripo'.length), `http://${req.headers.host}`);
       return await handleTripo(req, res, rest, TRIPO_RELAY_KEY);
@@ -417,5 +487,6 @@ server.listen(PORT, HOST, () => {
   console.log(`DashScope key: ${DASHSCOPE_KEY}`);
   console.log(`HY3D SecretId/Key: ${HY3D_SECRET_ID} / ${HY3D_SECRET_KEY}`);
 });
+
 
 

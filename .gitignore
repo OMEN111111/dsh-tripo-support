@@ -21,3 +21,9 @@ feasibility/artifacts/formal/raw/
 
 # Package metadata log; the .tgz is kept as a release artifact
 dist/pack.log
+
+# Other-session test outputs (not part of this plugin)
+PluginText/
+
+# Temporary package inspection
+.agent-temp/
