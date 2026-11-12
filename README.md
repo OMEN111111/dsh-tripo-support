@@ -5,7 +5,7 @@
 
 **让 DeepSeek Harness（DSH）直接管理并调用 Tripo、qianwenai（DashScope 3D）、腾讯混元3D 以及兼容的第三方异步 3D 生成服务。**
 
-Tripo, qianwenai/DashScope and Tencent Hunyuan3D async 3D providers for DeepSeek Harness — configure keys in **Settings → Models**, pick a 3D model in the composer, and let the agent generate, preview and post-process 3D assets.
+Tripo, qianwenai/DashScope and Tencent Hunyuan3D async 3D providers for DeepSeek Harness — configure keys in **Settings → 3D generation**, pick a 3D model in the composer, and let the agent generate, preview and post-process 3D assets.
 
 ![对话内 3D 预览](feasibility/artifacts/formal/chat-3d-preview.png)
 
@@ -143,7 +143,4 @@ plugin/assets/           model-viewer（Apache-2.0）
 ## 许可
 
 MIT，见 [LICENSE](LICENSE)。`@google/model-viewer` 使用 Apache-2.0，见 [plugin/assets/LICENSE-model-viewer](plugin/assets/LICENSE-model-viewer)。
-
-
-
 
