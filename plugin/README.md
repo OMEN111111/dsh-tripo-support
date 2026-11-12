@@ -21,8 +21,11 @@
 Copy-Item "$env:USERPROFILE\.dsh\profiles\desktop\cordis.patch.yml" `
   "$env:USERPROFILE\.dsh\profiles\desktop\cordis.patch.yml.bak-before-tripo"
 
-# 从本地目录安装（开发阶段建议先使用独立 profile）
-dsh plugin --profile desktop add ".\plugin"
+# 从 GitHub 仓库根安装（仓库根已声明 dsh.bundle.patch）
+dsh plugin --profile desktop add "https://github.com/OMEN111111/dsh-tripo-support.git"
+
+# 或从本地仓库根目录安装
+dsh plugin --profile desktop add "."
 
 # 或从打包文件安装
 dsh plugin --profile desktop add ".\dist\dsh-tripo-support-0.1.0.tgz"
