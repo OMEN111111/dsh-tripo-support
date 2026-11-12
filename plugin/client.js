@@ -119,6 +119,11 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       const [authMode, setAuthMode] = React.useState(provider.auth || 'tc3');
       const [testModel, setTestModel] = React.useState(provider.defaultModel || '');
       const [testing, setTesting] = React.useState(null);
+      const [discovered, setDiscovered] = React.useState(null);
+      const [discoverSource, setDiscoverSource] = React.useState('');
+      const [discoverSelected, setDiscoverSelected] = React.useState([]);
+      const [discoverBusy, setDiscoverBusy] = React.useState(false);
+      const [discoverError, setDiscoverError] = React.useState('');
       React.useEffect(() => {
         setDraft({ baseURL: provider.baseURL, region: provider.region || 'ap-guangzhou' });
         setCatalog(catalogOf(provider));

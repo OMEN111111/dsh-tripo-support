@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.5 — 2026-11-12
+
+### Fixed
+
+- Advanced settings no longer blanks the 3D settings page. The model-discovery state variables (`discoverBusy`, `discoverError`, `discovered`, `discoverSelected`) were referenced by the advanced panel but never declared, causing `ReferenceError: discoverBusy is not defined` and a crashed settings slot.
+- Verified advanced settings opens with the provider card, model catalog and discovery controls intact.
 ## 0.1.4 — 2026-11-12
 
 ### Fixed
@@ -99,6 +105,7 @@
 
 - Initial Tripo / qianwenai DashScope / Tencent Hunyuan3D support.
 - Async tools, task polling, downloads, GLB preview and Webhook.
+
 
 
 
