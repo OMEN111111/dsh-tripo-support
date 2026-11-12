@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.4 — 2026-11-12
+
+### Fixed
+
+- Removed providers now disappear from the composer pill immediately (provider-change event).
+- Model test results now use explicit success/failure styling; fetch failures are red.
+- HY3D official endpoint defaults to TC3; API Key is only offered for Bearer-compatible gateways.
+
+### Added
+
+- Model discovery in the provider model catalog: `检测可用模型` reads the provider's model list when available and lets the user selectively add entries.
+- Provider add menu includes official/custom paths; all added providers can be deleted and restored.
+- Per-model test selection.
+- PBR channel viewer modes: color, normal, roughness, metallic, wireframe, clay.
+
+### Changed
+
+- Version remains feature-scoped as 0.1.4; development docs and test artifacts are not published.
 ## 0.1.3 — 2026-11-12
 
 ### Added
@@ -81,6 +99,7 @@
 
 - Initial Tripo / qianwenai DashScope / Tencent Hunyuan3D support.
 - Async tools, task polling, downloads, GLB preview and Webhook.
+
 
 
 

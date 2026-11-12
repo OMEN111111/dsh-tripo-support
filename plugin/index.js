@@ -187,6 +187,46 @@ export function apply(ctx, config = {}) {
     };
   };
 
+  const discoverModels = async (providerId) => {
+    const provider = await providerOrThrow(String(providerId));
+    const catalog = (provider.modelCatalog?.length ? provider.modelCatalog : provider.models.map((id) => ({ id, name: id }))).map((item) => ({ ...item }));
+    if (provider.protocol === 'tencent') return { models: catalog, source: 'catalog', message: '腾讯云 HY3D 没有模型列表接口，已返回当前模型目录' };
+    const secrets = await providers.secrets(provider);
+    ensure(secrets.apiKey, `${provider.label} 还没有配置 API Key`);
+    const base = provider.baseURL.replace(/\/+$/, '');
+    let origin;
+    try { origin = new URL(base).origin; } catch { origin = base; }
+    const candidates = [
+      provider.modelDiscoveryURL,
+      provider.protocol === 'meshy' ? `${base}/openapi/v1/models` : undefined,
+      provider.protocol === 'hyper' ? `${base}/models` : undefined,
+      provider.protocol === 'dashscope' ? `${origin}/api/v1/models` : undefined,
+      provider.protocol === 'tripo' ? `${base}/models` : undefined,
+    ].filter(Boolean);
+    let lastError;
+    for (const url of candidates) {
+      try {
+        const response = await fetch(url, { headers: { Authorization: `Bearer ${secrets.apiKey}`, Accept: 'application/json', 'User-Agent': 'dsh-tripo-support' }, signal: AbortSignal.timeout(10000) });
+        if (response.status === 401 || response.status === 403) throw new Error(`API Key 无效（HTTP ${response.status}）`);
+        if (!response.ok) { lastError = new Error(`HTTP ${response.status}`); continue; }
+        const json = await response.json();
+        const raw = Array.isArray(json) ? json : json?.data || json?.models || json?.result || [];
+        const models = (Array.isArray(raw) ? raw : []).map((item) => ({
+          id: String(item?.id || item?.model || item?.name || item || '').trim(),
+          name: String(item?.name || item?.display_name || item?.id || item?.model || item || '').trim(),
+        })).filter((item) => item.id);
+        if (models.length) {
+          const seen = new Set();
+          return { models: models.filter((item) => !seen.has(item.id) && seen.add(item.id)), source: 'remote', message: `已从 ${url} 读取模型` };
+        }
+      } catch (error) {
+        lastError = error;
+        if (/API Key 无效/.test(String(error.message))) throw error;
+      }
+    }
+    return { models: catalog, source: 'catalog', message: `服务未提供模型列表，返回当前目录${lastError ? `（${lastError.message}）` : ''}` };
+  };
+
   const status = async () => ({
     ok: true,
     providers: await providers.list(),
@@ -846,6 +886,7 @@ export function apply(ctx, config = {}) {
         return send(200, { ok: true });
       }
       if (path === '/test') return send(200, { ok: true, result: await testProvider(String(body.providerId), body.model ? String(body.model) : undefined) });
+      if (path === '/models/discover') return send(200, { ok: true, ...(await discoverModels(String(body.providerId))) });
       if (path === '/selection') return send(200, { ok: true, selection: await providers.setSelection(body) });
       if (path === '/key') return send(200, { ok: true, provider: await providers.setKey(body) });
       if (path === '/key/clear') return send(200, { ok: true, provider: await providers.clearKey(String(body.providerId)) });
@@ -895,6 +936,7 @@ async function sessionOutputDir(ctx, exec, fallback) {
   }
   return fallback;
 }
+
 
 
 

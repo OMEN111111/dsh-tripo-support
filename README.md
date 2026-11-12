@@ -35,7 +35,7 @@ Tripo, Meshy, Hyper3D and Tencent Hunyuan3D async 3D providers for DeepSeek Harn
 dsh plugin --profile desktop add "https://github.com/OMEN111111/dsh-tripo-support.git"
 ```
 
-或使用 Release 中的 `dsh-tripo-support-0.1.3.tgz`。
+或使用 Release 中的 `dsh-tripo-support-0.1.4.tgz`。
 
 安装后完整退出并重新打开 DSH。
 
@@ -52,4 +52,5 @@ dsh plugin --profile desktop add "https://github.com/OMEN111111/dsh-tripo-suppor
 ## 许可
 
 MIT，见 [LICENSE](LICENSE)。`@google/model-viewer` 使用 Apache-2.0；three.js 使用 MIT，见 `plugin/assets/LICENSE-model-viewer` 与 `plugin/assets/LICENSE-three`。
+
 

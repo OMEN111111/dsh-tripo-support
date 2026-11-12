@@ -5,6 +5,7 @@ window.__ModuleLoader__.load({
     const ReactDOM = (() => { try { return require('react-dom'); } catch { return null; } })();
     const h = React.createElement;
     const API = '/plugins/dsh-tripo-support';
+    const notifyProvidersChanged = () => { try { window.dispatchEvent(new CustomEvent('dsh-3d-providers-changed')); } catch { /* ignore */ } };
 
     const CSS = `
 .dsh-3d-settings{display:grid;gap:18px;color:var(--dsw-alias-label-primary,#1f2328);font-size:13px}
@@ -117,7 +118,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       const [key, setKey] = React.useState({ apiKey: '', secretId: '', secretKey: '', webhookSecret: '' });
       const [authMode, setAuthMode] = React.useState(provider.auth || 'tc3');
       const [testModel, setTestModel] = React.useState(provider.defaultModel || '');
-      const [testing, setTesting] = React.useState('');
+      const [testing, setTesting] = React.useState(null);
       React.useEffect(() => {
         setDraft({ baseURL: provider.baseURL, region: provider.region || 'ap-guangzhou' });
         setCatalog(catalogOf(provider));
@@ -145,11 +146,30 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         } catch (error) { onNotice(`${provider.label} 保存失败：${error.message}`); }
       };
       const test = async () => {
-        setTesting('测试中…');
+        setTesting({ ok: true, text: '测试中…' });
         try {
           const data = await api('/test', { providerId: provider.id, model: testModel });
-          setTesting(data.result.ok ? `${data.result.model || testModel}：${data.result.message}` : data.result.message);
-        } catch (error) { setTesting(error.message); }
+          setTesting({ ok: data.result.ok, text: data.result.ok ? `${data.result.model || testModel}：${data.result.message}` : data.result.message });
+        } catch (error) { setTesting({ ok: false, text: error.message }); }
+      };
+      const detectModels = async () => {
+        setDiscoverBusy(true);
+        setDiscoverError('');
+        try {
+          const data = await api('/models/discover', { providerId: provider.id });
+          setDiscovered(data.models || []);
+          setDiscoverSource(data.message || '');
+          setDiscoverSelected((data.models || []).filter((model) => !catalog.some((row) => row.id === model.id)).map((model) => model.id));
+        } catch (error) { setDiscoverError(error.message); }
+        finally { setDiscoverBusy(false); }
+      };
+      const addDiscovered = () => {
+        const additions = (discovered || []).filter((model) => discoverSelected.includes(model.id)).map((model) => ({ id: model.id, name: model.name || model.id }));
+        const known = new Set(catalog.map((row) => row.id));
+        setCatalog([...catalog, ...additions.filter((model) => !known.has(model.id))]);
+        setDiscovered(null);
+        setDiscoverSelected([]);
+        setDiscoverSource('');
       };
       const remove = async () => {
         if (!window.confirm(`删除 ${provider.label}？此操作会移除该供应商配置。`)) return;
@@ -178,7 +198,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
               catalog.map((row) => h('option', { key: row.id, value: row.id }, row.name && row.name !== row.id ? `${row.name} (${row.id})` : row.id))),
             h('button', { className: 'dsh-3d-btn dsh-3d-btn-primary', type: 'button', onClick: save }, '保存'),
             h('button', { className: 'dsh-3d-btn', type: 'button', onClick: test, disabled: !provider.configured && !key.apiKey && !key.secretId && !key.secretKey }, '测试模型'),
-            testing ? h('span', { className: /失败|错误|Invalid|HTTP/.test(testing) ? 'dsh-3d-error' : 'dsh-3d-success' }, testing) : null),
+            testing ? h('span', { className: testing.ok ? 'dsh-3d-success' : 'dsh-3d-error' }, testing.text) : null),
           h('button', { className: 'dsh-3d-link', type: 'button', onClick: () => setAdvanced(!advanced) }, advanced ? '收起高级设置' : '高级设置（地址 / 模型目录）'),
           advanced ? h('div', { className: 'dsh-3d-form' },
             h('div', { className: 'dsh-3d-grid' },
@@ -190,6 +210,17 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
               h('input', { className: 'dsh-3d-input', value: row.name, placeholder: '显示名称', onChange: (e) => updateCatalog(index, { name: e.target.value }) }),
               h('button', { className: 'dsh-3d-btn', type: 'button', onClick: () => removeCatalog(index) }, '删除'))),
             h('button', { className: 'dsh-3d-btn', type: 'button', onClick: addCatalog }, '添加模型'),
+            h('div', { className: 'dsh-3d-actions' },
+              h('button', { className: 'dsh-3d-btn', type: 'button', onClick: detectModels, disabled: discoverBusy }, discoverBusy ? '检测中…' : '检测可用模型'),
+              discoverError ? h('span', { className: 'dsh-3d-error' }, discoverError) : null),
+            discovered ? h('div', { className: 'dsh-3d-card', style: { marginTop: '4px' } },
+              h('div', { className: 'dsh-3d-muted' }, discoverSource),
+              discovered.length ? discovered.map((model) => h('label', { className: 'dsh-3d-row', key: model.id, style: { cursor: 'pointer' } },
+                h('input', { type: 'checkbox', checked: discoverSelected.includes(model.id), onChange: (e) => setDiscoverSelected(e.target.checked ? [...discoverSelected, model.id] : discoverSelected.filter((id) => id !== model.id)) }),
+                h('span', { className: 'dsh-3d-name' }, model.name && model.name !== model.id ? `${model.name} (${model.id})` : model.id))) : h('div', { className: 'dsh-3d-muted' }, '没有发现模型'),
+              h('div', { className: 'dsh-3d-actions' },
+                h('button', { className: 'dsh-3d-btn dsh-3d-btn-primary', type: 'button', onClick: addDiscovered, disabled: !discoverSelected.length }, '添加到模型目录'),
+                h('button', { className: 'dsh-3d-btn', type: 'button', onClick: () => setDiscovered(null) }, '取消'))) : null,
             provider.protocol === 'tripo' ? h(Field, { label: 'Webhook Secret（可选）' }, h('input', { className: 'dsh-3d-input', type: 'password', autoComplete: 'new-password', value: key.webhookSecret, onChange: (e) => setKey({ ...key, webhookSecret: e.target.value }), placeholder: 'whsec_…' })) : null
           ) : null
         ) : null);
@@ -244,7 +275,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       const [snapshot, setSnapshot] = React.useState(null);
       const [notice, setNotice] = React.useState('');
       const refresh = React.useCallback(async () => {
-        try { setSnapshot(await api('/status')); } catch (error) { setNotice(error.message); }
+        try { setSnapshot(await api('/status')); notifyProvidersChanged(); } catch (error) { setNotice(error.message); }
       }, []);
       React.useEffect(() => { refresh(); }, [refresh]);
       if (!snapshot) return h('div', { className: 'dsh-3d-settings' }, h('div', { className: 'dsh-3d-head' }, h('h2', null, '3D 生成'), h('span', { className: 'dsh-3d-muted' }, '正在加载…')));
@@ -354,7 +385,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
           setExpandedProviderId((current) => current || selected);
         } catch (e) { setError(e.message); }
       }, []);
-      React.useEffect(() => { reload(); }, [reload]);
+      React.useEffect(() => { reload(); const onChange = () => reload(); window.addEventListener('dsh-3d-providers-changed', onChange); return () => window.removeEventListener('dsh-3d-providers-changed', onChange); }, [reload]);
       React.useEffect(() => {
         if (!open) { setMenuStyle(null); return; }
         const place = () => {
@@ -627,6 +658,10 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
     };
   },
 });
+
+
+
+
 
 
 
