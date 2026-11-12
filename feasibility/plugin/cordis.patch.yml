@@ -1,5 +1,0 @@
-- insert:
-    - id: tripo-support
-      name: dsh-tripo-support
-      config:
-        workspaceDir: ''

@@ -30,3 +30,14 @@ PluginText/
 
 # Local git archive bundle
 dist/*.bundle
+
+# Development-only material is not part of the published plugin
+docs/
+feasibility/
+tests/
+dist/
+
+# Runtime/test outputs from other sessions
+.agent/
+3d-output/
+outputs/

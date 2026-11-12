@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.1.3 — 2026-11-12
+
+### Added
+
+- **Provider onboarding**: the 3D settings page shows only added providers and expands an `添加模型供应商` menu with **官方途径** and **自定义模型 API** choices.
+- **Provider deletion**: every added provider can be removed, including official providers and the qwenai preset; all can be restored through the add menu.
+- **Model catalog**: per-provider `modelCatalog` maps callable model IDs to display names. The composer pill shows the alias while tools continue using the real model ID.
+- **Per-model test**: the provider card can select a catalog model and test that model.
+- **PBR channel preview**: the in-chat 3D viewer now supports color, normal, roughness, metallic, wireframe and clay/white-model modes.
+- **Hard one-shot guard**: at most one 3D generation operation per user turn; a second generation is denied with a user-facing reason.
+
+### Changed
+
+- HY3D defaults to **API Key (Bearer)** authentication; the card can switch to Tencent Cloud **SecretId + SecretKey (TC3)**. The official `ai3d` endpoint requires TC3, so API Key mode is for Bearer-compatible gateways.
+- The update checker is inside **Settings → 3D 生成 → 插件更新**, not a separate Plugins tab.
+- The viewer is bundled locally (three.js MIT); `model-viewer` remains a legacy asset.
+
+### Fixed
+
+- The 3D update checks the GitHub release page first, then the API and raw manifest as fallbacks.
 ## 0.1.2 — 2026-11-12
 
 ### Added
@@ -61,4 +81,5 @@
 
 - Initial Tripo / qianwenai DashScope / Tencent Hunyuan3D support.
 - Async tools, task polling, downloads, GLB preview and Webhook.
+
 

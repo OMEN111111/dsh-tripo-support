@@ -81,6 +81,26 @@ export function apply(ctx, config = {}) {
   const providers = new ProviderStore({ file: join(root, 'state.json'), credentials });
   const tasks = new TaskStore({ file: join(root, 'tasks.json'), previewFile: join(root, 'previews.json') });
 
+  const generationTurns = new Map();
+  ctx.effect(() => {
+    const dispose = ctx.on('agent/inbox/claimed', (payload) => {
+      const id = payload?.agent?.id;
+      if (id) generationTurns.set(id, 0);
+    });
+    return () => dispose?.();
+  }, 'dsh-tripo-support: reset one-shot generation per user turn');
+  ctx.tools.guard((execution) => {
+    const generationOps = new Set(['text_to_3d', 'image_to_3d', 'multiview_to_3d']);
+    const name = String(execution.name || '');
+    const args = execution.arguments && typeof execution.arguments === 'object' ? execution.arguments : {};
+    const isGeneration = name === 'generate_3d' || ((name === 'create_3d_task' || name === 'run_3d_operation') && generationOps.has(String(args.operation || '')));
+    if (!isGeneration) return undefined;
+    const agentId = execution.agent?.id || 'global';
+    const count = generationTurns.get(agentId) || 0;
+    if (count >= 1) return '本轮已经创建了一个 3D 生成任务。不要再次生成或对比生成；先向用户报告当前结果，并询问是否继续。';
+    generationTurns.set(agentId, count + 1);
+    return undefined;
+  });
   ctx.inject(['systemPrompt'], (scoped) => {
     scoped.effect(() => scoped.systemPrompt.section({
       name: 'dsh-tripo-support/3d-policy',
@@ -119,46 +139,75 @@ export function apply(ctx, config = {}) {
 
   const checkForUpdate = async () => {
     const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
-    // Use the release page redirect instead of the GitHub API, which is rate-limited for unauthenticated checks.
-    const response = await fetch(`https://github.com/${updateRepo}/releases/latest`, {
-      redirect: 'follow',
-      headers: { 'User-Agent': 'dsh-tripo-support' },
-    });
-    if (!response.ok) throw new Error(`GitHub 版本检查失败：HTTP ${response.status}`);
-    const releaseUrl = response.url || `https://github.com/${updateRepo}/releases/latest`;
-    const tag = decodeURIComponent((releaseUrl.match(/\/releases\/tag\/([^/?#]+)/) || [])[1] || '');
-    const latest = tag.replace(/^v/i, '');
-    if (!latest) throw new Error('GitHub 没有返回发布版本');
+    const fallback = [
+      {
+        url: `https://github.com/${updateRepo}/releases/latest`,
+        parse: async (response) => {
+          const releaseUrl = response.url || `https://github.com/${updateRepo}/releases/latest`;
+          const tag = decodeURIComponent((releaseUrl.match(/\/releases\/tag\/([^/?#]+)/) || [])[1] || '');
+          return { latest: tag.replace(/^v/i, ''), releaseUrl };
+        },
+      },
+      {
+        url: `https://api.github.com/repos/${updateRepo}/releases/latest`,
+        parse: async (response) => {
+          const release = await response.json();
+          return { latest: String(release.tag_name || '').replace(/^v/i, ''), releaseUrl: release.html_url || `https://github.com/${updateRepo}/releases` };
+        },
+      },
+      {
+        url: `https://raw.githubusercontent.com/${updateRepo}/main/package.json`,
+        parse: async (response) => {
+          const pkg = await response.json();
+          return { latest: String(pkg.version || ''), releaseUrl: `https://github.com/${updateRepo}/releases` };
+        },
+      },
+    ];
+    let found;
+    let lastError;
+    for (const attempt of fallback) {
+      try {
+        const response = await fetch(attempt.url, { redirect: 'follow', headers: { 'User-Agent': 'dsh-tripo-support' }, signal: AbortSignal.timeout(8000) });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const parsed = await attempt.parse(response);
+        if (parsed.latest) { found = parsed; break; }
+      } catch (error) { lastError = error; }
+    }
+    if (!found) throw new Error(`无法连接 GitHub 检查版本：${lastError?.message || ''}`);
+    const latest = found.latest.replace(/^v/i, '');
     return {
       current: packageJson.version,
       latest,
       updateAvailable: compareVersions(latest, packageJson.version) > 0,
-      releaseUrl,
+      releaseUrl: found.releaseUrl || `https://github.com/${updateRepo}/releases`,
       notes: '',
       publishedAt: '',
       assetUrl: `https://github.com/${updateRepo}/releases/download/v${latest}/dsh-tripo-support-${latest}.tgz`,
       installSpec: `https://github.com/${updateRepo}/releases/download/v${latest}/dsh-tripo-support-${latest}.tgz`,
     };
   };
+
   const status = async () => ({
     ok: true,
     providers: await providers.list(),
     operations: OPERATIONS,
     protocols: PROTOCOL_LABELS,
     selection: await providers.selection(),
+    presets: await providers.presets(),
   });
 
-  const testProvider = async (providerId) => {
+  const testProvider = async (providerId, model) => {
     const started = Date.now();
     try {
       const provider = await providerOrThrow(providerId);
+      if (model) ensure(provider.models.includes(String(model)), `${provider.label} 不包含模型 ${model}`);
       const secrets = await providers.secrets(provider);
       if (provider.protocol === 'tencent' && provider.auth !== 'bearer') ensure(secrets.secretId && secrets.secretKey, '还没有配置 SecretId / SecretKey');
       else ensure(secrets.apiKey, '还没有配置 API Key');
       const request = buildTestRequest(provider, secrets);
       const { response, json } = await fetchJson(request.url, { method: request.method, headers: request.headers, body: request.body });
       const result = parseTestResponse(request.protocol, response.status, json);
-      return { ok: true, latencyMs: Date.now() - started, message: result.message };
+      return { ok: true, latencyMs: Date.now() - started, message: result.message, model: model || provider.defaultModel };
     } catch (error) {
       return { ok: false, latencyMs: Date.now() - started, message: error instanceof Error ? error.message : String(error) };
     }
@@ -737,6 +786,11 @@ export function apply(ctx, config = {}) {
     try {
       if (req.method === 'GET' && path === '/status') return send(200, await status());
       if (req.method === 'GET' && path === '/update/check') return send(200, { ok: true, ...(await checkForUpdate()) });
+      if (req.method === 'GET' && path === '/viewer3d.js') {
+        const script = await readFile(new URL('./assets/viewer3d.js', import.meta.url));
+        res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8', 'Content-Length': script.length, 'Cache-Control': 'public, max-age=86400' });
+        return res.end(script);
+      }
       if (req.method === 'GET' && path === '/model-viewer.js') {
         const script = await readFile(new URL('./assets/model-viewer.min.js', import.meta.url));
         res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8', 'Content-Length': script.length, 'Cache-Control': 'public, max-age=86400' });
@@ -791,11 +845,12 @@ export function apply(ctx, config = {}) {
         }
         return send(200, { ok: true });
       }
-      if (path === '/test') return send(200, { ok: true, result: await testProvider(String(body.providerId)) });
+      if (path === '/test') return send(200, { ok: true, result: await testProvider(String(body.providerId), body.model ? String(body.model) : undefined) });
       if (path === '/selection') return send(200, { ok: true, selection: await providers.setSelection(body) });
       if (path === '/key') return send(200, { ok: true, provider: await providers.setKey(body) });
       if (path === '/key/clear') return send(200, { ok: true, provider: await providers.clearKey(String(body.providerId)) });
       if (path === '/provider') return send(200, { ok: true, provider: await providers.add(body) });
+      if (path === '/provider/official') return send(200, { ok: true, provider: await providers.addOfficial(String(body.presetId)) });
       if (path === '/provider/update') return send(200, { ok: true, provider: await providers.update(body) });
       if (path === '/provider/delete') return send(200, await providers.remove(String(body.providerId)));
       if (path === '/operation') {
@@ -840,6 +895,8 @@ async function sessionOutputDir(ctx, exec, fallback) {
   }
   return fallback;
 }
+
+
 
 
 

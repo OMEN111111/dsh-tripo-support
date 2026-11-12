@@ -1,9 +1,0 @@
-HTTP/1.1 401 
-Date: Wed, 11 Nov 2026 15:05:55 GMT
-Content-Type: application/json
-Content-Length: 172
-Connection: keep-alive
-X-Tripo-Trace-ID: c565bbf1-407d-41f6-9819-d15267d1c63b
-X-Request-ID: c565bbf1-407d-41f6-9819-d15267d1c63b
-
-{"code":2,"status":"error","message":"Invalid API key","suggestion":"API key must start with 'tsk_'. If you are sending a client_id (tcli_...), use the secret key instead"}

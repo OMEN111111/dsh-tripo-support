@@ -31,7 +31,7 @@ dsh plugin --profile desktop add "https://github.com/OMEN111111/dsh-tripo-suppor
 dsh plugin --profile desktop add "."
 
 # 或从打包文件安装
-dsh plugin --profile desktop add ".\dist\dsh-tripo-support-0.1.2.tgz"
+dsh plugin --profile desktop add ".\dist\dsh-tripo-support-0.1.3.tgz"
 ```
 
 安装完成后从托盘完整退出并重新打开 DSH。插件只把行插入 profile 的 bundle 列表；设置与凭据在插件自己的页面管理。
@@ -123,27 +123,10 @@ https://<你的 DSH 公网地址>/plugins/dsh-tripo-support/webhook/tripo-offici
 
 ## 对话内预览
 
-- `create_3d_task` 返回后，工具卡片每 2.5 秒轮询 `/plugins/dsh-tripo-support/task?...`。
-- 任务成功后，卡片内 `<model-viewer>` 直接加载 GLB；可旋转、缩放、自动旋转。
-- `model-viewer` 资源随插件打包在 `assets/model-viewer.min.js`，不依赖 CDN。
-- 大模型可降级为缩略图/下载链接（后续版本）。
-
-## 开发与测试
-
-测试夹具在 `../feasibility`：
-
-```powershell
-# 初始化隔离 DSH_HOME + feas profile
-..\feasibility\sandbox\prepare.ps1
-
-# 启动 mock 3D API + 隔离 DSH Web（端口 6130）
-..\feasibility\sandbox\start.ps1
-
-# 停止
-..\feasibility\sandbox\stop.ps1
-```
-
-Mock 覆盖 Tripo v3、DashScope 3D、腾讯混元3D（TC3 签名会被服务端重算验证）、Meshy 和 Hyper3D Rodin。协议目录静态检查共 51 项。
+- 生成完成后，对话内自动出现独立的 3D 结果卡片。
+- 查看器支持 **颜色、法线、粗糙度、金属度、线框、白膜** 六种显示模式。
+- 支持拖拽旋转、滚轮缩放和自动旋转；three.js 资源随插件打包，不依赖 CDN。
+- 任务失败或模型缺失时，卡片显示明确错误，不伪造预览。
 
 ## 安全
 
@@ -162,6 +145,7 @@ Mock 覆盖 Tripo v3、DashScope 3D、腾讯混元3D（TC3 签名会被服务端
 ## 第三方资源
 
 - `@google/model-viewer`，Apache-2.0，见 `assets/LICENSE-model-viewer` 与 `THIRD_PARTY_NOTICES.md`。
+
 
 
 

@@ -168,8 +168,20 @@ export function normalizeProvider(id, input) {
     models: Array.isArray(input.models) ? input.models.map(String).filter(Boolean) : [],
     defaultModel: String(input.defaultModel || ''),
   };
-  if (!p.models.length) {
-    p.models = protocol === 'tencent' ? [...TENCENT_MODELS] : protocol === 'dashscope' ? [...DASHSCOPE_MODELS] : protocol === 'meshy' ? [...MESHY_MODELS] : protocol === 'hyper' ? [...HYPER_MODELS] : [...TRIPO_MODELS];
+  const catalog = Array.isArray(input.modelCatalog)
+    ? input.modelCatalog.map((item) => ({
+        id: String(item?.id || item || '').trim(),
+        name: String(item?.name || item?.id || item || '').trim(),
+      })).filter((item) => item.id)
+    : [];
+  if (catalog.length) {
+    p.modelCatalog = catalog;
+    p.models = catalog.map((item) => item.id);
+  } else {
+    if (!p.models.length) {
+      p.models = protocol === 'tencent' ? [...TENCENT_MODELS] : protocol === 'dashscope' ? [...DASHSCOPE_MODELS] : protocol === 'meshy' ? [...MESHY_MODELS] : protocol === 'hyper' ? [...HYPER_MODELS] : [...TRIPO_MODELS];
+    }
+    p.modelCatalog = p.models.map((id) => ({ id, name: id }));
   }
   if (!p.models.includes(p.defaultModel)) p.defaultModel = p.models[0] || '';
   if (protocol === 'tencent') {
@@ -747,6 +759,7 @@ export function parseTestResponse(protocol, status, json) {
   if (status === 200 && json.code === 0) return { ok: true, message: `已连通，余额 ${json.data?.balance ?? '未知'}` };
   return { ok: true, message: `已连通（HTTP ${status}）` };
 }
+
 
 
 

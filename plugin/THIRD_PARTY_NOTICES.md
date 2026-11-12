@@ -8,3 +8,6 @@
 - Full license: `assets/LICENSE-model-viewer`
 
 `model-viewer` is bundled only to render generated GLB files inside the DSH tool card. No DSH source files are modified.
+
+- three.js (MIT), https://github.com/mrdoob/three.js, bundled for the PBR channel/wireframe viewer; license at assets/LICENSE-three.
+

@@ -13,6 +13,7 @@ export class ProviderStore {
     return {
       version: 1,
       selection: null,
+      removedDefaults: [],
       providers: Object.fromEntries(Object.entries(DEFAULT_PROVIDERS).map(([id, provider]) => [id, normalizeProvider(id, provider)])),
     };
   }
@@ -37,6 +38,8 @@ export class ProviderStore {
         });
       }
     }
+    if (Array.isArray(raw?.removedDefaults)) state.removedDefaults = [...new Set(raw.removedDefaults.map(String))];
+    for (const id of state.removedDefaults) delete state.providers[id];
     if (state.selection && !state.providers[state.selection.providerId]) state.selection = null;
     this.state = state;
     return state;
@@ -63,6 +66,23 @@ export class ProviderStore {
     return state.selection;
   }
 
+  async presets() {
+    const state = await this.load();
+    return Object.entries(DEFAULT_PROVIDERS).map(([id, definition]) => {
+      const provider = state.providers[id] || normalizeProvider(id, definition);
+      return {
+        id,
+        label: definition.label,
+        protocol: definition.protocol,
+        custom: definition.custom === true,
+        preset: definition.preset === true,
+        models: provider.models,
+        modelCatalog: provider.modelCatalog,
+        added: Boolean(state.providers[id]),
+      };
+    });
+  }
+
   async list() {
     const state = await this.load();
     return Promise.all(Object.values(state.providers).map((provider) => this.public(provider)));
@@ -82,6 +102,7 @@ export class ProviderStore {
       baseURL: provider.baseURL,
       region: provider.region,
       models: provider.models,
+      modelCatalog: provider.modelCatalog,
       defaultModel: provider.defaultModel,
       operations: operationsFor(provider.protocol).map((id) => id),
       configured: await this.configured(provider),
@@ -162,6 +183,7 @@ export class ProviderStore {
       label,
       protocol: input.protocol,
       auth: input.auth,
+      modelCatalog: input.modelCatalog,
       baseURL: input.baseURL,
       models: Array.isArray(input.models) ? input.models : String(input.models || '').split(/[,\n]/).map((item) => item.trim()).filter(Boolean),
       defaultModel: input.defaultModel,
@@ -181,7 +203,18 @@ export class ProviderStore {
     return this.public(provider);
   }
 
-  async update({ providerId, baseURL, models, defaultModel, region, auth }) {
+  async addOfficial(presetId) {
+    const state = await this.load();
+    const definition = DEFAULT_PROVIDERS[presetId];
+    if (!definition) throw new Error(`未知的官方服务：${presetId}`);
+    state.removedDefaults = state.removedDefaults.filter((id) => id !== presetId);
+    if (!state.providers[presetId]) state.providers[presetId] = normalizeProvider(presetId, definition);
+    this.state = state;
+    await this.save();
+    return this.public(state.providers[presetId]);
+  }
+
+  async update({ providerId, baseURL, models, modelCatalog, defaultModel, region, auth }) {
     const state = await this.load();
     const provider = state.providers[providerId];
     if (!provider) throw new Error(`未知的 3D 服务：${providerId}`);
@@ -203,6 +236,14 @@ export class ProviderStore {
       provider.models = Array.isArray(models)
         ? models.map(String).map((item) => item.trim()).filter(Boolean)
         : String(models).split(/[,\n]/).map((item) => item.trim()).filter(Boolean);
+      provider.modelCatalog = provider.models.map((id) => ({ id, name: id }));
+    }
+    if (Array.isArray(modelCatalog)) {
+      const catalog = modelCatalog.map((item) => ({ id: String(item?.id || '' ).trim(), name: String(item?.name || item?.id || '' ).trim() })).filter((item) => item.id);
+      if (catalog.length) {
+        provider.modelCatalog = catalog;
+        provider.models = catalog.map((item) => item.id);
+      }
     }
     if (defaultModel !== undefined) provider.defaultModel = String(defaultModel);
     if (!provider.models.includes(provider.defaultModel)) provider.defaultModel = provider.models[0] || '';
@@ -216,14 +257,16 @@ export class ProviderStore {
   async remove(providerId) {
     const state = await this.load();
     if (!state.providers[providerId]) throw new Error(`未知的 3D 服务：${providerId}`);
-    if (DEFAULT_PROVIDERS[providerId]) throw new Error('内置服务不能删除，只能清空密钥');
     delete state.providers[providerId];
+    if (DEFAULT_PROVIDERS[providerId] && !state.removedDefaults.includes(providerId)) state.removedDefaults.push(providerId);
     if (state.selection?.providerId === providerId) state.selection = null;
     this.state = state;
     await this.save();
     return { ok: true };
   }
 }
+
+
 
 
 

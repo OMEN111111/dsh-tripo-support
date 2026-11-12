@@ -1,6 +1,0 @@
-{
-  "meta": {
-    "title": "3D 生成服务（Tripo / 混元3D）",
-    "description": "在模型设置中配置 Tripo、混元3D 或兼容的第三方异步 3D 生成服务，并让 Agent 直接生成模型。"
-  }
-}
