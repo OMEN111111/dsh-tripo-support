@@ -3,11 +3,11 @@
 ## Layers
 
 ```
-plugin/index.js              Host wiring: tools, web routes, task lifecycle
+plugin/index.js              Host wiring: tools, web routes, task lifecycle, update check/apply
 plugin/lib/protocols.js      Protocol adapters + operation catalog
 plugin/lib/state.js          Provider profiles + credential refs
 plugin/lib/tasks.js          Async task records, downloads, preview registry
-plugin/client.js             3D settings page, composer pill, tool card viewer
+plugin/client.js             3D settings page, composer pill, chat result card, plugin update tab
 plugin/assets/model-viewer   Bundled GLB viewer (Apache-2.0)
 ```
 
@@ -52,9 +52,11 @@ DSH's `LlmAdapter` contract streams chat tokens and tool calls. Tripo/HY3D do no
 ## UI seats
 
 - `settings.section` — a dedicated Settings → 3D generation page with official and third-party provider configuration.
+- `settings.plugins.tab` — a 3D 支持 tab in Settings → Plugins that checks the GitHub release and offers an explicit update.
 - `conversation.input.right` — the `3D · provider` model selector.
 - `conversation.chat.node` — dedicated 3D result card, registered with `uiConversation.events` and rendered without expanding the tool row.
 - `tool.call.toolview` — compact metadata cards for `create_3d_task`, `run_3d_operation`, `generate_3d`, `wait_3d_task`.
+
 
 
 

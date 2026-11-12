@@ -8,6 +8,7 @@
 - **Hyper3D / Rodin official channel**: text-to-3D and image-to-3D via `https://api.hyper3d.com/api/v2`, including async status and download handling.
 - **`select_3d_model` tool**: lets the agent switch the active provider/model only after explicit user approval. This is intended for qwenai Tripo's per-operation models (texture, rigging, topology, etc.).
 - **Dedicated in-chat 3D result node**: successful `create_3d_task` / `run_3d_operation` / `generate_3d` results render a `model-viewer` card directly in the conversation, without requiring the user to expand the tool-call row. The card polls the task and shows the GLB when ready.
+- **Plugin-panel update checker**: Settings → Plugins → 3D 支持 reads the latest GitHub release, compares it with the installed version, and offers an explicit update action. Version remains `0.1.2`; the release asset is replaced in place.
 - **3D execution policy** injected into the system prompt:
   - one user request = one requested operation;
   - no automatic texture, retopology, rigging, DCC modeling or retries;

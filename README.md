@@ -24,6 +24,7 @@ Tripo, Meshy, Hyper3D and Tencent Hunyuan3D async 3D providers for DeepSeek Harn
 - **异步任务**：创建 → 轮询 → 下载到当前 Session 的 `3d-output/`；支持对话内实时进度。
 - **对话内 3D 预览**：生成完成后在对话中自动出现独立的 `model-viewer` 结果卡片，无需展开工具调用。
 - **批量与回调**：`batch_query_3d_tasks` 批量查询 Tripo 任务；Tripo Webhook 支持 HMAC-SHA256 校验。
+- **插件面板更新检查**：在「设置 → 内置插件 → 3D 支持」中检查 GitHub 最新版本，确认后可更新；当前版本保持 0.1.2。
 
 ## 截图
 

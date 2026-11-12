@@ -206,6 +206,51 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         tab === 'third-party' ? h(AddProvider, { onRefresh: refresh, onNotice: setNotice }) : null);
     }
 
+    function UpdatePanel() {
+      const [check, setCheck] = React.useState(null);
+      const [error, setError] = React.useState('');
+      const [message, setMessage] = React.useState('');
+      const [busy, setBusy] = React.useState(false);
+      const load = React.useCallback(async () => {
+        setBusy(true);
+        setError('');
+        try { setCheck(await api('/update/check')); } catch (e) { setError(e.message); }
+        finally { setBusy(false); }
+      }, []);
+      React.useEffect(() => { load(); }, [load]);
+      const apply = async () => {
+        if (!check?.updateAvailable) return;
+        if (!window.confirm(`更新到 v${check.latest}？DSH 可能需要重启后生效。`)) return;
+        setBusy(true);
+        setError('');
+        setMessage('');
+        try {
+          const data = await api('/update/apply', {});
+          const application = data.result?.result?.application || data.result?.application || 'applied';
+          setMessage(application === 'restart-required' ? '更新已下载，请重启 DSH 后生效。' : '已更新到最新版本。');
+          await load();
+        } catch (e) { setError(e.message); }
+        finally { setBusy(false); }
+      };
+      return h('div', { className: 'dsh-3d-settings' },
+        h('div', { className: 'dsh-3d-head' }, h('h2', null, '3D 支持'), h('span', { className: 'dsh-3d-muted' }, '检查并更新 Tripo / Meshy / Hyper3D / HY3D 插件。')),
+        h('div', { className: 'dsh-3d-card' },
+          h('div', { className: 'dsh-3d-row' },
+            h('span', { className: `dsh-3d-dot${check?.updateAvailable ? '' : ' dsh-3d-dot-ok'}` }),
+            h('span', { className: 'dsh-3d-name' }, 'dsh-tripo-support'),
+            h('span', { className: 'dsh-3d-spacer' }),
+            h('span', { className: 'dsh-3d-badge' }, check ? `当前 ${check.current}` : '检查中')),
+          check ? h('div', { className: 'dsh-3d-grid' },
+            h('div', { className: 'dsh-3d-field' }, h('span', { className: 'dsh-3d-label' }, '仓库最新版本'), h('span', { className: 'dsh-3d-name' }, `v${check.latest}`)),
+            h('div', { className: 'dsh-3d-field' }, h('span', { className: 'dsh-3d-label' }, '状态'), h('span', { className: check.updateAvailable ? 'dsh-3d-error' : 'dsh-3d-success' }, check.updateAvailable ? '发现新版本' : '已是最新版本'))) : null,
+          check?.releaseUrl ? h('a', { href: check.releaseUrl, target: '_blank', rel: 'noreferrer', className: 'dsh-3d-link' }, '查看 GitHub Release') : null,
+          h('div', { className: 'dsh-3d-actions' },
+            h('button', { className: 'dsh-3d-btn', type: 'button', onClick: load, disabled: busy }, busy ? '检查中…' : '检查更新'),
+            check?.updateAvailable ? h('button', { className: 'dsh-3d-btn dsh-3d-btn-primary', type: 'button', onClick: apply, disabled: busy }, '更新到最新版本') : null),
+          message ? h('div', { className: 'dsh-3d-success' }, message) : null,
+          error ? h('div', { className: 'dsh-3d-error' }, error) : null));
+    }
+
     function SectionIcon({ size = 16 }) {
       return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true' },
         h('path', { d: 'M12 2 21 7 12 12 3 7Z' }),
@@ -496,6 +541,12 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
           id: 'tripo-support',
           order: 12,
         }, SectionIcon));
+        ctx.slots.inject('settings.plugins.tab', () => ctx.slots.register({
+          name: 'settings.plugins.tab',
+          id: 'dsh-tripo-support',
+          order: 20,
+          label: () => '3D 支持',
+        }, UpdatePanel));
         ctx.slots.inject('conversation.input.right', () => ctx.slots.register({
           name: 'conversation.input.right',
           id: 'dsh-tripo-support-3d-model',
@@ -514,6 +565,8 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
     };
   },
 });
+
+
 
 
 

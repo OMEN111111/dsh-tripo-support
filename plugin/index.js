@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { ProviderStore } from './lib/state.js';
@@ -104,6 +104,41 @@ export function apply(ctx, config = {}) {
     return provider;
   };
 
+  const updateRepo = String(config.updateRepo || 'OMEN111111/dsh-tripo-support');
+  const updateApi = `https://api.github.com/repos/${updateRepo}/releases/latest`;
+
+  const versionParts = (value) => String(value || '0').replace(/^v/i, '').split('-')[0].split('.').map((part) => Number.parseInt(part, 10) || 0);
+  const compareVersions = (left, right) => {
+    const a = versionParts(left);
+    const b = versionParts(right);
+    for (let index = 0; index < Math.max(a.length, b.length); index += 1) {
+      const delta = (a[index] || 0) - (b[index] || 0);
+      if (delta !== 0) return delta > 0 ? 1 : -1;
+    }
+    return 0;
+  };
+
+  const checkForUpdate = async () => {
+    const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+    const response = await fetch(updateApi, {
+      headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'dsh-tripo-support' },
+    });
+    if (!response.ok) throw new Error(`GitHub 版本检查失败：HTTP ${response.status}`);
+    const release = await response.json();
+    const latest = String(release.tag_name || '').replace(/^v/i, '');
+    if (!latest) throw new Error('GitHub 没有返回发布版本');
+    const asset = Array.isArray(release.assets) ? release.assets.find((item) => String(item.name || '').endsWith('.tgz')) : undefined;
+    return {
+      current: packageJson.version,
+      latest,
+      updateAvailable: compareVersions(latest, packageJson.version) > 0,
+      releaseUrl: release.html_url || `https://github.com/${updateRepo}/releases`,
+      notes: release.body || '',
+      publishedAt: release.published_at || '',
+      assetUrl: asset?.browser_download_url || '',
+      installSpec: asset?.browser_download_url || `https://github.com/${updateRepo}.git`,
+    };
+  };
   const status = async () => ({
     ok: true,
     providers: await providers.list(),
@@ -700,6 +735,7 @@ export function apply(ctx, config = {}) {
     };
     try {
       if (req.method === 'GET' && path === '/status') return send(200, await status());
+      if (req.method === 'GET' && path === '/update/check') return send(200, { ok: true, ...(await checkForUpdate()) });
       if (req.method === 'GET' && path === '/model-viewer.js') {
         const script = await readFile(new URL('./assets/model-viewer.min.js', import.meta.url));
         res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8', 'Content-Length': script.length, 'Cache-Control': 'public, max-age=86400' });
@@ -729,6 +765,15 @@ export function apply(ctx, config = {}) {
       }
       const text = Buffer.concat(chunks).toString('utf8');
       const body = text ? JSON.parse(text) : {};
+      if (path === '/update/apply') {
+        const check = await checkForUpdate();
+        ensure(check.updateAvailable, '当前已是最新版本');
+        const manager = ctx.get('pluginManager');
+        ensure(manager?.installBundle, '当前 DSH 没有提供插件管理服务');
+        const requestId = `dsh-tripo-support-${randomUUID()}`;
+        const result = await manager.installBundle(check.installSpec, { enabled: true, saveExact: true, requestId });
+        return send(200, { ok: true, check, result });
+      }
       if (path.startsWith('/webhook/')) {
         const providerId = decodeURIComponent(path.slice('/webhook/'.length));
         const provider = await providerOrThrow(providerId);
@@ -794,6 +839,7 @@ async function sessionOutputDir(ctx, exec, fallback) {
   }
   return fallback;
 }
+
 
 
 
