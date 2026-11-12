@@ -11,7 +11,7 @@ Tripo, qianwenai/DashScope and Tencent Hunyuan3D async 3D providers for DeepSeek
 
 ## 特性
 
-- **模型设置页集成**：在「设置 → 模型」中直接添加和管理 3D 服务，和自定义模型 API 的体验一致。
+- **独立设置页**：在「设置 → 3D 生成」中管理官方与第三方服务，和 DSH 模型配置界面分开。
 - **独立 3D 模型选择器**：对话框工具条中的 `3D · provider` 胶囊，不覆盖 DSH 原生 LLM 模型选择器。
 - **三套协议适配**：
   - Tripo 官方 v3（Bearer API Key）
@@ -25,13 +25,13 @@ Tripo, qianwenai/DashScope and Tencent Hunyuan3D async 3D providers for DeepSeek
 
 ## 截图
 
-| 设置 → 模型 | 设置页操作面板 |
+| 设置 → 3D 生成 | 第三方服务 |
 |---|---|
-| ![模型设置](feasibility/artifacts/screenshots/01-models-page.png) | ![操作面板](feasibility/artifacts/formal/operation-preview.png) |
+| ![3D 设置页](feasibility/artifacts/ui-redesign/settings-3d.png) | ![第三方服务](feasibility/artifacts/ui-redesign/settings-third-add.png) |
 
 | 对话框 3D 选择器 | 对话内预览 |
 |---|---|
-| ![3D 选择器](feasibility/artifacts/screenshots/07-model-picker-popover.png) | ![对话内预览](feasibility/artifacts/formal/chat-3d-preview.png) |
+| ![3D 选择器](feasibility/artifacts/ui-redesign/pill-open.png) | ![对话内预览](feasibility/artifacts/formal/chat-3d-preview.png) |
 
 ## 安装
 
@@ -49,7 +49,7 @@ dsh plugin --profile desktop add "https://github.com/OMEN111111/dsh-tripo-suppor
 dsh plugin --profile desktop add "."
 
 # 或从打包文件安装
-dsh plugin --profile desktop add ".\dist\dsh-tripo-support-0.1.0.tgz"
+dsh plugin --profile desktop add ".\dist\dsh-tripo-support-0.1.1.tgz"
 ```
 
 安装后从托盘完整退出并重新打开 DSH。插件只会在 profile 的 bundle 列表中插入一行；密钥由 DSH 凭据服务保存。
@@ -120,11 +120,11 @@ plugin/assets/           model-viewer（Apache-2.0）
 
 ## 测试
 
-- 隔离 DSH 端到端测试：设置页卡片、独立 3D 选择器、操作面板、Agent 工具调用、工具卡片轮询、对话内 GLB 预览。
+- 隔离 DSH 端到端测试：独立 3D 设置页、官方/第三方渠道、独立 3D 选择器、Agent 工具调用、工具卡片轮询、对话内 GLB 预览。
 - 协议目录静态检查：`node tests/protocols-smoke.mjs`，41 项（Tripo 18 / DashScope 13 / Tencent 10）。
 - Tripo、DashScope、腾讯混元3D 的生成与后处理均通过本地 mock；腾讯云签名由 mock 重算验证。
 - Tripo Webhook：有效签名 200，错误签名 400。
-- 打包安装：`dist/dsh-tripo-support-0.1.0.tgz` 在 fresh profile 中安装并加载成功。
+- 打包安装：`dist/dsh-tripo-support-0.1.1.tgz` 在 fresh profile 中安装并加载成功。
 
 详见 [docs/TESTING.md](docs/TESTING.md) 与 [feasibility/REPORT.md](feasibility/REPORT.md)。
 
@@ -143,4 +143,7 @@ plugin/assets/           model-viewer（Apache-2.0）
 ## 许可
 
 MIT，见 [LICENSE](LICENSE)。`@google/model-viewer` 使用 Apache-2.0，见 [plugin/assets/LICENSE-model-viewer](plugin/assets/LICENSE-model-viewer)。
+
+
+
 

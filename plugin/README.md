@@ -1,10 +1,10 @@
 # dsh-tripo-support
 
-在 DeepSeek Harness（DSH）的「设置 → 模型」中管理 Tripo、qianwenai / DashScope、腾讯混元3D 以及兼容的第三方异步 3D 服务，并让 Agent 在项目里生成、预览和继续处理 3D 模型。
+在 DeepSeek Harness（DSH）的「设置 → 3D 生成」中管理 Tripo、qianwenai / DashScope、腾讯混元3D 以及兼容的第三方异步 3D 服务，并让 Agent 在项目里生成、预览和继续处理 3D 模型。
 
 ## 功能
 
-- **设置 → 模型 → 3D 生成服务**卡片：服务名称、协议、Base URL、模型目录、API Key / SecretId+SecretKey、测试连接、默认模型。
+- **设置 → 3D 生成页面**：官方渠道 / 第三方渠道、API Key / SecretId+SecretKey、Base URL 与模型目录（官方预填，可高级覆盖）。
 - **对话框工具条 3D 模型选择器**：独立于原生 LLM 模型选择器，不破坏 DSH 聊天模型体系。
 - **对话内 3D 预览**：`create_3d_task` / `run_3d_operation` / `generate_3d` 的工具卡片使用 `model-viewer` 直接旋转、缩放查看 GLB。
 - **异步任务**：创建任务 → 轮询 → 下载到当前 Session 工作区的 `3d-output/`。
@@ -28,7 +28,7 @@ dsh plugin --profile desktop add "https://github.com/OMEN111111/dsh-tripo-suppor
 dsh plugin --profile desktop add "."
 
 # 或从打包文件安装
-dsh plugin --profile desktop add ".\dist\dsh-tripo-support-0.1.0.tgz"
+dsh plugin --profile desktop add ".\dist\dsh-tripo-support-0.1.1.tgz"
 ```
 
 安装完成后从托盘完整退出并重新打开 DSH。插件只把行插入 profile 的 bundle 列表；设置与凭据在插件自己的页面管理。
@@ -137,6 +137,8 @@ Mock 覆盖 Tripo v3、DashScope 3D、腾讯混元3D（TC3 签名会被服务端
 ## 第三方资源
 
 - `@google/model-viewer`，Apache-2.0，见 `assets/LICENSE-model-viewer` 与 `THIRD_PARTY_NOTICES.md`。
+
+
 
 
 

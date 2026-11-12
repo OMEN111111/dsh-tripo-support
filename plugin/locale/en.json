@@ -1,6 +1,6 @@
 {
   "meta": {
-    "description": "Configure Tripo, qianwenai (DashScope), Tencent Hunyuan3D, or compatible third-party async 3D services in Models settings, and let the agent generate, preview, and process 3D models.",
-    "title": "3D generation services (Tripo / Hunyuan3D / DashScope)"
+    "description": "Manage Tripo, qianwenai (DashScope), Tencent Hunyuan3D and third-party async 3D services under Settings → 3D generation, and pick a model from the composer 3D pill.",
+    "title": "3D generation (Tripo / Hunyuan3D / DashScope)"
   }
 }

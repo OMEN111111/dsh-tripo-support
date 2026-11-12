@@ -1,6 +1,6 @@
 {
   "name": "dsh-tripo-support",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Tripo, DashScope/qianwenai and Tencent Hunyuan3D async 3D providers for DeepSeek Harness.",

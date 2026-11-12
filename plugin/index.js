@@ -92,6 +92,7 @@ export function apply(ctx, config = {}) {
     providers: await providers.list(),
     operations: OPERATIONS,
     protocols: PROTOCOL_LABELS,
+    selection: await providers.selection(),
   });
 
   const testProvider = async (providerId) => {
@@ -610,7 +611,8 @@ export function apply(ctx, config = {}) {
     timeoutMs: 600000,
     async execute(args, exec) {
       const list = await providers.list();
-      const providerId = args.provider || list.find((item) => item.configured)?.id || list[0]?.id;
+      const selected = await providers.selection();
+      const providerId = args.provider || selected?.providerId || list.find((item) => item.configured)?.id || list[0]?.id;
       ensure(providerId, '没有可用的 3D 服务');
       const operation = (args.imageUrls && args.imageUrls.length > 1) ? 'multiview_to_3d' : (args.imageUrl ? 'image_to_3d' : 'text_to_3d');
       const result = await runOperation({
@@ -688,6 +690,7 @@ export function apply(ctx, config = {}) {
         return send(200, { ok: true });
       }
       if (path === '/test') return send(200, { ok: true, result: await testProvider(String(body.providerId)) });
+      if (path === '/selection') return send(200, { ok: true, selection: await providers.setSelection(body) });
       if (path === '/key') return send(200, { ok: true, provider: await providers.setKey(body) });
       if (path === '/key/clear') return send(200, { ok: true, provider: await providers.clearKey(String(body.providerId)) });
       if (path === '/provider') return send(200, { ok: true, provider: await providers.add(body) });
@@ -735,6 +738,8 @@ async function sessionOutputDir(ctx, exec, fallback) {
   }
   return fallback;
 }
+
+
 
 
 

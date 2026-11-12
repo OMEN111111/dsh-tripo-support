@@ -47,6 +47,7 @@ DSH's `LlmAdapter` contract streams chat tokens and tool calls. Tripo/HY3D do no
 
 ## UI seats
 
-- `settings.models.footer` — provider cards and the operation panel in Settings → Models.
+- `settings.section` — a dedicated Settings → 3D generation page with official and third-party provider configuration.
 - `conversation.input.right` — the `3D · provider` model selector.
 - `tool.call.toolview` — custom cards for `create_3d_task`, `run_3d_operation`, `generate_3d`, `wait_3d_task`.
+

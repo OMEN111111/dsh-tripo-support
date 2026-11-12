@@ -12,6 +12,7 @@ export class ProviderStore {
   defaults() {
     return {
       version: 1,
+      selection: null,
       providers: Object.fromEntries(Object.entries(DEFAULT_PROVIDERS).map(([id, provider]) => [id, normalizeProvider(id, provider)])),
     };
   }
@@ -31,6 +32,7 @@ export class ProviderStore {
         state.providers[id] = normalizeProvider(id, provider);
       }
     }
+    if (state.selection && !state.providers[state.selection.providerId]) state.selection = null;
     this.state = state;
     return state;
   }
@@ -38,6 +40,22 @@ export class ProviderStore {
   async save() {
     await mkdir(join(this.file, '..'), { recursive: true });
     await writeFile(this.file, JSON.stringify(this.state, null, 2), 'utf8');
+  }
+
+  async selection() {
+    const state = await this.load();
+    return state.selection || null;
+  }
+
+  async setSelection({ providerId, model }) {
+    const state = await this.load();
+    const provider = state.providers[providerId];
+    if (!provider) throw new Error(`未知的 3D 服务：${providerId}`);
+    const chosen = provider.models.includes(model) ? model : (provider.defaultModel || provider.models[0] || '');
+    state.selection = { providerId, model: chosen };
+    this.state = state;
+    await this.save();
+    return state.selection;
   }
 
   async list() {
@@ -185,5 +203,6 @@ export class ProviderStore {
     return { ok: true };
   }
 }
+
 
 

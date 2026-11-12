@@ -1,6 +1,6 @@
 {
   "meta": {
-    "description": "在模型设置中配置 Tripo、qianwenai（DashScope）、腾讯混元3D 或兼容的第三方异步 3D 服务，并让 Agent 生成、预览和处理 3D 模型。",
-    "title": "3D 生成服务（Tripo / 混元3D / DashScope）"
+    "description": "在设置 → 3D 生成中管理 Tripo、qianwenai（DashScope）、腾讯混元3D 与第三方异步 3D 服务，并在对话框 3D 胶囊中选择模型。",
+    "title": "3D 生成（Tripo / 混元3D / DashScope）"
   }
 }

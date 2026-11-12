@@ -31,5 +31,10 @@ Intermediate screenshots, control dumps and failed-run diagnostics kept for trac
 
 ## formal/
 
-Formal-plugin run evidence: settings page, operation panel, and the in-chat 3D tool card (`chat-3d-preview.png`).
+Formal-plugin run evidence: settings page, composer pill, and the in-chat 3D tool card (`chat-3d-preview.png`).
+
+
+## ui-redesign/
+
+Evidence for the revised DSH-style UI: a dedicated Settings → 3D generation page and a composer 3D provider/model pill. See `ui-redesign/README.md`.
 

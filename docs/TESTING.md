@@ -15,7 +15,7 @@ The real `desktop` profile is not touched.
 | Area | Result |
 |---|---|
 | Plugin activation in DSH | pass; no startup errors |
-| Settings → Models card | pass; provider cards and operation panel rendered |
+| Settings → 3D generation page | pass; official/third-party tabs, compact provider cards, separate left-nav item |
 | Key write through UI | pass; credential state becomes configured |
 | Tripo official protocol | pass; create → poll → download against mock |
 | DashScope / qianwenai protocol | pass; `X-DashScope-Async`; derived `/api/v1/tasks/{id}` |
@@ -23,8 +23,9 @@ The real `desktop` profile is not touched.
 | Tripo operations | pass against mock: generation, texture, segment, smart segment, retopology, UV, mesh complete, convert, rig check, auto rig, retarget, image-to-splat |
 | Tencent operations | pass against mock: texture, reduce face, part, UV, motion, auto rig, profile-to-3D, convert (synchronous) |
 | Agent tool call | pass; mock LLM emitted `create_3d_task`; tool succeeded |
+| Composer 3D pill | pass; provider switch and model switch both persisted through `/selection` |
 | Tool card polling + preview | pass; `<model-viewer>` `loaded=true`, `modelIsVisible=true` |
-| Chat 3D preview | screenshot `feasibility/artifacts/formal/chat-3d-preview.png` |
+| Chat 3D preview | `loaded=true`, `modelIsVisible=true`; screenshot `feasibility/artifacts/formal/chat-3d-preview.png` |
 | Tripo Webhook | pass; valid HMAC returned 200, bad signature returned 400 |
 
 ## Not covered
@@ -55,7 +56,7 @@ For the agent-loop test, add the mock LLM rows to the isolated profile and start
 - qianwenai: `feasibility/artifacts/api-probes/qwenai-auth-probe.txt` (HTTP 401 `InvalidApiKey`).
 
 
-- Packaged tarball: `dist/dsh-tripo-support-0.1.0.tgz` installed into a fresh `packtest` profile; plugin loaded and `/plugins/dsh-tripo-support/status` returned the three default providers.
+- Packaged tarball: `dist/dsh-tripo-support-0.1.1.tgz` installed into a fresh `packtest` profile; plugin loaded and `/plugins/dsh-tripo-support/status` returned the three default providers.
 
 
 ## Remaining scope
@@ -65,5 +66,7 @@ For the agent-loop test, add the mock LLM rows to the isolated profile and start
 - Third-party HY3D protocols other than DashScope-compatible require a new adapter; only Tripo v3 and DashScope-compatible paths were tested.
 
 - Protocol catalog smoke test: `node tests/protocols-smoke.mjs` passed 41 checks (Tripo 18 ops, DashScope 13, Tencent 10).
+
+
 
 
