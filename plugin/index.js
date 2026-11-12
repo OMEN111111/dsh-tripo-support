@@ -105,7 +105,6 @@ export function apply(ctx, config = {}) {
   };
 
   const updateRepo = String(config.updateRepo || 'OMEN111111/dsh-tripo-support');
-  const updateApi = `https://api.github.com/repos/${updateRepo}/releases/latest`;
 
   const versionParts = (value) => String(value || '0').replace(/^v/i, '').split('-')[0].split('.').map((part) => Number.parseInt(part, 10) || 0);
   const compareVersions = (left, right) => {
@@ -120,23 +119,25 @@ export function apply(ctx, config = {}) {
 
   const checkForUpdate = async () => {
     const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
-    const response = await fetch(updateApi, {
-      headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'dsh-tripo-support' },
+    // Use the release page redirect instead of the GitHub API, which is rate-limited for unauthenticated checks.
+    const response = await fetch(`https://github.com/${updateRepo}/releases/latest`, {
+      redirect: 'follow',
+      headers: { 'User-Agent': 'dsh-tripo-support' },
     });
     if (!response.ok) throw new Error(`GitHub 版本检查失败：HTTP ${response.status}`);
-    const release = await response.json();
-    const latest = String(release.tag_name || '').replace(/^v/i, '');
+    const releaseUrl = response.url || `https://github.com/${updateRepo}/releases/latest`;
+    const tag = decodeURIComponent((releaseUrl.match(/\/releases\/tag\/([^/?#]+)/) || [])[1] || '');
+    const latest = tag.replace(/^v/i, '');
     if (!latest) throw new Error('GitHub 没有返回发布版本');
-    const asset = Array.isArray(release.assets) ? release.assets.find((item) => String(item.name || '').endsWith('.tgz')) : undefined;
     return {
       current: packageJson.version,
       latest,
       updateAvailable: compareVersions(latest, packageJson.version) > 0,
-      releaseUrl: release.html_url || `https://github.com/${updateRepo}/releases`,
-      notes: release.body || '',
-      publishedAt: release.published_at || '',
-      assetUrl: asset?.browser_download_url || '',
-      installSpec: asset?.browser_download_url || `https://github.com/${updateRepo}.git`,
+      releaseUrl,
+      notes: '',
+      publishedAt: '',
+      assetUrl: `https://github.com/${updateRepo}/releases/download/v${latest}/dsh-tripo-support-${latest}.tgz`,
+      installSpec: `https://github.com/${updateRepo}/releases/download/v${latest}/dsh-tripo-support-${latest}.tgz`,
     };
   };
   const status = async () => ({
@@ -152,7 +153,7 @@ export function apply(ctx, config = {}) {
     try {
       const provider = await providerOrThrow(providerId);
       const secrets = await providers.secrets(provider);
-      if (provider.protocol === 'tencent') ensure(secrets.secretId && secrets.secretKey, '还没有配置 SecretId / SecretKey');
+      if (provider.protocol === 'tencent' && provider.auth !== 'bearer') ensure(secrets.secretId && secrets.secretKey, '还没有配置 SecretId / SecretKey');
       else ensure(secrets.apiKey, '还没有配置 API Key');
       const request = buildTestRequest(provider, secrets);
       const { response, json } = await fetchJson(request.url, { method: request.method, headers: request.headers, body: request.body });
@@ -167,7 +168,7 @@ export function apply(ctx, config = {}) {
     const provider = await providerOrThrow(providerId);
     ensure(OPERATIONS[operation], `未知的 3D 操作：${operation}`);
     const secrets = await providers.secrets(provider);
-    if (provider.protocol === 'tencent') ensure(secrets.secretId && secrets.secretKey, `${provider.label} 还没有配置 SecretId / SecretKey`);
+    if (provider.protocol === 'tencent' && provider.auth !== 'bearer') ensure(secrets.secretId && secrets.secretKey, `${provider.label} 还没有配置 SecretId / SecretKey`);
     else ensure(secrets.apiKey, `${provider.label} 还没有配置 API Key`);
     const request = await buildCreateRequest(provider, operation, args, secrets);
     const { response, json } = await fetchJson(request.url, { method: request.method, headers: request.headers, body: request.body, signal });
@@ -199,7 +200,7 @@ export function apply(ctx, config = {}) {
     const op = operation || record?.operation;
     ensure(op, `找不到任务 ${taskId} 的操作类型`);
     const secrets = await providers.secrets(provider);
-    if (provider.protocol === 'tencent') ensure(secrets.secretId && secrets.secretKey, `${provider.label} 还没有配置 SecretId / SecretKey`);
+    if (provider.protocol === 'tencent' && provider.auth !== 'bearer') ensure(secrets.secretId && secrets.secretKey, `${provider.label} 还没有配置 SecretId / SecretKey`);
     else ensure(secrets.apiKey, `${provider.label} 还没有配置 API Key`);
     const request = buildQueryRequest(provider, taskId, op, secrets);
     const { json } = await fetchJson(request.url, { method: request.method, headers: request.headers, body: request.body, signal });
@@ -267,7 +268,7 @@ export function apply(ctx, config = {}) {
     const provider = await providerOrThrow(providerId);
     if (provider.protocol === 'tencent' && operation === 'convert') {
       const secrets = await providers.secrets(provider);
-      ensure(secrets.secretId && secrets.secretKey, `${provider.label} 还没有配置 SecretId / SecretKey`);
+      if (provider.auth === 'bearer') ensure(secrets.apiKey, `${provider.label} 还没有配置 API Key`); else ensure(secrets.secretId && secrets.secretKey, `${provider.label} 还没有配置 SecretId / SecretKey`);
       const request = await buildCreateRequest(provider, operation, args, secrets);
       const { json } = await fetchJson(request.url, { method: request.method, headers: request.headers, body: request.body, signal });
       const response = json.Response || {};
@@ -839,6 +840,7 @@ async function sessionOutputDir(ctx, exec, fallback) {
   }
   return fallback;
 }
+
 
 
 

@@ -147,13 +147,12 @@ export const DEFAULT_PROVIDERS = {
     id: 'hy3d-official',
     label: 'HY3D',
     protocol: 'tencent',
-    auth: 'tc3',
+    auth: 'bearer',
     baseURL: 'https://ai3d.tencentcloudapi.com',
     region: 'ap-guangzhou',
     models: TENCENT_MODELS,
     defaultModel: '3.1-pro',
-    secretIdRef: 'HY3D_SECRET_ID',
-    secretKeyRef: 'HY3D_SECRET_KEY',
+    apiKeyRef: 'HY3D_API_KEY',
   },
 };
 
@@ -164,7 +163,7 @@ export function normalizeProvider(id, input) {
     id,
     protocol,
     label: String(input.label || id),
-    auth: protocol === 'tencent' ? 'tc3' : 'bearer',
+    auth: protocol === 'tencent' && input.auth === 'bearer' ? 'bearer' : protocol === 'tencent' ? 'tc3' : 'bearer',
     baseURL: String(input.baseURL || DEFAULT_PROVIDERS[id]?.baseURL || '').replace(/\/+$/, ''),
     models: Array.isArray(input.models) ? input.models.map(String).filter(Boolean) : [],
     defaultModel: String(input.defaultModel || ''),
@@ -175,9 +174,15 @@ export function normalizeProvider(id, input) {
   if (!p.models.includes(p.defaultModel)) p.defaultModel = p.models[0] || '';
   if (protocol === 'tencent') {
     p.region = String(input.region || 'ap-guangzhou');
-    p.secretIdRef = String(input.secretIdRef || `DSH3D_${id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_SECRET_ID`);
-    p.secretKeyRef = String(input.secretKeyRef || `DSH3D_${id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_SECRET_KEY`);
-    delete p.apiKeyRef;
+    if (p.auth === 'bearer') {
+      p.apiKeyRef = String(input.apiKeyRef || `DSH3D_${id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_API_KEY`);
+      delete p.secretIdRef;
+      delete p.secretKeyRef;
+    } else {
+      p.secretIdRef = String(input.secretIdRef || `DSH3D_${id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_SECRET_ID`);
+      p.secretKeyRef = String(input.secretKeyRef || `DSH3D_${id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_SECRET_KEY`);
+      delete p.apiKeyRef;
+    }
   } else {
     p.apiKeyRef = String(input.apiKeyRef || `DSH3D_${id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_API_KEY`);
     delete p.secretIdRef;
@@ -394,6 +399,16 @@ function hmac(key, value) {
   return createHmac('sha256', key).update(value).digest();
 }
 
+function tencentBearerHeaders(provider, action, secrets) {
+  return {
+    Authorization: `Bearer ${secrets.apiKey}`,
+    'Content-Type': 'application/json',
+    'X-TC-Action': action,
+    'X-TC-Version': '2025-05-13',
+    'X-TC-Region': provider.region || 'ap-guangzhou',
+  };
+}
+
 const MESHY_ENDPOINTS = {
   text_to_3d: '/openapi/v2/text-to-3d',
   image_to_3d: '/openapi/v2/image-to-3d',
@@ -469,6 +484,9 @@ export async function buildCreateRequest(provider, operation, args, secrets) {
   }
   if (provider.protocol === 'tencent') {
     const { action, body } = tencentSubmit(operation, a, provider);
+    if (provider.auth === 'bearer') {
+      return { url: provider.baseURL, method: 'POST', headers: tencentBearerHeaders(provider, action, secrets), body: JSON.stringify(body), action, protocol: 'tencent', model: a.model };
+    }
     const signed = tc3Headers(provider, action, body, secrets);
     return { url: provider.baseURL, method: 'POST', headers: signed.headers, body: signed.body, action, protocol: 'tencent', model: a.model };
   }
@@ -522,6 +540,9 @@ export function buildQueryRequest(provider, taskId, operation, secrets) {
   if (provider.protocol === 'tencent') {
     const [, queryAction] = TENCENT_ACTION[operation] || [];
     if (!queryAction) throw new Error(`混元3D 操作 ${operation} 没有查询接口`);
+    if (provider.auth === 'bearer') {
+      return { url: provider.baseURL, method: 'POST', headers: tencentBearerHeaders(provider, queryAction, secrets), body: JSON.stringify({ JobId: taskId }), protocol: 'tencent' };
+    }
     const signed = tc3Headers(provider, queryAction, { JobId: taskId }, secrets);
     return { url: provider.baseURL, method: 'POST', headers: signed.headers, body: signed.body, protocol: 'tencent' };
   }
@@ -691,6 +712,9 @@ export function buildTestRequest(provider, secrets) {
     return { url: `${provider.baseURL.replace(/\/+$/, '')}/check_balance`, method: 'GET', headers: { Authorization: `Bearer ${secrets.apiKey}` }, protocol: 'hyper' };
   }
   if (provider.protocol === 'tencent') {
+    if (provider.auth === 'bearer') {
+      return { url: provider.baseURL, method: 'POST', headers: tencentBearerHeaders(provider, 'QueryHunyuanTo3DProJob', secrets), body: JSON.stringify({ JobId: '0' }), protocol: 'tencent' };
+    }
     const signed = tc3Headers(provider, 'QueryHunyuanTo3DProJob', { JobId: '0' }, secrets);
     return { url: provider.baseURL, method: 'POST', headers: signed.headers, body: signed.body, protocol: 'tencent' };
   }
@@ -723,6 +747,8 @@ export function parseTestResponse(protocol, status, json) {
   if (status === 200 && json.code === 0) return { ok: true, message: `已连通，余额 ${json.data?.balance ?? '未知'}` };
   return { ok: true, message: `已连通（HTTP ${status}）` };
 }
+
+
 
 
 

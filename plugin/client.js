@@ -106,17 +106,21 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       const [advanced, setAdvanced] = React.useState(false);
       const [draft, setDraft] = React.useState({ baseURL: provider.baseURL, region: provider.region || 'ap-guangzhou', models: provider.models.join(', ') });
       const [key, setKey] = React.useState({ apiKey: '', secretId: '', secretKey: '', webhookSecret: '' });
+      const [authMode, setAuthMode] = React.useState(provider.auth || 'tc3');
       const [testing, setTesting] = React.useState('');
       React.useEffect(() => {
         setDraft({ baseURL: provider.baseURL, region: provider.region || 'ap-guangzhou', models: provider.models.join(', ') });
-      }, [provider.baseURL, provider.region, provider.models]);
+        setAuthMode(provider.auth || 'tc3');
+      }, [provider.baseURL, provider.region, provider.models, provider.auth]);
       const set = (patch) => setDraft({ ...draft, ...patch });
       const save = async () => {
         try {
           const hasKey = Boolean(key.apiKey || key.secretId || key.secretKey || key.webhookSecret);
-          if (!hasKey && !advanced) { setEditing(false); return; }
+          const authChanged = provider.protocol === 'tencent' && authMode !== provider.auth;
+          if (!hasKey && !advanced && !authChanged) { setEditing(false); return; }
+          if (authChanged) await api('/provider/update', { providerId: provider.id, auth: authMode, ...(advanced ? { baseURL: draft.baseURL, region: draft.region, models: draft.models } : {}) });
           if (hasKey) await api('/key', { providerId: provider.id, ...key });
-          if (advanced) await api('/provider/update', { providerId: provider.id, baseURL: draft.baseURL, region: draft.region, models: draft.models });
+          if (advanced && !authChanged) await api('/provider/update', { providerId: provider.id, baseURL: draft.baseURL, region: draft.region, models: draft.models });
           setKey({ apiKey: '', secretId: '', secretKey: '', webhookSecret: '' });
           setEditing(false);
           setAdvanced(false);
@@ -143,13 +147,17 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         ),
         editing ? h('div', { className: 'dsh-3d-form' },
           provider.protocol === 'tencent'
-            ? h('div', { className: 'dsh-3d-grid' },
-              h(Field, { label: 'SecretId' }, h('input', { className: 'dsh-3d-input', type: 'password', autoComplete: 'new-password', value: key.secretId, onChange: (e) => setKey({ ...key, secretId: e.target.value }), placeholder: '输入 SecretId' })),
-              h(Field, { label: 'SecretKey' }, h('input', { className: 'dsh-3d-input', type: 'password', autoComplete: 'new-password', value: key.secretKey, onChange: (e) => setKey({ ...key, secretKey: e.target.value }), placeholder: '输入 SecretKey' })))
-            : h(Field, { label: `${provider.custom ? 'API Key' : 'API Key'}` }, h('input', { className: 'dsh-3d-input', type: 'password', autoComplete: 'new-password', value: key.apiKey, onChange: (e) => setKey({ ...key, apiKey: e.target.value }), placeholder: '输入 API Key' })),
+            ? h(React.Fragment, null,
+              h(Field, { label: '认证方式' }, h('select', { className: 'dsh-3d-input', value: authMode, onChange: (e) => setAuthMode(e.target.value) }, h('option', { value: 'bearer' }, 'API Key（Bearer）'), h('option', { value: 'tc3' }, '腾讯云 SecretId + SecretKey'))),
+              authMode === 'tc3'
+                ? h('div', { className: 'dsh-3d-grid' },
+                  h(Field, { label: 'SecretId' }, h('input', { className: 'dsh-3d-input', type: 'password', autoComplete: 'new-password', value: key.secretId, onChange: (e) => setKey({ ...key, secretId: e.target.value }), placeholder: '输入 SecretId' })),
+                  h(Field, { label: 'SecretKey' }, h('input', { className: 'dsh-3d-input', type: 'password', autoComplete: 'new-password', value: key.secretKey, onChange: (e) => setKey({ ...key, secretKey: e.target.value }), placeholder: '输入 SecretKey' })))
+                : h(Field, { label: 'API Key' }, h('input', { className: 'dsh-3d-input', type: 'password', autoComplete: 'new-password', value: key.apiKey, onChange: (e) => setKey({ ...key, apiKey: e.target.value }), placeholder: '输入 API Key' })))
+            : h(Field, { label: 'API Key' }, h('input', { className: 'dsh-3d-input', type: 'password', autoComplete: 'new-password', value: key.apiKey, onChange: (e) => setKey({ ...key, apiKey: e.target.value }), placeholder: '输入 API Key' })),
           h('div', { className: 'dsh-3d-actions' },
             h('button', { className: 'dsh-3d-btn dsh-3d-btn-primary', type: 'button', onClick: save }, '保存'),
-            h('button', { className: 'dsh-3d-btn', type: 'button', onClick: test, disabled: !provider.configured && !key.apiKey && !key.secretId }, '测试连接'),
+            h('button', { className: 'dsh-3d-btn', type: 'button', onClick: test, disabled: !provider.configured && !key.apiKey && !key.secretId && !key.secretKey }, '测试连接'),
             testing ? h('span', { className: testing === '连接正常' ? 'dsh-3d-success' : 'dsh-3d-error' }, testing) : null),
           h('button', { className: 'dsh-3d-link', type: 'button', onClick: () => setAdvanced(!advanced) }, advanced ? '收起高级设置' : '高级设置（地址 / 模型）'),
           advanced ? h('div', { className: 'dsh-3d-grid' },
@@ -163,7 +171,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
 
     function AddProvider({ onRefresh, onNotice }) {
       const [open, setOpen] = React.useState(false);
-      const [draft, setDraft] = React.useState({ label: '', protocol: 'tripo', baseURL: defaultBase('tripo'), models: '', apiKey: '', secretId: '', secretKey: '' });
+      const [draft, setDraft] = React.useState({ label: '', protocol: 'tripo', auth: 'bearer', baseURL: defaultBase('tripo'), models: '', apiKey: '', secretId: '', secretKey: '' });
       const set = (patch) => setDraft({ ...draft, ...patch });
       if (!open) return h('button', { className: 'dsh-3d-btn', type: 'button', onClick: () => setOpen(true) }, '添加第三方服务');
       const submit = async () => {
@@ -178,9 +186,13 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
             h(Field, { label: 'Base URL' }, h('input', { className: 'dsh-3d-input', value: draft.baseURL, onChange: (e) => set({ baseURL: e.target.value }), spellCheck: false }))),
           h(Field, { label: '模型 ID（逗号分隔）' }, h('input', { className: 'dsh-3d-input', value: draft.models, onChange: (e) => set({ models: e.target.value }), placeholder: 'v3.1-20260211 或 Tripo/Tripo-H3.1' })),
           draft.protocol === 'tencent'
-            ? h('div', { className: 'dsh-3d-grid' },
-              h(Field, { label: 'SecretId' }, h('input', { className: 'dsh-3d-input', type: 'password', value: draft.secretId, onChange: (e) => set({ secretId: e.target.value }) })),
-              h(Field, { label: 'SecretKey' }, h('input', { className: 'dsh-3d-input', type: 'password', value: draft.secretKey, onChange: (e) => set({ secretKey: e.target.value }) })))
+            ? h(React.Fragment, null,
+              h(Field, { label: '认证方式' }, h('select', { className: 'dsh-3d-input', value: draft.auth, onChange: (e) => set({ auth: e.target.value }) }, h('option', { value: 'bearer' }, 'API Key（Bearer）'), h('option', { value: 'tc3' }, '腾讯云 SecretId + SecretKey'))),
+              draft.auth === 'tc3'
+                ? h('div', { className: 'dsh-3d-grid' },
+                  h(Field, { label: 'SecretId' }, h('input', { className: 'dsh-3d-input', type: 'password', value: draft.secretId, onChange: (e) => set({ secretId: e.target.value }) })),
+                  h(Field, { label: 'SecretKey' }, h('input', { className: 'dsh-3d-input', type: 'password', value: draft.secretKey, onChange: (e) => set({ secretKey: e.target.value }) })))
+                : h(Field, { label: 'API Key' }, h('input', { className: 'dsh-3d-input', type: 'password', value: draft.apiKey, onChange: (e) => set({ apiKey: e.target.value }) })))
             : h(Field, { label: 'API Key' }, h('input', { className: 'dsh-3d-input', type: 'password', value: draft.apiKey, onChange: (e) => set({ apiKey: e.target.value }) })),
           h('div', { className: 'dsh-3d-actions' }, h('button', { className: 'dsh-3d-btn dsh-3d-btn-primary', type: 'button', onClick: submit }, '添加'))));
     }
@@ -203,7 +215,9 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         notice ? h('div', { className: notice.includes('失败') ? 'dsh-3d-error' : 'dsh-3d-success' }, notice) : null,
         h('div', { className: 'dsh-3d-list' },
           providers.length ? providers.map((provider) => h(ProviderCard, { key: provider.id, provider, onRefresh: refresh, onNotice: setNotice })) : h('div', { className: 'dsh-3d-empty' }, tab === 'official' ? '暂无官方服务' : '还没有第三方服务')),
-        tab === 'third-party' ? h(AddProvider, { onRefresh: refresh, onNotice: setNotice }) : null);
+        tab === 'third-party' ? h(AddProvider, { onRefresh: refresh, onNotice: setNotice }) : null,
+        h('div', { className: 'dsh-3d-head' }, h('h2', null, '插件更新'), h('span', { className: 'dsh-3d-muted' }, '检查 GitHub 仓库最新版本；更新前会再次确认。')),
+        h(UpdatePanel));
     }
 
     function UpdatePanel() {
@@ -232,9 +246,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         } catch (e) { setError(e.message); }
         finally { setBusy(false); }
       };
-      return h('div', { className: 'dsh-3d-settings' },
-        h('div', { className: 'dsh-3d-head' }, h('h2', null, '3D 支持'), h('span', { className: 'dsh-3d-muted' }, '检查并更新 Tripo / Meshy / Hyper3D / HY3D 插件。')),
-        h('div', { className: 'dsh-3d-card' },
+      return h('div', { className: 'dsh-3d-card' },
           h('div', { className: 'dsh-3d-row' },
             h('span', { className: `dsh-3d-dot${check?.updateAvailable ? '' : ' dsh-3d-dot-ok'}` }),
             h('span', { className: 'dsh-3d-name' }, 'dsh-tripo-support'),
@@ -248,7 +260,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
             h('button', { className: 'dsh-3d-btn', type: 'button', onClick: load, disabled: busy }, busy ? '检查中…' : '检查更新'),
             check?.updateAvailable ? h('button', { className: 'dsh-3d-btn dsh-3d-btn-primary', type: 'button', onClick: apply, disabled: busy }, '更新到最新版本') : null),
           message ? h('div', { className: 'dsh-3d-success' }, message) : null,
-          error ? h('div', { className: 'dsh-3d-error' }, error) : null));
+          error ? h('div', { className: 'dsh-3d-error' }, error) : null);
     }
 
     function SectionIcon({ size = 16 }) {
@@ -541,12 +553,6 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
           id: 'tripo-support',
           order: 12,
         }, SectionIcon));
-        ctx.slots.inject('settings.plugins.tab', () => ctx.slots.register({
-          name: 'settings.plugins.tab',
-          id: 'dsh-tripo-support',
-          order: 20,
-          label: () => '3D 支持',
-        }, UpdatePanel));
         ctx.slots.inject('conversation.input.right', () => ctx.slots.register({
           name: 'conversation.input.right',
           id: 'dsh-tripo-support-3d-model',
@@ -565,6 +571,9 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
     };
   },
 });
+
+
+
 
 
 

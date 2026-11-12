@@ -35,15 +35,12 @@ try {
   await wait(1300);
   await clickExact('设置');
   await wait(2000);
-  const plugins = await clickExact('内置插件');
-  console.log(`plugins=${plugins}`);
-  await wait(1500);
-  const tab = await clickExact('3D 支持');
-  console.log(`tab=${tab}`);
-  await wait(2500);
+  const section = await clickExact('3D 生成');
+  console.log(`section=${section}`);
+  await wait(2200);
   const text = await page.evaluate(() => document.body.innerText);
-  await writeFile(`${artifacts}/update-panel.txt`, text, 'utf8');
-  await page.screenshot({ path: `${artifacts}/update-panel.png`, fullPage: true });
-  console.log(text.slice(-1200));
+  await writeFile(`${artifacts}/settings-3d-update.txt`, text, 'utf8');
+  await page.screenshot({ path: `${artifacts}/settings-3d-update.png`, fullPage: true });
+  console.log(text.slice(-1000));
   console.log('ERRORS=' + JSON.stringify(errors.slice(-10)));
 } finally { await browser.close(); }

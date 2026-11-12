@@ -8,7 +8,7 @@
 - **对话框工具条 3D 模型选择器**：独立于原生 LLM 模型选择器，不破坏 DSH 聊天模型体系。
 - **对话内 3D 预览**：生成完成后在对话中自动出现独立的 `model-viewer` 结果卡片，不需要展开工具调用；支持旋转、缩放。
 - **异步任务**：创建任务 → 轮询 → 下载到当前 Session 工作区的 `3d-output/`。
-- **插件面板更新检查**：在「设置 → 内置插件 → 3D 支持」中检查 GitHub 最新版本，确认后可更新。
+- **插件更新检查**：在「设置 → 3D 生成 → 插件更新」中检查 GitHub 最新版本，确认后可更新。
 - **完整操作集**：
   - Tripo 官方 v3：文生3D、图生3D、多视图、文生图/图生图/多视图编辑、贴图、网格分割/智能分割、重拓扑、UV、补洞、格式转换、可绑骨检查、自动绑骨、动画重定向、图片生成 Gaussian Splat。
   - Meshy 官方：文生/图生/多视图 3D、贴图、重拓扑、UV、格式转换、自动绑骨。
@@ -78,17 +78,18 @@ qianwenai/百炼的 3D 服务使用 Tripo 模型，因此位于「第三方渠�
 
 查询地址由 Base URL 自动推导为 `/api/v1/tasks/{task_id}`；如果平台使用不同的查询路径，可在服务配置中覆盖。
 
-### 腾讯混元3D 官方
+### 腾讯混元3D（HY3D）
 
 | 字段 | 值 |
 |---|---|
 | 协议 | 腾讯混元3D（TI-3D） |
 | Base URL | `https://ai3d.tencentcloudapi.com` |
-| Region | `ap-guangzhou`（当前官方地域） |
-| SecretId / SecretKey | 腾讯云 API 密钥 |
+| 认证 | 默认 `API Key (Bearer)`；可切换 `SecretId + SecretKey (TC3)` |
+| Region | `ap-guangzhou`（TC3 模式） |
 | 默认模型 | `3.1-pro`（或 `3.0-pro` / `rapid`） |
 
-插件自动使用 `TC3-HMAC-SHA256` 签名、`X-TC-Action`、`X-TC-Version: 2025-05-13`。
+HY3D 卡片默认只要求 API Key；需要腾讯云原生 TC3 签名时，在「认证方式」中切换为 SecretId + SecretKey。API Key 模式适用于接受 Bearer 的腾讯云兼容网关。
+
 
 ### 第三方混元3D
 
@@ -161,6 +162,9 @@ Mock 覆盖 Tripo v3、DashScope 3D、腾讯混元3D（TC3 签名会被服务端
 ## 第三方资源
 
 - `@google/model-viewer`，Apache-2.0，见 `assets/LICENSE-model-viewer` 与 `THIRD_PARTY_NOTICES.md`。
+
+
+
 
 
 

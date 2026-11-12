@@ -24,7 +24,7 @@ Tripo, Meshy, Hyper3D and Tencent Hunyuan3D async 3D providers for DeepSeek Harn
 - **异步任务**：创建 → 轮询 → 下载到当前 Session 的 `3d-output/`；支持对话内实时进度。
 - **对话内 3D 预览**：生成完成后在对话中自动出现独立的 `model-viewer` 结果卡片，无需展开工具调用。
 - **批量与回调**：`batch_query_3d_tasks` 批量查询 Tripo 任务；Tripo Webhook 支持 HMAC-SHA256 校验。
-- **插件面板更新检查**：在「设置 → 内置插件 → 3D 支持」中检查 GitHub 最新版本，确认后可更新；当前版本保持 0.1.2。
+- **插件更新检查**：在「设置 → 3D 生成 → 插件更新」中检查 GitHub 最新版本，确认后可更新；当前版本保持 0.1.2。
 
 ## 截图
 
@@ -89,15 +89,17 @@ dsh plugin --profile desktop add ".\dist\dsh-tripo-support-0.1.2.tgz"
 | API Key | Rodin API Key |
 | 默认模型 | `Gen-2.5-Medium` |
 
-### 腾讯混元3D 官方
+### 腾讯混元3D（HY3D）
 
 | 字段 | 值 |
 |---|---|
 | 协议 | 腾讯混元3D（TI-3D） |
 | Base URL | `https://ai3d.tencentcloudapi.com` |
-| Region | `ap-guangzhou` |
-| SecretId / SecretKey | 腾讯云 API 密钥 |
+| 认证 | 默认 `API Key (Bearer)`；可切换 `SecretId + SecretKey (TC3)` |
+| Region | `ap-guangzhou`（TC3 模式） |
 | 默认模型 | `3.1-pro` / `3.0-pro` / `rapid` |
+
+HY3D 默认使用 API Key，不再要求 SecretId/SecretKey。需要腾讯云原生 TC3 签名时，在卡片「认证方式」中切换即可；API Key 模式适用于接受 Bearer 的腾讯云兼容网关。
 
 ### 第三方（qwenai / 百炼 DashScope）
 
@@ -168,6 +170,9 @@ plugin/assets/           model-viewer（Apache-2.0）
 ## 许可
 
 MIT，见 [LICENSE](LICENSE)。`@google/model-viewer` 使用 Apache-2.0，见 [plugin/assets/LICENSE-model-viewer](plugin/assets/LICENSE-model-viewer)。
+
+
+
 
 
 

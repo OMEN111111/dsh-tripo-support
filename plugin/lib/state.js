@@ -92,7 +92,7 @@ export class ProviderStore {
 
   async configured(provider) {
     try {
-      if (provider.protocol === 'tencent') {
+      if (provider.protocol === 'tencent' && provider.auth !== 'bearer') {
         const [a, b] = await Promise.all([
           this.credentials.describe(provider.secretIdRef),
           this.credentials.describe(provider.secretKeyRef),
@@ -107,7 +107,7 @@ export class ProviderStore {
   }
 
   async secrets(provider) {
-    if (provider.protocol === 'tencent') {
+    if (provider.protocol === 'tencent' && provider.auth !== 'bearer') {
       const [id, key] = await Promise.all([
         this.credentials.resolve(provider.secretIdRef),
         this.credentials.resolve(provider.secretKeyRef),
@@ -127,7 +127,7 @@ export class ProviderStore {
     const provider = await this.get(providerId);
     if (!provider) throw new Error(`未知的 3D 服务：${providerId}`);
     if (webhookSecret) await this.credentials.set(provider.webhookSecretRef, String(webhookSecret));
-    if (provider.protocol === 'tencent') {
+    if (provider.protocol === 'tencent' && provider.auth !== 'bearer') {
       if (secretId) await this.credentials.set(provider.secretIdRef, String(secretId));
       if (secretKey) await this.credentials.set(provider.secretKeyRef, String(secretKey));
       if (!secretId && !secretKey && !webhookSecret) throw new Error('SecretId / SecretKey 不能同时为空');
@@ -142,7 +142,7 @@ export class ProviderStore {
   async clearKey(providerId) {
     const provider = await this.get(providerId);
     if (!provider) throw new Error(`未知的 3D 服务：${providerId}`);
-    if (provider.protocol === 'tencent') {
+    if (provider.protocol === 'tencent' && provider.auth !== 'bearer') {
       await this.credentials.unset(provider.secretIdRef);
       await this.credentials.unset(provider.secretKeyRef);
     } else {
@@ -161,12 +161,13 @@ export class ProviderStore {
     const provider = normalizeProvider(id, {
       label,
       protocol: input.protocol,
+      auth: input.auth,
       baseURL: input.baseURL,
       models: Array.isArray(input.models) ? input.models : String(input.models || '').split(/[,\n]/).map((item) => item.trim()).filter(Boolean),
       defaultModel: input.defaultModel,
       region: input.region,
     });
-    if (provider.protocol === 'tencent') {
+    if (provider.protocol === 'tencent' && provider.auth !== 'bearer') {
       if (!input.secretId || !input.secretKey) throw new Error('添加混元3D 服务需要 SecretId 和 SecretKey');
       await this.credentials.set(provider.secretIdRef, String(input.secretId));
       await this.credentials.set(provider.secretKeyRef, String(input.secretKey));
@@ -180,11 +181,23 @@ export class ProviderStore {
     return this.public(provider);
   }
 
-  async update({ providerId, baseURL, models, defaultModel, region }) {
+  async update({ providerId, baseURL, models, defaultModel, region, auth }) {
     const state = await this.load();
     const provider = state.providers[providerId];
     if (!provider) throw new Error(`未知的 3D 服务：${providerId}`);
     if (baseURL !== undefined) { provider.baseURL = String(baseURL).trim().replace(/\/+$/, ''); if (provider.protocol === 'dashscope') provider.queryURL = deriveDashscopeTasksURL(provider.baseURL); }
+    if (auth !== undefined && provider.protocol === 'tencent') {
+      provider.auth = auth === 'bearer' ? 'bearer' : 'tc3';
+      if (provider.auth === 'bearer') {
+        provider.apiKeyRef = provider.apiKeyRef || `DSH3D_${provider.id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_API_KEY`;
+        delete provider.secretIdRef;
+        delete provider.secretKeyRef;
+      } else {
+        provider.secretIdRef = provider.secretIdRef || `DSH3D_${provider.id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_SECRET_ID`;
+        provider.secretKeyRef = provider.secretKeyRef || `DSH3D_${provider.id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_SECRET_KEY`;
+        delete provider.apiKeyRef;
+      }
+    }
     if (region !== undefined && provider.protocol === 'tencent') provider.region = String(region).trim();
     if (models !== undefined) {
       provider.models = Array.isArray(models)
@@ -211,6 +224,9 @@ export class ProviderStore {
     return { ok: true };
   }
 }
+
+
+
 
 
 

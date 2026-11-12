@@ -20,6 +20,7 @@ The real `desktop` profile is not touched.
 | Tripo official protocol | pass; create → poll → download against mock |
 | DashScope / qianwenai protocol | pass; `X-DashScope-Async`; derived `/api/v1/tasks/{id}` |
 | Tencent TI-3D protocol | pass; TC3 signature recomputed and verified by mock |
+| HY3D API Key mode | pass against mock; Bearer auth configured without SecretId/SecretKey, generation succeeded |
 | Meshy protocol | pass against mock; create 202 → poll → download → preview |
 | Hyper3D Rodin protocol | pass against mock; subscription-key status → UUID download → preview |
 | Tripo operations | pass against mock: generation, texture, segment, smart segment, retopology, UV, mesh complete, convert, rig check, auto rig, retarget, image-to-splat |
@@ -29,7 +30,7 @@ The real `desktop` profile is not touched.
 | Dedicated chat result node | pass; `<model-viewer>` `loaded=true`, `modelIsVisible=true` without expanding the tool row |
 | Chat 3D preview | `loaded=true`, `modelIsVisible=true`; screenshot `feasibility/artifacts/formal/chat-3d-preview.png` |
 | Tripo Webhook | pass; valid HMAC returned 200, bad signature returned 400 |
-| Plugin-panel update check | pass; `/update/check` returned current/latest `0.1.2`; tab rendered in Settings → Plugins |
+| 3D settings update check | pass; `/update/check` returned current/latest `0.1.2`; the 插件更新 card rendered in Settings → 3D 生成 |
 | Self-update | pass; installed a 0.1.1 test copy, `/update/check` found 0.1.2, `/update/apply` installed the release tarball; after restart current version is 0.1.2 |
 
 ## Not covered
@@ -72,6 +73,8 @@ For the agent-loop test, add the mock LLM rows to the isolated profile and start
 
 - Protocol catalog smoke test: `node tests/protocols-smoke.mjs` passed 51 checks (Tripo 18, DashScope 13, Tencent 10, Meshy 8, Hyper3D 2).
 ode tests/protocols-smoke.mjs` passed 51 checks (Tripo 18, DashScope 13, Tencent 10, Meshy 8, Hyper3D 2).
+
+
 
 
 

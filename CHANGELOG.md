@@ -8,7 +8,7 @@
 - **Hyper3D / Rodin official channel**: text-to-3D and image-to-3D via `https://api.hyper3d.com/api/v2`, including async status and download handling.
 - **`select_3d_model` tool**: lets the agent switch the active provider/model only after explicit user approval. This is intended for qwenai Tripo's per-operation models (texture, rigging, topology, etc.).
 - **Dedicated in-chat 3D result node**: successful `create_3d_task` / `run_3d_operation` / `generate_3d` results render a `model-viewer` card directly in the conversation, without requiring the user to expand the tool-call row. The card polls the task and shows the GLB when ready.
-- **Plugin-panel update checker**: Settings → Plugins → 3D 支持 reads the latest GitHub release, compares it with the installed version, and offers an explicit update action. Version remains `0.1.2`; the release asset is replaced in place.
+- **Plugin-panel update checker**: Settings → 3D 生成 → Plugin update reads the latest GitHub release, compares it with the installed version, and offers an explicit update action. Version remains `0.1.2`; the release asset is replaced in place.
 - **3D execution policy** injected into the system prompt:
   - one user request = one requested operation;
   - no automatic texture, retopology, rigging, DCC modeling or retries;
@@ -19,6 +19,7 @@
 ### Changed
 
 - Moved **qwenai / 百炼 (Tripo)** from the official tab to the **third-party** tab. It is a Tripo-backed service, not a direct official provider.
+- HY3D now defaults to **API Key (Bearer)** authentication; the card can switch back to Tencent Cloud **SecretId + SecretKey (TC3)** when needed. This removes the mandatory SecretId/SecretKey fields for API-key-compatible HY3D endpoints.
 - Official channel order and labels: **Tripo**, **Meshy**, **Hyper3D**, **HY3D**; the composer pill shows only provider names, without “官方” suffixes.
 - Settings page remains limited to keys/configuration; provider and model invocation stays in the composer pill.
 - Tool descriptions now explicitly prohibit automatic retries and chained 3D operations.
@@ -60,3 +61,4 @@
 
 - Initial Tripo / qianwenai DashScope / Tencent Hunyuan3D support.
 - Async tools, task polling, downloads, GLB preview and Webhook.
+

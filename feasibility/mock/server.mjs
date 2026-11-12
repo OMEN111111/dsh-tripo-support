@@ -19,6 +19,7 @@ const TRIPO_RELAY_KEY = 'thirdparty-key';
 const DASHSCOPE_KEY = 'test-dashscope-key';
 const HY3D_SECRET_ID = 'test-hy3d-secret-id';
 const HY3D_SECRET_KEY = 'test-hy3d-secret-key';
+const HY3D_API_KEY = 'test-hy3d-api-key';
 const MESHY_KEY = 'test-meshy-key';
 const HYPER_KEY = 'test-hyper-key';
 const meshyTasks = new Map();
@@ -293,7 +294,8 @@ async function handleDashscope(req, res, url) {
 async function handleHy3d(req, res) {  if (req.method !== 'POST') return sendJson(res, 405, { Response: { Error: { Code: 'MethodNotAllowed', Message: 'POST only' } } });
   const action = String(req.headers['x-tc-action'] || '');
   const rawBody = (await readBody(req)) || '{}';
-  const verification = verifyTc3(req, rawBody);
+  const bearer = req.headers.authorization === `Bearer ${HY3D_API_KEY}`;
+  const verification = bearer ? { ok: true } : verifyTc3(req, rawBody);
   if (!verification.ok) {
     return sendJson(res, 401, { Response: { Error: { Code: verification.code, Message: verification.message }, RequestId: randomUUID() } });
   }

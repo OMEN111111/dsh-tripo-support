@@ -10,5 +10,8 @@
 | `pill-provider-expanded.png` | Clicking a provider switches the active provider and expands its model list. |
 | `pill-selected.png` | Selecting a model updates the persisted selection; the pill shows the new provider/model. |
 | `pill-result.json` | The selection endpoint persisted `qwenai-dashscope / Tripo/Tripo-Texture` during the test. |
-| `update-panel.png` | Settings → Plugins → 3D 支持 checks the GitHub release and shows current/latest versions. |
 
+
+
+| `settings-3d-update.png` | Settings → 3D 生成 → 插件更新 checks the GitHub release and shows current/latest versions. |
+| `hy3d-auth.png` | HY3D defaults to API Key (Bearer), with an optional SecretId + SecretKey (TC3) mode. |

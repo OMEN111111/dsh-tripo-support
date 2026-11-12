@@ -33,7 +33,7 @@ A provider is data, not code:
 - `protocol: meshy` — Meshy `/openapi/v2` tasks and Bearer key.
 - `protocol: hyper` — Hyper3D Rodin `/api/v2` multipart tasks, subscription-key status and UUID download.
 - `protocol: dashscope` — Bailian / qianwenai async 3D (third-party preset); `X-DashScope-Async: enable`; query URL derived by replacing the services path with `/api/v1/tasks`.
-- `protocol: tencent` — Tencent Cloud TI-3D; SecretId/SecretKey; TC3-HMAC-SHA256; action names per operation.
+- `protocol: tencent` — Tencent Cloud TI-3D; `auth: bearer` sends `Authorization: Bearer` plus `X-TC-Action` headers, `auth: tc3` uses SecretId/SecretKey and TC3-HMAC-SHA256; action names per operation.
 
 Credentials live in DSH's `credentials` service. The profile only stores refs (`apiKeyRef` or `secretIdRef`/`secretKeyRef`).
 
@@ -52,10 +52,13 @@ DSH's `LlmAdapter` contract streams chat tokens and tool calls. Tripo/HY3D do no
 ## UI seats
 
 - `settings.section` — a dedicated Settings → 3D generation page with official and third-party provider configuration.
-- `settings.plugins.tab` — a 3D 支持 tab in Settings → Plugins that checks the GitHub release and offers an explicit update.
+- Settings → 3D 生成 → 插件更新 — checks the GitHub release and offers an explicit update.
 - `conversation.input.right` — the `3D · provider` model selector.
 - `conversation.chat.node` — dedicated 3D result card, registered with `uiConversation.events` and rendered without expanding the tool row.
 - `tool.call.toolview` — compact metadata cards for `create_3d_task`, `run_3d_operation`, `generate_3d`, `wait_3d_task`.
+
+
+
 
 
 
