@@ -27,3 +27,6 @@ PluginText/
 
 # Temporary package inspection
 .agent-temp/
+
+# Local git archive bundle
+dist/*.bundle
