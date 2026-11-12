@@ -133,10 +133,10 @@ qwenai/百炼的 3D 服务使用 Tripo 模型，因此在「第三方渠道」�
 
 ```
 plugin/index.js          Host 工具、Web 路由、任务生命周期
-plugin/lib/protocols.js  Tripo / DashScope / 腾讯云协议适配与操作目录
+plugin/lib/protocols.js  Tripo / Meshy / Hyper3D / DashScope / 腾讯云协议适配与操作目录
 plugin/lib/state.js      服务配置与 DSH 凭据引用
 plugin/lib/tasks.js      异步任务记录、下载、预览注册
-plugin/client.js         模型设置卡片、3D 选择器、工具卡片预览
+plugin/client.js         3D 设置页、3D 选择器、对话内结果卡片
 plugin/assets/           model-viewer（Apache-2.0）
 ```
 
@@ -167,6 +167,7 @@ plugin/assets/           model-viewer（Apache-2.0）
 ## 许可
 
 MIT，见 [LICENSE](LICENSE)。`@google/model-viewer` 使用 Apache-2.0，见 [plugin/assets/LICENSE-model-viewer](plugin/assets/LICENSE-model-viewer)。
+
 
 
 
