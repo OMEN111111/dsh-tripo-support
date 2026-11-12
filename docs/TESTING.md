@@ -30,6 +30,7 @@ The real `desktop` profile is not touched.
 | Chat 3D preview | `loaded=true`, `modelIsVisible=true`; screenshot `feasibility/artifacts/formal/chat-3d-preview.png` |
 | Tripo Webhook | pass; valid HMAC returned 200, bad signature returned 400 |
 | Plugin-panel update check | pass; `/update/check` returned current/latest `0.1.2`; tab rendered in Settings → Plugins |
+| Self-update | pass; installed a 0.1.1 test copy, `/update/check` found 0.1.2, `/update/apply` installed the release tarball; after restart current version is 0.1.2 |
 
 ## Not covered
 

@@ -40,6 +40,7 @@
 - Dedicated chat result node: `model-viewer loaded=true`, visible without expanding the tool card.
 - Settings page: official providers (Tripo / Meshy / Hyper3D / HY3D) and third-party qwenai preset render correctly.
 - Composer pill: provider switching and model switching persist through `/selection`.
+- Self-update: installed a 0.1.1 test copy, detected 0.1.2, installed the release tarball via `/update/apply`, and verified 0.1.2 after restart.
 
 ### Known limitations
 
