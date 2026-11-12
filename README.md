@@ -23,7 +23,7 @@ Tripo, Meshy, Hyper3D and Tencent Hunyuan3D async 3D providers for DeepSeek Harn
 | Tripo | API Key（Bearer） |
 | Meshy | API Key（Bearer） |
 | Hyper3D / Rodin | API Key（Bearer） |
-| HY3D（腾讯混元3D） | 默认 API Key（Bearer）；可选 SecretId + SecretKey（TC3） |
+| HY3D（腾讯混元3D） | 默认 SecretId + SecretKey（TC3）；可选 API Key（Bearer，兼容网关） |
 | qwenai / 百炼（Tripo） | 第三方预设，API Key（Bearer） |
 | 自定义模型 API | Tripo v3 / Meshy / Hyper3D / DashScope / HY3D 兼容协议 |
 
@@ -52,3 +52,4 @@ dsh plugin --profile desktop add "https://github.com/OMEN111111/dsh-tripo-suppor
 ## 许可
 
 MIT，见 [LICENSE](LICENSE)。`@google/model-viewer` 使用 Apache-2.0；three.js 使用 MIT，见 `plugin/assets/LICENSE-model-viewer` 与 `plugin/assets/LICENSE-three`。
+

@@ -13,7 +13,7 @@
 
 ### Changed
 
-- HY3D defaults to **API Key (Bearer)** authentication; the card can switch to Tencent Cloud **SecretId + SecretKey (TC3)**. The official `ai3d` endpoint requires TC3, so API Key mode is for Bearer-compatible gateways.
+- HY3D official `ai3d` uses **SecretId + SecretKey (TC3)** by default; the card can switch to **API Key (Bearer)** for compatible gateways. The API-key default caused `AuthFailure.InvalidAuthorization` on the official endpoint and was reverted.
 - The update checker is inside **Settings → 3D 生成 → 插件更新**, not a separate Plugins tab.
 - The viewer is bundled locally (three.js MIT); `model-viewer` remains a legacy asset.
 
@@ -39,7 +39,7 @@
 ### Changed
 
 - Moved **qwenai / 百炼 (Tripo)** from the official tab to the **third-party** tab. It is a Tripo-backed service, not a direct official provider.
-- HY3D now defaults to **API Key (Bearer)** authentication; the card can switch back to Tencent Cloud **SecretId + SecretKey (TC3)** when needed. This removes the mandatory SecretId/SecretKey fields for API-key-compatible HY3D endpoints.
+- HY3D official `ai3d` keeps **SecretId + SecretKey (TC3)** as the default; **API Key (Bearer)** remains available for compatible gateways. The previous API-key default was reverted after the official endpoint returned `AuthFailure.InvalidAuthorization`.
 - Official channel order and labels: **Tripo**, **Meshy**, **Hyper3D**, **HY3D**; the composer pill shows only provider names, without “官方” suffixes.
 - Settings page remains limited to keys/configuration; provider and model invocation stays in the composer pill.
 - Tool descriptions now explicitly prohibit automatic retries and chained 3D operations.
@@ -81,5 +81,6 @@
 
 - Initial Tripo / qianwenai DashScope / Tencent Hunyuan3D support.
 - Async tools, task polling, downloads, GLB preview and Webhook.
+
 
 

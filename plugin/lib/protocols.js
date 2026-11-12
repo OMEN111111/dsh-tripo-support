@@ -147,12 +147,13 @@ export const DEFAULT_PROVIDERS = {
     id: 'hy3d-official',
     label: 'HY3D',
     protocol: 'tencent',
-    auth: 'bearer',
+    auth: 'tc3',
     baseURL: 'https://ai3d.tencentcloudapi.com',
     region: 'ap-guangzhou',
     models: TENCENT_MODELS,
     defaultModel: '3.1-pro',
-    apiKeyRef: 'HY3D_API_KEY',
+    secretIdRef: 'HY3D_SECRET_ID',
+    secretKeyRef: 'HY3D_SECRET_KEY',
   },
 };
 

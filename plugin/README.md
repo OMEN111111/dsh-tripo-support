@@ -88,7 +88,7 @@ qianwenai/百炼的 3D 服务使用 Tripo 模型，因此位于「第三方渠�
 | Region | `ap-guangzhou`（TC3 模式） |
 | 默认模型 | `3.1-pro`（或 `3.0-pro` / `rapid`） |
 
-HY3D 卡片默认只要求 API Key；需要腾讯云原生 TC3 签名时，在「认证方式」中切换为 SecretId + SecretKey。API Key 模式适用于接受 Bearer 的腾讯云兼容网关。
+HY3D 官方地址使用 SecretId + SecretKey（TC3）。若使用接受 Bearer 的第三方 HY3D 网关，可在「认证方式」切换为 API Key。
 
 
 ### 第三方混元3D
@@ -145,6 +145,7 @@ https://<你的 DSH 公网地址>/plugins/dsh-tripo-support/webhook/tripo-offici
 ## 第三方资源
 
 - `@google/model-viewer`，Apache-2.0，见 `assets/LICENSE-model-viewer` 与 `THIRD_PARTY_NOTICES.md`。
+
 
 
 
