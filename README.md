@@ -38,6 +38,7 @@ Tripo, Meshy, Hyper3D and Tencent Hunyuan3D async 3D providers for DeepSeek Harn
 ## 安装
 
 更新日志见 [`CHANGELOG.md`](CHANGELOG.md)。
+最新发布：https://github.com/OMEN111111/dsh-tripo-support/releases/tag/v0.1.2
 
 要求：DeepSeek Harness Desktop `0.2.2-rc.2`（兼容 `>=0.2.2-rc.1 <0.3.0`）。
 
