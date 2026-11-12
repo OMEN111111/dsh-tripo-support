@@ -1,0 +1,62 @@
+3D 生成服务
+Tripo 官方 / qianwenai（DashScope）/ 混元3D 官方 / 第三方兼容服务。密钥存入 DSH 凭据库，不写入配置文件。
+刷新
+3D 操作完成
+Tripo 官方
+Tripo v3
+密钥已配置
+编辑
+http://127.0.0.1:6123/v3
+5 个模型 · 14 个操作 · 默认 v3.1-20260211
+API Key（官方或第三方平台均可）
+保存密钥
+清空
+测试连接
+qwenai / 百炼 3D
+DashScope 3D
+密钥已配置
+编辑
+http://127.0.0.1:6123/api/v1/services/aigc/video-generation/3d-generation
+12 个模型 · 13 个操作 · 默认 Tripo/Tripo-H3.1
+API Key（官方或第三方平台均可）
+保存密钥
+清空
+测试连接
+腾讯混元3D 官方
+混元3D / TC3
+密钥已配置
+编辑
+http://127.0.0.1:6123
+3 个模型 · 10 个操作 · 默认 3.1-pro
+SecretId
+SecretKey
+保存密钥
+清空
+测试连接
++ 添加第三方 / 自定义 3D 服务
+3D 操作面板（生成 / 拆件 / 拓扑 / 贴图 / 绑定 / 动画）
+服务
+Tripo 官方
+qwenai / 百炼 3D
+腾讯混元3D 官方
+操作
+文生 3D
+图生 3D
+多视图生 3D
+生成贴图
+网格分割 / 拆件
+智能分割 / 拆件
+网格补全
+重拓扑 / 减面
+格式转换
+可绑骨检查
+自动绑骨
+动画重定向
+图片生成 Gaussian Splat
+模型
+提示词
+高级参数 JSON
+执行操作
+会创建异步任务、轮询并下载到工作区；生成类操作可显示 3D 预览。
+qwenai / 百炼 3D / text_to_3d / success / 7a845bed-b3c1-4391-919b-b04ebb98e7c3 文件：D:\Program\dsh-tripo-support\feasibility\sandbox\dsh-home\tripo-support\output\qwenai-dashscope-7a845bed-b3c1-4391-919b-b04ebb98e7c3-example.glb
+/plugins/dsh-tripo-support/model/4c3b9ee06c65ac8ef7eb408a

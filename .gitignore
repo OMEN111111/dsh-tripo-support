@@ -1,0 +1,23 @@
+node_modules/
+.DS_Store
+Thumbs.db
+
+# Internal backups and one-off recovery artifacts
+.agent-backups/
+
+# Isolated DSH runtime state (recreate with feasibility/sandbox/prepare.ps1)
+feasibility/sandbox/dsh-home/
+feasibility/sandbox/*.log
+feasibility/sandbox/*.pid
+feasibility/sandbox/dump-*.yml
+feasibility/sandbox/packtest-*
+
+# Downloaded only for the local preview test; re-download with the documented URL
+feasibility/mock/model-viewer.min.js
+
+# Intermediate failed-run diagnostics
+feasibility/artifacts/raw/
+feasibility/artifacts/formal/raw/
+
+# Package metadata log; the .tgz is kept as a release artifact
+dist/pack.log

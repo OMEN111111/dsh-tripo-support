@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "3D generation services (Tripo / Hunyuan3D)",
+    "description": "Configure Tripo, Hunyuan3D, or compatible third-party async 3D services in Models settings and let the agent generate models."
+  }
+}
