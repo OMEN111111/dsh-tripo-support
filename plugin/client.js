@@ -642,7 +642,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       pbr: '生成 PBR 材质（颜色、金属度、粗糙度、法线等），质量更好但可能增加费用。',
       texturePrompt: '描述想要的材质、颜色、磨损和风格。',
       sourceTaskId: '要修改的模型来源任务；选中左侧模型后会自动填入。',
-      modelUrl: '要修改的模型文件地址；选中左侧模型后会自动填入。',
+      modelUrl: '要修改的模型文件地址；选中左侧模型后会自动填入。旧模型没有保存远程地址时会填入本地路径，云端供应商可能需要公网链接。',
       rigType: '选择角色骨架类型。人形选择「人形（双足）」，动物选择对应的四足/鸟类等。',
       spec: '骨骼命名标准；仅在绑骨时影响导出兼容性。',
       outFormat: '输出文件格式。GLB 适合网页预览，FBX 适合 DCC / 游戏引擎。',
@@ -1079,6 +1079,36 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       );
     }
 
+    function captureModelThumbnail(path) {
+      return new Promise((resolve, reject) => {
+        const element = document.createElement('dsh-3d-viewer');
+        element.setAttribute('auto-rotate', 'false');
+        element.style.cssText = 'position:fixed;left:-10000px;top:0;width:160px;height:160px;display:block;';
+        let settled = false;
+        const finish = (callback, value) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          element.remove();
+          callback(value);
+        };
+        const timer = setTimeout(() => finish(reject, new Error('生成缩略图超时')), 60000);
+        element.addEventListener('viewer-loaded', () => {
+          try {
+            element.renderer.render(element.scene, element.camera);
+            const data = element.renderer.domElement.toDataURL('image/jpeg', 0.78);
+            if (!data || data === 'data:,') throw new Error('缩略图内容为空');
+            finish(resolve, data);
+          } catch (err) {
+            finish(reject, err);
+          }
+        }, { once: true });
+        element.addEventListener('viewer-error', (event) => finish(reject, new Error(event?.detail || '缩略图加载失败')), { once: true });
+        element.setAttribute('src', `${API}/workshop/model?path=${encodeURIComponent(path)}`);
+        document.body.appendChild(element);
+      });
+    }
+
     function fileToDataUrl(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1100,9 +1130,12 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         try { return localStorage.getItem('dsh-3d-workshop-scope') === 'all' ? 'all' : 'current'; } catch { return 'current'; }
       });
       const effectiveScope = scope === 'current' && !currentPath ? 'all' : scope;
+      const viewerReady = useViewer3D();
       const [snapshot, setSnapshot] = React.useState(null);
       const [workspaces, setWorkspaces] = React.useState([]);
       const [models, setModels] = React.useState([]);
+      const [thumbnails, setThumbnails] = React.useState({});
+      const thumbnailQueue = React.useRef(new Set());
       const [activePath, setActivePath] = React.useState('');
       const [search, setSearch] = React.useState('');
       const [loading, setLoading] = React.useState(false);
@@ -1144,6 +1177,25 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         return () => window.removeEventListener('dsh-3d-providers-changed', reload);
       }, [loadSnapshot]);
       React.useEffect(() => { loadModels(); }, [loadModels]);
+      const modelKey = models.map((model) => model.path).join('|');
+      React.useEffect(() => {
+        if (!viewerReady || !models.length) return undefined;
+        let cancelled = false;
+        const queue = models.filter((model) => model.previewable && !model.thumbnailUrl && !thumbnailQueue.current.has(model.path)).slice(0, 12);
+        (async () => {
+          for (const model of queue) {
+            if (cancelled) return;
+            thumbnailQueue.current.add(model.path);
+            try {
+              const thumbnail = await captureModelThumbnail(model.path);
+              if (!cancelled) setThumbnails((current) => ({ ...current, [model.path]: thumbnail }));
+            } catch {
+              thumbnailQueue.current.delete(model.path);
+            }
+          }
+        })();
+        return () => { cancelled = true; };
+      }, [viewerReady, modelKey]);
       React.useEffect(() => {
         try { localStorage.setItem('dsh-3d-workshop-scope', scope); } catch { /* ignore */ }
       }, [scope]);
@@ -1250,10 +1302,12 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
           const next = { ...current.values };
           let touched = false;
           if (changed || !next.sourceTaskId) {
-            if (active.taskId) { next.sourceTaskId = active.taskId; touched = true; }
+            const sourceTaskId = active.taskId || active.sourceTaskId;
+            if (sourceTaskId) { next.sourceTaskId = sourceTaskId; touched = true; }
           }
           if (changed || !next.modelUrl) {
-            if (active.modelUrl) { next.modelUrl = active.modelUrl; touched = true; }
+            const modelUrl = active.modelUrl || active.path;
+            if (modelUrl) { next.modelUrl = modelUrl; touched = true; }
           }
           return touched ? { ...current, values: next } : current;
         });
@@ -1364,7 +1418,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       };
       const useActiveAsSource = () => {
         if (!active) return;
-        setForm((current) => ({ ...current, values: { ...current.values, ...(active.taskId ? { sourceTaskId: active.taskId } : {}), ...(active.modelUrl ? { modelUrl: active.modelUrl } : {}) } }));
+        setForm((current) => ({ ...current, values: { ...current.values, ...((active.taskId || active.sourceTaskId) ? { sourceTaskId: active.taskId || active.sourceTaskId } : {}), ...((active.modelUrl || active.path) ? { modelUrl: active.modelUrl || active.path } : {}) } }));
       };
       const submit = async () => {
         if (!selectedProvider || !currentOperation) return;
@@ -1449,8 +1503,8 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
                 onClick: () => selectModel(model),
               },
                 h('span', { className: 'dsh-3d-ws-thumb' },
-                  model.thumbnailUrl
-                    ? h('img', { src: model.thumbnailUrl, alt: '', loading: 'lazy', referrerPolicy: 'no-referrer', onError: (event) => { event.currentTarget.style.display = 'none'; } })
+                  (thumbnails[model.path] || model.thumbnailUrl)
+                    ? h('img', { src: thumbnails[model.path] || model.thumbnailUrl, alt: '', loading: 'lazy', referrerPolicy: 'no-referrer', onError: (event) => { event.currentTarget.style.display = 'none'; } })
                     : h('svg', { width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' }, h('path', { d: 'M12 2 21 7 12 12 3 7Z' }), h('path', { d: 'M3 7v10l9 5 9-5V7' }), h('path', { d: 'M12 12v10' }))));
             })))),
       ));
@@ -1493,7 +1547,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
             h('div', { className: 'dsh-3d-ws-source-name', title: active?.path || '' }, active ? active.name : '先在左侧选择模型'),
             h('div', { className: 'dsh-3d-ws-source-actions' },
               h('button', { type: 'button', className: 'dsh-3d-ws-secondary', disabled: !active || (!active.taskId && !active.modelUrl), onClick: useActiveAsSource }, '重新填入模型信息'),
-              active?.taskId ? h('span', { className: 'dsh-3d-ws-sub' }, `任务 ${active.taskId}`) : null)) : null,
+              (active?.taskId || active?.sourceTaskId) ? h('span', { className: 'dsh-3d-ws-sub' }, `任务 ${active.taskId || active.sourceTaskId}`) : null)) : null,
           imagePickerOperation ? (currentOperation === 'multiview_to_3d'
             ? h(WorkshopMultiViewPicker, {
               slots: workshopViewSlots(selectedProvider, currentModel),

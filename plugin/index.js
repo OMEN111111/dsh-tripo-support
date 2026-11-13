@@ -56,6 +56,7 @@ function ensure(condition, message) {
 }
 
 const WORKSHOP_MODEL_EXTENSIONS = new Set(['.glb', '.gltf', '.fbx', '.obj', '.stl', '.usdz']);
+const TASK_ID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
 const previewableModel = (file) => ['.glb', '.gltf'].includes(extname(file).toLowerCase());
 const pathKey = (value) => resolve(String(value || '')).replace(/\\/g, '/').toLowerCase();
 const isWithin = (child, root) => {
@@ -148,7 +149,8 @@ export function apply(ctx, config = {}) {
         if (!entry.isFile() || !WORKSHOP_MODEL_EXTENSIONS.has(extname(entry.name).toLowerCase())) continue;
         let info;
         try { info = await stat(file); } catch { continue; }
-        const task = taskForFile(file);
+        const embeddedTaskId = (entry.name.match(TASK_ID_PATTERN) || [])[0] || '';
+        const task = taskForFile(file) || tasks.list().find((item) => item.taskId && item.taskId === embeddedTaskId);
         models.push({
           id: pathKey(file),
           name: entry.name,
@@ -164,6 +166,7 @@ export function apply(ctx, config = {}) {
           operation: task?.operation,
           model: task?.model,
           taskId: task?.taskId,
+          sourceTaskId: task?.taskId || embeddedTaskId || undefined,
           modelUrl: task?.modelUrl,
           thumbnailUrl: /^https?:/i.test(String(task?.previewUrl || '')) ? task.previewUrl : undefined,
           status: task?.status,
