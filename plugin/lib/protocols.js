@@ -24,28 +24,28 @@ export const PROTOCOL_LABELS = {
 };
 
 export const OPERATIONS = {
-  text_to_3d: { label: '文生 3D', description: '文本提示词生成 3D 模型', fields: ['prompt'] },
-  image_to_3d: { label: '图生 3D', description: '单张图片生成 3D 模型', fields: ['imageUrl', 'sourceTaskId'] },
-  multiview_to_3d: { label: '多视图生 3D', description: '多视角图片生成 3D 模型', fields: ['imageUrls'] },
-  texture: { label: '生成贴图', description: '为已有模型重新生成贴图 / PBR 材质', fields: ['sourceTaskId', 'modelUrl', 'texturePrompt', 'pbr'] },
-  segment: { label: '网格分割 / 拆件', description: '按几何或语义把模型拆成部件', fields: ['sourceTaskId', 'modelUrl', 'modelVersion', 'granularity'] },
-  smart_segment: { label: '智能分割 / 拆件', description: '端到端智能分割，可自动建模', fields: ['sourceTaskId', 'modelUrl', 'segType', 'granularity', 'hint'] },
-  retopology: { label: '重拓扑 / 减面', description: '重建干净拓扑或降低面数', fields: ['sourceTaskId', 'modelUrl', 'modelVersion', 'faceLimit', 'quad', 'smartUv'] },
-  uv: { label: 'UV 展开', description: '为模型展开 UV', fields: ['sourceTaskId', 'modelUrl'] },
-  mesh_complete: { label: '网格补全', description: '补全缺失的网格', fields: ['sourceTaskId', 'modelUrl'] },
-  convert: { label: '格式转换', description: '转换为 GLB / FBX / OBJ / USDZ 等格式', fields: ['sourceTaskId', 'modelUrl', 'format'] },
-  rig_check: { label: '可绑骨检查', description: '判断模型是否可绑骨并推荐骨骼类型', fields: ['sourceTaskId', 'modelUrl'] },
-  auto_rig: { label: '自动绑骨', description: '自动添加骨骼与蒙皮', fields: ['sourceTaskId', 'modelUrl', 'rigType', 'spec', 'outFormat', 'motionType'] },
-  animation_retarget: { label: '动画重定向', description: '把预设动画应用到已绑骨模型', fields: ['sourceTaskId', 'animations', 'outFormat'] },
-  image_to_splat: { label: '图片生成 Gaussian Splat', description: '从图片生成 Gaussian Splat', fields: ['imageUrl'] },
-  text_to_image: { label: '文生图（Tripo）', description: '文本生成参考图 / 概念图', fields: ['prompt', 'size'] },
-  image_to_image: { label: '图生图 / 图片编辑（Tripo）', description: '参考图编辑、风格迁移、多图融合', fields: ['prompt', 'imageUrl', 'imageUrls', 'size'] },
-  image_to_multiview: { label: '图生多视图（Tripo）', description: '从单图生成多视图参考图', fields: ['imageUrl'] },
-  edit_multiview: { label: '编辑多视图（Tripo）', description: '编辑多视图参考图', fields: ['prompt', 'imageUrl', 'sourceTaskId'] },
-  part: { label: '组件 / 部件生成', description: '生成可编辑的分部件模型（混元3D）', fields: ['modelUrl', 'format'] },
-  reduce_face: { label: '智能减面 / 拓扑', description: '降低面数（混元3D）', fields: ['modelUrl', 'faceLevel', 'format'] },
-  motion: { label: '文生动作', description: '生成动作（混元3D）', fields: ['prompt', 'modelUrl', 'duration'] },
-  profile_to_3d: { label: '3D 人物生成', description: '人物图片生成 3D 角色（混元3D）', fields: ['imageUrl', 'template'] },
+  text_to_3d: { label: '文字生成 3D', description: '输入文字描述生成 3D 模型', fields: ['prompt', 'faceCount', 'textureQuality', 'textureSize', 'geometryQuality', 'generateParts', 'quad', 'pbr'] },
+  image_to_3d: { label: '单张图片生成 3D', description: '上传一张图片生成 3D 模型', fields: ['imageUrl', 'sourceTaskId', 'faceCount', 'textureQuality', 'textureSize', 'geometryQuality', 'generateParts', 'quad', 'pbr'] },
+  multiview_to_3d: { label: '多张图片生成 3D', description: '上传多张视角图片生成 3D 模型', fields: ['imageUrls', 'faceCount', 'textureQuality', 'textureSize', 'geometryQuality', 'generateParts', 'quad', 'pbr'] },
+  texture: { label: '生成贴图', description: '为已有模型生成贴图或 PBR 材质', fields: ['sourceTaskId', 'modelUrl', 'texturePrompt', 'textureQuality', 'textureSize', 'pbr'] },
+  segment: { label: '拆分模型', description: '把模型按几何或语义拆成多个部分', fields: ['sourceTaskId', 'modelUrl', 'modelVersion', 'granularity'] },
+  smart_segment: { label: '智能拆分', description: '自动识别并拆出模型部件', fields: ['sourceTaskId', 'modelUrl', 'segType', 'granularity', 'hint'] },
+  retopology: { label: '减少面数 / 重建拓扑', description: '降低面数或生成更干净的网格', fields: ['sourceTaskId', 'modelUrl', 'modelVersion', 'faceLimit', 'quad', 'smartUv'] },
+  uv: { label: '展开 UV', description: '为模型生成 UV 坐标', fields: ['sourceTaskId', 'modelUrl'] },
+  mesh_complete: { label: '修补模型', description: '补全缺失的网格', fields: ['sourceTaskId', 'modelUrl'] },
+  convert: { label: '转换格式', description: '转换为 GLB / FBX / OBJ / USDZ 等格式', fields: ['sourceTaskId', 'modelUrl', 'format'] },
+  rig_check: { label: '检查能否绑骨', description: '检查模型是否适合添加骨骼', fields: ['sourceTaskId', 'modelUrl'] },
+  auto_rig: { label: '自动绑骨', description: '自动添加骨骼和蒙皮', fields: ['sourceTaskId', 'modelUrl', 'rigType', 'spec', 'outFormat'] },
+  animation_retarget: { label: '套用动作', description: '把预设动作应用到已绑骨模型', fields: ['sourceTaskId', 'animations', 'outFormat'] },
+  image_to_splat: { label: '图片生成 Splat', description: '从图片生成 Gaussian Splat', fields: ['imageUrl'] },
+  text_to_image: { label: '文字生成图片', description: '输入文字生成参考图', fields: ['prompt', 'size'] },
+  image_to_image: { label: '编辑图片', description: '参考图编辑、风格迁移或多图融合', fields: ['prompt', 'imageUrl', 'imageUrls', 'size'] },
+  image_to_multiview: { label: '生成多视图', description: '从单张图片生成多视图参考图', fields: ['imageUrl'] },
+  edit_multiview: { label: '编辑多视图', description: '编辑已有的多视图参考图', fields: ['prompt', 'imageUrl', 'sourceTaskId'] },
+  part: { label: '分部件生成', description: '生成可编辑的分部件模型', fields: ['modelUrl', 'format'] },
+  reduce_face: { label: '智能减面', description: '降低模型面数', fields: ['modelUrl', 'faceLevel', 'format'] },
+  motion: { label: '生成动作', description: '为模型生成动作', fields: ['prompt', 'modelUrl', 'duration'] },
+  profile_to_3d: { label: '照片生成人物', description: '人物照片生成 3D 角色', fields: ['imageUrl', 'template'] },
 };
 
 const TRIPO_OPERATIONS = [
@@ -61,7 +61,7 @@ const DASHSCOPE_OPERATIONS = [
 ];
 
 const TENCENT_OPERATIONS = [
-  'text_to_3d', 'image_to_3d', 'texture', 'reduce_face', 'part', 'uv', 'motion',
+  'text_to_3d', 'image_to_3d', 'multiview_to_3d', 'texture', 'reduce_face', 'part', 'uv', 'motion',
   'auto_rig', 'profile_to_3d', 'convert',
 ];
 const MESHY_OPERATIONS = [
@@ -238,11 +238,56 @@ function mergeParams(parameters, extra = {}) {
   return clean({ ...(parameters && typeof parameters === 'object' ? parameters : {}), ...extra });
 }
 
+function tripoGenerationOptions(a) {
+  const options = {
+    face_limit: a.faceCount,
+    texture_quality: a.textureQuality,
+    geometry_quality: a.geometryQuality,
+    generate_parts: a.generateParts,
+    quad: a.quad,
+    pbr: a.pbr,
+  };
+  if (a.generateParts || a.pbr === false) {
+    options.pbr = false;
+    options.texture = false;
+  }
+  return options;
+}
+
+function tripoTextureQuality(a) {
+  if (a.textureQuality) return a.textureQuality;
+  const size = String(a.textureSize || '').toUpperCase();
+  return { '1K': 'standard', '2K': 'standard', '4K': 'detailed', '8K': 'extreme' }[size];
+}
+
+function slotValue(slot) {
+  return slot?.fileToken || slot?.url || slot?.dataUrl || undefined;
+}
+
+function tripoMultiviewInputs(a) {
+  if (a.multiviewSlots && typeof a.multiviewSlots === 'object') {
+    const values = [];
+    for (const id of ['front', 'left', 'back', 'right']) {
+      const value = slotValue(a.multiviewSlots[id]);
+      if (value) values.push({ [id]: value });
+    }
+    return values;
+  }
+  return a.imageFileTokens?.length ? a.imageFileTokens : a.imageUrls;
+}
+
+function multiviewValues(a) {
+  if (a.multiviewSlots && typeof a.multiviewSlots === 'object') {
+    return ['front', 'left', 'right', 'back'].map((id) => slotValue(a.multiviewSlots[id])).filter(Boolean);
+  }
+  return a.imageFileTokens?.length ? a.imageFileTokens : (Array.isArray(a.imageUrls) ? a.imageUrls : []);
+}
+
 const TRIPO_CREATE = {
-  text_to_3d: (a) => ({ path: '/generation/text-to-model', body: { prompt: a.prompt, model: a.model, ...a.parameters } }),
-  image_to_3d: (a) => ({ path: '/generation/image-to-model', body: { input: a.imageUrl || a.sourceTaskId, model: a.model, ...a.parameters } }),
-  multiview_to_3d: (a) => ({ path: '/generation/multiview-to-model', body: { inputs: a.imageUrls, model: a.model, ...a.parameters } }),
-  texture: (a) => ({ path: '/models/texture', body: { input: a.sourceTaskId || a.modelUrl, model: a.model, texture_prompt: a.texturePrompt ? { text: a.texturePrompt } : undefined, pbr: a.pbr, ...a.parameters } }),
+  text_to_3d: (a) => ({ path: '/generation/text-to-model', body: { prompt: a.prompt, model: a.model, ...a.parameters, ...tripoGenerationOptions(a) } }),
+  image_to_3d: (a) => ({ path: '/generation/image-to-model', body: { input: a.imageFileToken || a.imageUrl || a.sourceTaskId, model: a.model, ...a.parameters, ...tripoGenerationOptions(a) } }),
+  multiview_to_3d: (a) => ({ path: '/generation/multiview-to-model', body: { inputs: tripoMultiviewInputs(a), model: a.model, ...a.parameters, ...tripoGenerationOptions(a) } }),
+  texture: (a) => ({ path: '/models/texture', body: { input: a.sourceTaskId || a.modelUrl, model: a.model, texture_prompt: a.texturePrompt ? { text: a.texturePrompt } : undefined, pbr: a.pbr, texture_quality: tripoTextureQuality(a), ...a.parameters } }),
   segment: (a) => ({ path: '/mesh/segment', body: { input: a.sourceTaskId || a.modelUrl, model: a.modelVersion, segmentation_granularity: a.granularity, ...a.parameters } }),
   smart_segment: (a) => ({ path: '/mesh/smartsegment', body: { seg_type: a.segType || 'model', input: a.sourceTaskId || a.modelUrl, granularity: a.granularity, hint: a.hint, ...a.parameters } }),
   retopology: (a) => ({ path: '/mesh/decimate', body: { input: a.sourceTaskId || a.modelUrl, model: a.modelVersion, face_limit: a.faceLimit, quad: a.quad, smart_uv: a.smartUv, ...a.parameters } }),
@@ -252,7 +297,7 @@ const TRIPO_CREATE = {
   rig_check: (a) => ({ path: '/animations/rig-check', body: { input: a.sourceTaskId || a.modelUrl, ...a.parameters } }),
   auto_rig: (a) => ({ path: '/animations/rig', body: { input: a.sourceTaskId || a.modelUrl, rig_type: a.rigType, spec: a.spec, out_format: a.outFormat, ...a.parameters } }),
   animation_retarget: (a) => ({ path: '/animations/retarget', body: { input: a.sourceTaskId, animations: a.animations, out_format: a.outFormat, ...a.parameters } }),
-  image_to_splat: (a) => ({ path: '/generation/image-to-splat', body: { input: a.imageUrl, ...a.parameters } }),
+  image_to_splat: (a) => ({ path: '/generation/image-to-splat', body: { input: a.imageFileToken || a.imageUrl, ...a.parameters } }),
   text_to_image: (a) => ({ path: '/generation/text-to-image', body: { prompt: a.prompt, model: a.model, size: a.size, ...a.parameters } }),
   image_to_image: (a) => ({ path: '/generation/image-to-image', body: { input: a.imageUrl, inputs: a.imageUrls, prompt: a.prompt, model: a.model, size: a.size, ...a.parameters } }),
   image_to_multiview: (a) => ({ path: '/generation/image-to-multiview', body: { input: a.imageUrl, ...a.parameters } }),
@@ -286,9 +331,12 @@ function dashscopeModel(provider, operation, requested) {
 
 function dashscopeInput(operation, a) {
   if (operation === 'text_to_3d') return { prompt: a.prompt };
-  if (operation === 'image_to_3d') return { image: a.imageUrl };
-  if (operation === 'multiview_to_3d') return { images: (a.imageUrls || []).map((url) => ({ type: String(url).toLowerCase().endsWith('.png') ? 'png' : 'jpeg', file_token: url })) };
-  if (operation === 'image_to_splat') return { image: a.imageUrl };
+  if (operation === 'image_to_3d') return { image: a.imageFileToken || a.imageUrl };
+  if (operation === 'multiview_to_3d') {
+    const inputs = multiviewValues(a);
+    return { images: inputs.map((url) => ({ type: String(url).toLowerCase().endsWith('.png') ? 'png' : 'jpeg', file_token: url })) };
+  }
+  if (operation === 'image_to_splat') return { image: a.imageFileToken || a.imageUrl };
   if (operation === 'convert') return clean({ original_model_task_id: a.sourceTaskId, model_url: a.modelUrl, format: a.format });
   return clean({ original_model_task_id: a.sourceTaskId, model_url: a.modelUrl });
 }
@@ -301,6 +349,7 @@ function dashscopeParameters(operation, a) {
   if (a.geometryQuality) extra.geometry_quality = a.geometryQuality;
   if (a.quad !== undefined) extra.quad = a.quad;
   if (a.faceLimit !== undefined) extra.face_limit = a.faceLimit;
+  if (a.faceCount !== undefined) extra.face_limit = a.faceCount;
   if (a.modelVersion) extra.model_version = a.modelVersion;
   if (a.granularity) extra.segmentation_granularity = a.granularity;
   if (a.rigType) extra.rig_type = a.rigType;
@@ -315,6 +364,7 @@ function dashscopeParameters(operation, a) {
 const TENCENT_ACTION = {
   text_to_3d: ['SubmitHunyuanTo3DProJob', 'QueryHunyuanTo3DProJob'],
   image_to_3d: ['SubmitHunyuanTo3DProJob', 'QueryHunyuanTo3DProJob'],
+  multiview_to_3d: ['SubmitHunyuanTo3DProJob', 'QueryHunyuanTo3DProJob'],
   texture: ['SubmitTextureTo3DJob', 'DescribeTextureTo3DJob'],
   reduce_face: ['SubmitReduceFaceJob', 'DescribeReduceFaceJob'],
   part: ['SubmitHunyuan3DPartJob', 'QueryHunyuan3DPartJob'],
@@ -330,6 +380,32 @@ function tencentSubmit(operation, a, provider) {
   const [action] = TENCENT_ACTION[operation] || [];
   const base = mergeParams(a.parameters);
   const file = (key, type = a.format || 'GLB') => (a.modelUrl ? { [key]: { Url: a.modelUrl, Type: type } } : {});
+  if (operation === 'multiview_to_3d') {
+    const slots = a.multiviewSlots || {};
+    const front = slots.front || {};
+    const viewTypes = { left: 'left', right: 'right', back: 'back', top: 'top', bottom: 'bottom', left_front: 'left_front', right_front: 'right_front' };
+    const multiview = Object.entries(slots)
+      .filter(([id, slot]) => id !== 'front' && slot && (slot.url || slot.dataUrl))
+      .map(([id, slot]) => clean({
+        ViewType: viewTypes[id] || id,
+        ViewImageUrl: slot.url,
+        ViewImageBase64: slot.dataUrl ? String(slot.dataUrl).replace(/^data:[^;]+;base64,/, '') : undefined,
+      }));
+    return {
+      action: 'SubmitHunyuanTo3DProJob',
+      body: clean({
+        ...base,
+        Prompt: a.prompt,
+        ImageUrl: front.url,
+        ImageBase64: front.dataUrl ? String(front.dataUrl).replace(/^data:[^;]+;base64,/, '') : undefined,
+        MultiViewImages: multiview.length ? multiview : undefined,
+        Model: String(a.model || '').startsWith('3.1') ? '3.1' : '3.0',
+        ResultFormat: base.ResultFormat || 'GLB',
+        EnablePBR: a.pbr ?? true,
+        FaceCount: a.faceCount,
+      }),
+    };
+  }
   if (operation === 'text_to_3d' || operation === 'image_to_3d') {
     if (rapid) {
       return { action: 'SubmitHunyuanTo3DRapidJob', body: clean({ ...base, Prompt: a.prompt, ImageUrl: a.imageUrl, ResultFormat: base.ResultFormat || 'GLB', EnablePBR: a.pbr ?? true }) };
@@ -348,7 +424,7 @@ function tencentSubmit(operation, a, provider) {
     };
   }
   if (operation === 'texture') {
-    return { action, body: clean({ ...base, ...file('File3D'), Model: String(a.model || '').startsWith('3.1') ? '3.1' : '3.0', Prompt: a.texturePrompt, Image: a.imageUrl ? { Url: a.imageUrl } : undefined, EnablePBR: a.pbr, TextureSize: base.TextureSize }) };
+    return { action, body: clean({ ...base, ...file('File3D'), Model: String(a.model || '').startsWith('3.1') ? '3.1' : '3.0', Prompt: a.texturePrompt, Image: a.imageUrl ? { Url: a.imageUrl } : undefined, EnablePBR: a.pbr, TextureSize: a.textureSize ? Number(a.textureSize) : base.TextureSize }) };
   }
   if (operation === 'reduce_face') {
     return { action, body: clean({ ...base, ...file('File3D'), PolygonType: base.PolygonType, FaceLevel: a.faceLevel || base.FaceLevel }) };
@@ -437,7 +513,7 @@ function meshyBody(operation, a) {
   const extra = a.parameters && typeof a.parameters === 'object' ? a.parameters : {};
   if (operation === 'text_to_3d') return clean({ mode: 'preview', prompt: a.prompt, ai_model: a.model, target_formats: ['glb'], ...extra });
   if (operation === 'image_to_3d') return clean({ image_url: a.imageUrl, ai_model: a.model, should_texture: false, ...extra });
-  if (operation === 'multiview_to_3d') return clean({ image_urls: a.imageUrls, ai_model: a.model, should_texture: false, ...extra });
+  if (operation === 'multiview_to_3d') return clean({ image_urls: multiviewValues(a), ai_model: a.model, should_texture: false, ...extra });
   if (operation === 'texture') return clean({ input_task_id: a.sourceTaskId, text_style_prompt: a.texturePrompt, ai_model: a.model, ...extra });
   if (operation === 'retopology') return clean({ input_task_id: a.sourceTaskId, target_polycount: a.faceLimit, topology: a.quad ? 'quad' : 'triangle', ...extra });
   if (operation === 'uv') return clean({ input_task_id: a.sourceTaskId, ...extra });

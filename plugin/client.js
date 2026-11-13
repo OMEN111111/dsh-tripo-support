@@ -101,6 +101,20 @@ const WORKSHOP_CSS = `
 .dsh-3d-ws-center{position:relative;z-index:1;display:flex;flex-direction:column;min-width:0;min-height:0;background:#10141a}
 .dsh-3d-ws-pane-head{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.2));flex:none}
 .dsh-3d-ws-pane-title{font-size:12px;font-weight:600;color:var(--dsw-alias-label-primary,#111827)}
+.dsh-3d-ws-balance{font-size:10.5px;line-height:18px;padding:0 6px;border-radius:9px;background:rgba(76,120,255,.10);color:var(--dsh-3d-accent,#4c78ff);white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+.dsh-3d-ws-hintline{font-size:10.5px;line-height:1.4;color:var(--dsw-alias-label-tertiary,#6b7280);margin-top:-3px}
+.dsh-3d-ws-segment{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;border-radius:8px;background:var(--dsw-alias-bg-layer-2,rgba(127,127,127,.07))}
+.dsh-3d-ws-segment-btn{appearance:none;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--dsw-alias-label-secondary,#6b7280);font:inherit;font-size:11px;line-height:24px;padding:0 4px;cursor:pointer;white-space:nowrap}
+.dsh-3d-ws-segment-btn:hover{color:var(--dsw-alias-label-primary,#111827)}
+.dsh-3d-ws-segment-btn-active{background:var(--dsw-alias-bg-layer-1,#fff);border-color:var(--dsw-alias-border-l1,rgba(127,127,127,.2));color:var(--dsw-alias-label-primary,#111827);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.dsh-3d-ws-file{display:flex;align-items:center;gap:7px;min-width:0;padding:6px 8px;border:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.24));border-radius:7px;background:var(--dsw-alias-bg-layer-2,rgba(127,127,127,.04))}
+.dsh-3d-ws-file-thumb{width:34px;height:34px;border-radius:6px;object-fit:cover;flex:none;background:var(--dsw-alias-bg-layer-1,#fff)}
+.dsh-3d-ws-file-list{display:grid;gap:4px}
+.dsh-3d-ws-file-name{min-width:0;flex:1;font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dsh-3d-ws-file-size{font-size:10.5px;color:var(--dsw-alias-label-tertiary,#6b7280);white-space:nowrap}
+.dsh-3d-ws-file-remove{appearance:none;border:0;background:none;color:var(--dsw-alias-label-tertiary,#6b7280);font:inherit;font-size:14px;line-height:18px;cursor:pointer;padding:0 2px}
+.dsh-3d-ws-file-remove:hover{color:var(--dsw-alias-state-error-primary,#ef4444)}
+.dsh-3d-ws-grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .dsh-3d-ws-scope{display:flex;gap:2px;padding:8px 10px 4px;flex:none}
 .dsh-3d-ws-scope-btn{flex:1;appearance:none;border:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.25));background:transparent;color:var(--dsw-alias-label-secondary,#6b7280);font:inherit;font-size:11.5px;line-height:24px;padding:0 6px;cursor:pointer}
 .dsh-3d-ws-scope-btn:first-child{border-radius:6px 0 0 6px}
@@ -111,10 +125,21 @@ const WORKSHOP_CSS = `
 .dsh-3d-ws-list{flex:1;overflow-y:auto;padding:0 8px 10px;min-height:0}
 .dsh-3d-ws-group{margin-top:8px}
 .dsh-3d-ws-group-title{font-size:10.5px;font-weight:600;color:var(--dsw-alias-label-tertiary,#6b7280);padding:3px 4px 5px;text-transform:uppercase;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dsh-3d-ws-item{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:center;width:100%;padding:7px 6px;border:1px solid transparent;border-radius:7px;background:none;color:inherit;text-align:left;cursor:pointer;font:inherit}
+.dsh-3d-ws-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.dsh-3d-ws-item{display:block;width:100%;padding:0;border:2px solid transparent;border-radius:14px;background:none;color:inherit;text-align:left;cursor:pointer;font:inherit;aspect-ratio:1/1;overflow:hidden}
 .dsh-3d-ws-item:hover{background:var(--dsw-alias-bg-layer-2,rgba(127,127,127,.07))}
-.dsh-3d-ws-item-active{background:var(--dsw-alias-brand-primary-soft,rgba(76,120,255,.12));border-color:var(--dsw-alias-brand-primary,#4c78ff)}
+.dsh-3d-ws-item-active{border-color:var(--dsw-alias-brand-primary,#4c78ff);box-shadow:0 0 0 2px var(--dsw-alias-brand-primary-soft,rgba(76,120,255,.12))}
+.dsh-3d-ws-thumb{width:100%;height:100%;border-radius:12px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(145deg,rgba(76,120,255,.22),rgba(118,86,255,.12));color:var(--dsw-alias-brand-primary,#4c78ff)}
+.dsh-3d-ws-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .dsh-3d-ws-item-icon{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(76,120,255,.22),rgba(118,86,255,.12));color:var(--dsw-alias-brand-primary,#4c78ff)}
+.dsh-3d-ws-slot-grid{display:grid;gap:6px}
+.dsh-3d-ws-slot{position:relative;aspect-ratio:1/1;border:1px dashed var(--dsw-alias-border-l2,rgba(127,127,127,.35));border-radius:8px;background:var(--dsw-alias-bg-layer-2,rgba(127,127,127,.04));overflow:hidden;display:grid;place-items:center;cursor:pointer;min-width:0}
+.dsh-3d-ws-slot:hover{border-color:var(--dsh-3d-accent,#4c78ff)}
+.dsh-3d-ws-slot img{width:100%;height:100%;object-fit:cover;display:block}
+.dsh-3d-ws-slot-label{position:absolute;left:0;right:0;bottom:0;padding:3px 5px;background:rgba(0,0,0,.56);color:#fff;font-size:10px;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.dsh-3d-ws-slot-empty{font-size:10.5px;color:var(--dsw-alias-label-tertiary,#6b7280);text-align:center;padding:4px;pointer-events:none}
+.dsh-3d-ws-slot-remove{position:absolute;right:3px;top:3px;width:17px;height:17px;border:0;border-radius:50%;background:rgba(0,0,0,.62);color:#fff;font:inherit;font-size:12px;line-height:17px;padding:0;cursor:pointer;z-index:1}
+.dsh-3d-ws-slot-hint{font-size:10.5px;color:var(--dsw-alias-label-tertiary,#6b7280);line-height:1.4}
 .dsh-3d-ws-item-main{min-width:0;display:grid;gap:2px}
 .dsh-3d-ws-item-name{font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dsh-3d-ws-item-meta{font-size:10.5px;color:var(--dsw-alias-label-tertiary,#6b7280);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -128,7 +153,8 @@ const WORKSHOP_CSS = `
 .dsh-3d-ws-toolbtn:hover{background:rgba(255,255,255,.1);color:#fff}
 .dsh-3d-ws-viewport{position:relative;flex:1;min-height:0;background:#10141a}
 .dsh-3d-ws-viewport dsh-3d-viewer{width:100%;height:100%;display:block;min-height:0;outline:none}
-.dsh-3d-ws-viewer-empty{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.45);font-size:12px;padding:24px;text-align:center}
+.dsh-3d-ws-viewer-empty{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.45);font-size:12px;padding:24px;text-align:center;pointer-events:none}
+.dsh-3d-ws-viewer-empty a{pointer-events:auto}
 .dsh-3d-ws-hint{position:absolute;left:10px;right:10px;bottom:34px;color:rgba(255,255,255,.52);font-size:10.5px;line-height:1.5;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .dsh-3d-ws-viewport>.dsh-3d-ws-statusbar{position:absolute;left:0;right:0;bottom:0;background:rgba(21,26,33,.86);border-top:1px solid rgba(255,255,255,.08)}
 .dsh-3d-ws-viewer-error{position:absolute;inset:0;display:grid;place-items:center;color:#fca5a5;font-size:12px;padding:24px;text-align:center;background:rgba(16,20,26,.9)}
@@ -583,19 +609,169 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
     }
     const WORKSHOP_MODES = [['color', '颜色'], ['normal', '法线'], ['roughness', '粗糙度'], ['metallic', '金属度'], ['wireframe', '线框'], ['clay', '白膜']];
     const WORKSHOP_FIELD_LABELS = {
-      prompt: '提示词', imageUrl: '图片 URL', imageUrls: '多视图图片 URL', sourceTaskId: '源任务 ID', modelUrl: '源模型 URL',
-      texturePrompt: '贴图提示词', pbr: '生成 PBR 材质', format: '输出格式', outFormat: '输出格式', modelVersion: '模型版本',
-      granularity: '分割粒度', segType: '分割类型', hint: '分割提示', faceLimit: '目标面数', quad: '四边面', smartUv: '智能 UV',
-      rigType: '骨骼类型', spec: '骨骼规格 / JSON', motionType: '动作类型', animations: '动作列表', template: '人物模板',
-      duration: '动作时长（秒）', size: '图片尺寸', parameters: '高级参数（JSON）',
+      prompt: '描述', imageUrl: '图片链接', imageUrls: '多张图片链接', sourceTaskId: '模型来源', modelUrl: '模型文件地址',
+      texturePrompt: '贴图描述', pbr: '高质量材质', format: '输出格式', outFormat: '输出格式', modelVersion: '模型版本',
+      granularity: '拆分精细度', segType: '拆分方式', hint: '拆分提示', faceLimit: '目标面数', faceCount: '面数',
+      textureQuality: '贴图质量', textureSize: '贴图尺寸', geometryQuality: '模型精度', generateParts: '分部件生成',
+      quad: '四边面', smartUv: '自动展开 UV', rigType: '骨骼类型', spec: '骨骼标准', motionType: '动作类型',
+      animations: '动作', template: '人物模板', duration: '动作时长', size: '图片尺寸', parameters: '更多参数（高级）',
+      faceLevel: '减面程度',
+    };
+    const WORKSHOP_OPERATION_LABELS = {
+      text_to_3d: '文字生成 3D', image_to_3d: '单张图生成 3D', multiview_to_3d: '多张图生成 3D',
+      texture: '生成贴图', segment: '拆分模型', smart_segment: '智能拆分', retopology: '减面 / 重建拓扑',
+      uv: '展开 UV', mesh_complete: '修补模型', convert: '转换格式', rig_check: '检查绑骨', auto_rig: '自动绑骨',
+      animation_retarget: '套用动作', image_to_splat: '图片生成 Splat', text_to_image: '文字生成图片',
+      image_to_image: '编辑图片', image_to_multiview: '生成多视图', edit_multiview: '编辑多视图',
+      part: '分部件生成', reduce_face: '智能减面', motion: '生成动作', profile_to_3d: '照片生成人物',
+    };
+    const WORKSHOP_GENERATION_OPERATIONS = new Set(['text_to_3d', 'image_to_3d', 'multiview_to_3d']);
+    const WORKSHOP_MODE_HELP = {
+      text_to_3d: '文字生成 3D：根据文字描述创建模型。Tripo 基础约 10–20 积分，贴图尺寸、模型精度、分部件等会增加消耗。',
+      image_to_3d: '单张图生成 3D：用一张图片作为主体参考。Tripo 基础约 20–30 积分。',
+      multiview_to_3d: '多张图生成 3D：按前/左/右/后等视角提供图片，几何更准确。Tripo 基础约 20–30 积分。',
+    };
+    const WORKSHOP_FIELD_HELP = {
+      prompt: '描述你想生成的物体、材质、风格和用途。描述越具体，结果越可控。',
+      faceCount: '输出模型的面数上限。面数越高越精细，生成时间和费用可能增加。不同模型支持的上限不同。',
+      textureSize: '贴图分辨率。4K / 8K 通常会增加积分消耗，具体以供应商报价为准。',
+      textureQuality: '贴图质量等级。精细或极致画质可能增加积分消耗。',
+      geometryQuality: '模型几何精度。精细模式会增加生成时间和费用。',
+      generateParts: '生成可以单独编辑的模型部件；会关闭贴图与材质，Tripo 预计额外增加 20 积分。',
+      quad: '输出四边面网格，适合后续建模；Tripo 可能额外增加 5 积分。',
+      pbr: '生成 PBR 材质（颜色、金属度、粗糙度、法线等），质量更好但可能增加费用。',
+      texturePrompt: '描述想要的材质、颜色、磨损和风格。',
+      sourceTaskId: '要修改的模型来源任务；选中左侧模型后会自动填入。',
+      modelUrl: '要修改的模型文件地址；选中左侧模型后会自动填入。',
+      rigType: '选择角色骨架类型。人形选择「人形（双足）」，动物选择对应的四足/鸟类等。',
+      spec: '骨骼命名标准；仅在绑骨时影响导出兼容性。',
+      outFormat: '输出文件格式。GLB 适合网页预览，FBX 适合 DCC / 游戏引擎。',
+      animations: '要套用的预设动作；Tripo 按动作数量计费，每个动作约 10 积分。',
+      faceLevel: '减面程度；程度越高，保留的面越少。',
+      format: '输出文件格式。',
+      granularity: '拆分精细度。精细会拆出更多语义部件，可能增加费用。',
+      segType: '拆分依据：按模型结构或按参考图片。',
+      hint: '告诉模型你希望重点拆出哪些部件。',
+      template: '人物生成模板。',
+      duration: '动作时长，单位为秒。',
+      parameters: '高级参数，通常保持默认即可。',
+    };
+    const WORKSHOP_FIELD_PROTOCOLS = {
+      faceCount: ['tripo', 'dashscope', 'tencent'],
+      faceLimit: ['tripo', 'dashscope', 'meshy'],
+      faceLevel: ['tencent'],
+      textureQuality: ['dashscope'],
+      textureSize: ['tripo', 'tencent'],
+      geometryQuality: ['tripo', 'dashscope'],
+      generateParts: ['tripo'],
+      quad: ['tripo', 'dashscope', 'meshy'],
+      pbr: ['tripo', 'dashscope', 'tencent'],
+      texturePrompt: ['tripo', 'dashscope', 'tencent'],
+      modelVersion: ['tripo', 'dashscope'],
+      rigType: ['tripo', 'dashscope'],
+      spec: ['tripo', 'dashscope'],
+      outFormat: ['tripo', 'dashscope'],
+      animations: ['tripo', 'dashscope'],
+      segType: ['tripo', 'dashscope'],
+      granularity: ['tripo', 'dashscope'],
+      hint: ['tripo', 'dashscope'],
+      duration: ['tencent'],
+      template: ['tencent'],
+    };
+    const WORKSHOP_SELECT_OPTIONS = {
+      faceCount: [['', '自动'], ['5000', '5,000 面'], ['10000', '10,000 面'], ['20000', '20,000 面'], ['50000', '50,000 面'], ['100000', '100,000 面'], ['200000', '200,000 面']],
+      faceLimit: [['', '自动'], ['2000', '2,000 面'], ['5000', '5,000 面'], ['10000', '10,000 面'], ['20000', '20,000 面'], ['50000', '50,000 面'], ['100000', '100,000 面']],
+      faceLevel: [['', '自动'], ['high', '高'], ['medium', '中'], ['low', '低']],
+      textureQuality: [['', '自动'], ['standard', '标准'], ['detailed', '精细'], ['extreme', '极致 8K']],
+      textureSize: [['', '自动'], ['1024', '1K'], ['2048', '2K'], ['4096', '4K'], ['8192', '8K']],
+      geometryQuality: [['', '自动'], ['standard', '标准'], ['detailed', '精细']],
+      modelVersion: [['', '自动'], ['v3.0', 'v3.0（推荐）'], ['v2.0', 'v2.0'], ['v1.0', 'v1.0']],
+      rigType: [['biped', '人形（双足）'], ['quadruped', '四足动物'], ['hexapod', '六足'], ['octopod', '八足'], ['avian', '鸟类 / 有翼'], ['serpentine', '蛇形'], ['aquatic', '水生'], ['others', '其他']],
+      spec: [['tripo', 'Tripo 标准'], ['mixamo', 'Mixamo'], ['actorcore', 'ActorCore'], ['unity', 'Unity'], ['unreal', 'Unreal'], ['vrm', 'VRM']],
+      outFormat: [['glb', 'GLB'], ['fbx', 'FBX']],
+      format: [['GLB', 'GLB'], ['FBX', 'FBX'], ['OBJ', 'OBJ'], ['USDZ', 'USDZ'], ['STL', 'STL']],
+      motionType: [['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5'], ['6', '6'], ['7', '7'], ['8', '8'], ['9', '9'], ['10', '10'], ['11', '11'], ['12', '12']],
+      duration: Array.from({ length: 12 }, (_, index) => [String(index + 1), `${index + 1} 秒`]),
+      segType: [['model', '按模型智能拆分'], ['image', '按图片拆分']],
+      granularity: [['', '自动'], ['simple', '简单'], ['balanced', '适中'], ['detailed', '精细']],
     };
     const WORKSHOP_OPERATION_GROUPS = [
       { label: '生成', ids: ['text_to_3d', 'image_to_3d', 'multiview_to_3d', 'profile_to_3d', 'image_to_splat'] },
-      { label: '纹理与拓扑', ids: ['texture', 'segment', 'smart_segment', 'retopology', 'uv', 'mesh_complete', 'reduce_face', 'part'] },
-      { label: '绑定与动画', ids: ['rig_check', 'auto_rig', 'animation_retarget', 'motion'] },
+      { label: '编辑模型', ids: ['texture', 'segment', 'smart_segment', 'retopology', 'uv', 'mesh_complete', 'reduce_face', 'part'] },
+      { label: '绑定与动作', ids: ['rig_check', 'auto_rig', 'animation_retarget', 'motion'] },
       { label: '转换与参考图', ids: ['convert', 'text_to_image', 'image_to_image', 'image_to_multiview', 'edit_multiview'] },
     ];
     const WORKSHOP_SOURCE_OPERATIONS = new Set(['texture', 'segment', 'smart_segment', 'retopology', 'uv', 'mesh_complete', 'convert', 'rig_check', 'auto_rig', 'animation_retarget', 'part', 'reduce_face', 'motion']);
+    const WORKSHOP_VIEW_SLOTS = {
+      four: [['front', '前'], ['left', '左侧'], ['right', '右侧'], ['back', '后']],
+      eight: [['front', '前'], ['left_front', '左 45°'], ['left', '左侧'], ['right', '右侧'], ['right_front', '右 45°'], ['back', '后'], ['top', '顶'], ['bottom', '底']],
+    };
+    const workshopViewSlots = (provider, model) => {
+      if (provider?.protocol === 'tencent') return String(model || '').startsWith('3.1') ? WORKSHOP_VIEW_SLOTS.eight : WORKSHOP_VIEW_SLOTS.four;
+      return WORKSHOP_VIEW_SLOTS.four;
+    };
+    const workshopFaceCountOptions = (provider, model) => {
+      const high = [['', '自动'], ['1500000', '1.5M'], ['1000000', '1M'], ['500000', '500K'], ['200000', '200K'], ['100000', '100K'], ['50000', '50K'], ['20000', '20K'], ['10000', '10K'], ['5000', '5K']];
+      if (provider?.protocol === 'tencent') return high.concat([['3000', '3K']]);
+      if (provider?.protocol === 'meshy') return [['', '自动'], ['300000', '300K'], ['200000', '200K'], ['100000', '100K'], ['50000', '50K'], ['20000', '20K'], ['10000', '10K']];
+      if (provider?.protocol === 'tripo' || provider?.protocol === 'dashscope') {
+        const value = String(model || '');
+        if (value.startsWith('v2.5')) return high.filter(([id]) => !id || Number(id) <= 500000);
+        if (value.startsWith('v3.0')) return high.filter(([id]) => !id || Number(id) <= 1000000);
+        return high;
+      }
+      return high;
+    };
+    const workshopModelVersionOptions = (operation) => operation === 'segment'
+      ? [['', '自动'], ['v2.0-20260430', '语义分割 v2'], ['v1.0-20250506', '几何分割 v1']]
+      : WORKSHOP_SELECT_OPTIONS.modelVersion;
+    const estimateTaskCost = (provider, operation, values = {}) => {
+      const fallback = (text, note) => ({ amount: null, text, note });
+      if (!provider) return fallback('按实际计费', '请选择供应商');
+      if (provider.protocol === 'tripo' && !provider.custom) {
+        let amount;
+        if (WORKSHOP_GENERATION_OPERATIONS.has(operation)) {
+          const hasTexture = values.pbr !== false && !values.generateParts;
+          amount = operation === 'text_to_3d' ? (hasTexture ? 20 : 10) : (hasTexture ? 30 : 20);
+          if (values.generateParts) {
+            amount += 20;
+          } else {
+            if (values.textureSize === '4096') amount += 10;
+            if (values.textureSize === '8192') amount += 20;
+            if (values.geometryQuality === 'detailed') amount += 20;
+            if (values.quad) amount += 5;
+          }
+        } else {
+          amount = {
+            texture: values.textureSize === '8192' ? 30 : values.textureSize === '4096' ? 20 : 10,
+            segment: 40,
+            smart_segment: values.segType === 'image' ? 85 : 55,
+            retopology: values.modelVersion === 'v1.0' ? 10 : values.modelVersion === 'v3.0' ? (values.quad ? 40 : 35) : 30,
+            uv: 20,
+            mesh_complete: 50,
+            convert: 5,
+            rig_check: 0,
+            auto_rig: 25,
+            animation_retarget: 10 * (Array.isArray(values.animations) ? Math.max(1, values.animations.length) : Math.max(1, String(values.animations || '').split(/[\n,]/).filter(Boolean).length)),
+            text_to_image: 5,
+            image_to_image: 5,
+            image_to_multiview: 10,
+            edit_multiview: 5,
+          }[operation];
+        }
+        if (Number.isFinite(amount)) return { amount, text: `本次任务预计消耗 ${amount} 积分`, note: '参考 Tripo 官网报价；实际以账户扣费为准。' };
+        return fallback('按实际计费', '该操作暂无公开固定报价，实际以供应商扣费为准。');
+      }
+      if (provider.protocol === 'meshy' && !provider.custom) {
+        const amount = WORKSHOP_GENERATION_OPERATIONS.has(operation) ? 20 : operation === 'texture' ? (values.textureSize === '8192' ? 15 : 10) : null;
+        if (amount !== null) return { amount, text: `本次任务预计消耗 ${amount} 积分`, note: '参考 Meshy API 定价；实际以账户扣费为准。' };
+        return fallback('按实际计费', '该操作暂无公开固定积分报价，实际以 Meshy 扣费为准。');
+      }
+      if (provider.protocol === 'tencent') return fallback('按腾讯云账单', '腾讯云按任务/资源实际计费，不使用积分。');
+      if (provider.protocol === 'hyper') return fallback('按订阅额度', 'Hyper3D 按订阅额度或实际扣减计费，不使用积分。');
+      if (provider.protocol === 'dashscope') return fallback('按百炼实际计费', '百炼 / qwenai 按平台实际账单计费，不使用积分。');
+      return fallback('按实际计费', '按当前网关实际计费。');
+    };
 
     const formatBytes = (bytes) => {
       const value = Number(bytes || 0);
@@ -789,7 +965,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       React.useEffect(() => {
         if (hostRef.current && mode) hostRef.current.setAttribute('mode', mode);
       }, [mode]);
-      if (!item) return h('div', { className: 'dsh-3d-ws-viewer-empty' }, '从左侧选择一个模型预览');
+      if (!item) return h('div', { className: 'dsh-3d-ws-viewport' }, h('div', { className: 'dsh-3d-ws-viewer-empty' }, '从左侧选择一个模型预览'));
       if (item.previewable === false) {
         return h('div', { className: 'dsh-3d-ws-viewport' },
           h('div', { className: 'dsh-3d-ws-viewer-empty' },
@@ -805,31 +981,111 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       );
     }
 
-    function WorkshopField({ field, value, onChange }) {
+    function WorkshopField({ field, value, onChange, options: optionsProp }) {
       const label = WORKSHOP_FIELD_LABELS[field] || field;
-      if (field === 'pbr' || field === 'quad' || field === 'smartUv') {
-        return h('label', { className: 'dsh-3d-ws-check' }, h('input', { type: 'checkbox', checked: Boolean(value), onChange: (event) => onChange(event.target.checked) }), label);
+      const help = WORKSHOP_FIELD_HELP[field] || '';
+      if (field === 'pbr' || field === 'quad' || field === 'smartUv' || field === 'generateParts') {
+        return h('label', { className: 'dsh-3d-ws-check', title: help },
+          h('input', { type: 'checkbox', checked: field === 'pbr' ? value !== false : Boolean(value), onChange: (event) => onChange(event.target.checked) }),
+          h('span', null, label),
+          field === 'generateParts' ? h('em', { className: 'dsh-3d-ws-label' }, '会关闭贴图与材质') : null);
       }
-      if (field === 'format' || field === 'outFormat') {
-        const options = field === 'format' ? ['GLB', 'FBX', 'OBJ', 'USDZ', 'STL'] : ['GLB', 'FBX', 'OBJ', 'USDZ'];
-        return h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, label),
-          h('select', { className: 'dsh-3d-ws-select', value: value || options[0], onChange: (event) => onChange(event.target.value) }, options.map((option) => h('option', { key: option, value: option }, option))));
+      const options = optionsProp || WORKSHOP_SELECT_OPTIONS[field];
+      if (options) {
+        return h('label', { className: 'dsh-3d-ws-field', title: help }, h('span', { className: 'dsh-3d-ws-label' }, label),
+          h('select', { className: 'dsh-3d-ws-select', title: help, value: value ?? options[0][0], onChange: (event) => onChange(event.target.value) },
+            options.map(([optionValue, optionLabel]) => h('option', { key: optionValue, value: optionValue, title: optionLabel }, optionLabel))));
       }
-      if (field === 'segType') {
-        return h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, label),
-          h('select', { className: 'dsh-3d-ws-select', value: value || 'model', onChange: (event) => onChange(event.target.value) }, h('option', { value: 'model' }, '模型'), h('option', { value: 'image' }, '图片')));
+      if (field === 'prompt' || field === 'texturePrompt' || field === 'hint' || field === 'animations' || field === 'imageUrls' || field === 'parameters') {
+        const placeholder = field === 'imageUrls' ? '每行一个图片链接（2-4 张）' : field === 'animations' ? '每行一个动作名称' : field === 'parameters' ? '一般不用填写' : field === 'prompt' ? '例如：低多边形宝箱，木质纹理，铁质锁扣' : '';
+        return h('label', { className: 'dsh-3d-ws-field', title: help }, h('span', { className: 'dsh-3d-ws-label' }, label),
+          h('textarea', { className: 'dsh-3d-ws-textarea', title: help, value: value ?? '', placeholder, onChange: (event) => onChange(event.target.value) }));
       }
-      if (field === 'faceLimit' || field === 'duration' || field === 'motionType') {
-        return h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, label),
-          h('input', { className: 'dsh-3d-ws-input', type: 'number', min: field === 'duration' ? 1 : undefined, max: field === 'duration' ? 12 : undefined, value: value ?? '', onChange: (event) => onChange(event.target.value) }));
-      }
-      if (field === 'prompt' || field === 'texturePrompt' || field === 'hint' || field === 'spec' || field === 'animations' || field === 'imageUrls' || field === 'parameters') {
-        const placeholder = field === 'imageUrls' ? '每行一个图片 URL（2-4 张）' : field === 'animations' ? '每行一个动作名称，或逗号分隔' : field === 'parameters' ? '协议专用参数，JSON 对象' : field === 'prompt' ? '描述你想生成的 3D 模型…' : '';
-        return h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, label),
-          h('textarea', { className: 'dsh-3d-ws-textarea', value: value ?? '', placeholder, onChange: (event) => onChange(event.target.value) }));
-      }
-      return h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, label),
-        h('input', { className: 'dsh-3d-ws-input', value: value ?? '', placeholder: field === 'sourceTaskId' ? '填写源任务 ID，或使用左侧选中的模型' : field === 'imageUrl' ? 'https://…' : '', onChange: (event) => onChange(event.target.value) }));
+      return h('label', { className: 'dsh-3d-ws-field', title: help }, h('span', { className: 'dsh-3d-ws-label' }, label),
+        h('input', { className: 'dsh-3d-ws-input', title: help, value: value ?? '', placeholder: field === 'sourceTaskId' ? '选择左侧模型后自动填入' : field === 'imageUrl' ? '粘贴公开图片链接，或选择本地图片' : field === 'modelUrl' ? '选择左侧模型后自动填入' : '', onChange: (event) => onChange(event.target.value) }));
+    }
+
+    function WorkshopImagePicker({ multiple, provider, operation, uploaded, busy, error, onPick, onClear, urlValue, onUrlChange }) {
+      const canLocal = provider?.protocol === 'tripo' || provider?.protocol === 'hyper' || (provider?.protocol === 'tencent' && operation === 'profile_to_3d');
+      const canMultiple = provider?.protocol === 'tripo';
+      const inputRef = React.useRef(null);
+      return h('div', { className: 'dsh-3d-ws-field' },
+        h('span', { className: 'dsh-3d-ws-label' }, multiple ? '多张参考图' : '参考图', h('em', { className: 'dsh-3d-ws-label' }, multiple ? '建议 2-4 张' : 'PNG / JPG / WEBP')),
+        canLocal ? h(React.Fragment, null,
+          h('input', { ref: inputRef, type: 'file', accept: 'image/png,image/jpeg,image/webp', multiple: multiple && canMultiple, style: { display: 'none' }, onChange: (event) => { onPick([...event.target.files || []]); event.target.value = ''; } }),
+          h('div', { className: 'dsh-3d-ws-source-actions' },
+            h('button', { type: 'button', className: 'dsh-3d-ws-secondary', disabled: busy || (multiple && !canMultiple), onClick: () => inputRef.current?.click() }, busy ? '上传中…' : '选择本地图片'),
+            multiple && !canMultiple ? h('span', { className: 'dsh-3d-ws-sub' }, '该供应商多图仅支持链接') : null),
+          uploaded?.length ? h('div', { className: 'dsh-3d-ws-file-list' }, uploaded.map((file, index) => h('div', { key: `${file.name}-${index}`, className: 'dsh-3d-ws-file' },
+            file.previewUrl ? h('img', { className: 'dsh-3d-ws-file-thumb', src: file.previewUrl, alt: '' }) : null,
+            h('span', { className: 'dsh-3d-ws-file-name' }, file.name),
+            h('span', { className: 'dsh-3d-ws-file-size' }, formatBytes(file.size)),
+            h('button', { type: 'button', className: 'dsh-3d-ws-file-remove', onClick: () => onClear(index), 'aria-label': `移除 ${file.name}` }, '×')))) : null,
+          error ? h('div', { className: 'dsh-3d-ws-error' }, error) : null,
+        ) : h('div', { className: 'dsh-3d-ws-sub' }, '该供应商需要公网图片链接；可直接粘贴图片 URL。'),
+        h('label', { className: 'dsh-3d-ws-field' },
+          h('span', { className: 'dsh-3d-ws-label' }, multiple ? '或粘贴多张图片链接' : '或粘贴图片链接'),
+          multiple
+            ? h('textarea', { className: 'dsh-3d-ws-textarea', value: urlValue ?? '', placeholder: '每行一个图片链接（2-4 张）', onChange: (event) => onUrlChange(event.target.value) })
+            : h('input', { className: 'dsh-3d-ws-input', value: urlValue ?? '', placeholder: 'https://…', onChange: (event) => onUrlChange(event.target.value) })));
+    }
+
+    function WorkshopMultiViewPicker({ slots, value, busy, error, localUpload, onPickFile, onPickUrl, onClear }) {
+      const inputRef = React.useRef(null);
+      const targetRef = React.useRef('');
+      const [target, setTarget] = React.useState('');
+      const choose = (id) => {
+        if (busy) return;
+        if (!localUpload) {
+          const url = window.prompt('粘贴这个视角的图片链接');
+          if (url && /^https?:/i.test(url.trim())) onPickUrl(id, url.trim());
+          return;
+        }
+        targetRef.current = id;
+        setTarget(id);
+        inputRef.current?.click();
+      };
+      return h('div', { className: 'dsh-3d-ws-field' },
+        h('span', { className: 'dsh-3d-ws-label' }, '多视角图片', h('em', { className: 'dsh-3d-ws-label' }, '每个视角最多一张，可留空')),
+        localUpload ? h('input', {
+          ref: inputRef,
+          type: 'file',
+          accept: 'image/png,image/jpeg,image/webp',
+          style: { display: 'none' },
+          onChange: (event) => {
+            const file = event.target.files?.[0];
+            if (file) onPickFile(targetRef.current || target, file);
+            event.target.value = '';
+          },
+        }) : null,
+        h('div', { className: 'dsh-3d-ws-slot-grid', style: { gridTemplateColumns: slots.length > 4 ? 'repeat(4,minmax(0,1fr))' : 'repeat(2,minmax(0,1fr))' } },
+          slots.map(([id, label]) => {
+            const item = value?.[id];
+            return h('div', {
+              key: id,
+              role: 'button',
+              tabIndex: 0,
+              className: 'dsh-3d-ws-slot',
+              title: item ? `${label}：${item.name || item.url || ''}` : `添加${label}图片`,
+              onClick: () => choose(id),
+              onKeyDown: (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); choose(id); } },
+            },
+              item ? h('img', { src: item.previewUrl || item.url, alt: label }) : h('span', { className: 'dsh-3d-ws-slot-empty' }, `${label}\n点击添加`),
+              h('span', { className: 'dsh-3d-ws-slot-label' }, label),
+              item ? h('button', { type: 'button', className: 'dsh-3d-ws-slot-remove', onClick: (event) => { event.stopPropagation(); onClear(id); }, 'aria-label': `移除${label}图片` }, '×') : null);
+          })),
+        localUpload ? null : h('div', { className: 'dsh-3d-ws-slot-hint' }, '当前供应商无法直接接收本地文件，点击插槽可粘贴公网图片链接。'),
+        error ? h('div', { className: 'dsh-3d-ws-error' }, error) : null,
+      );
+    }
+
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(new Error(`读取 ${file.name} 失败`));
+        reader.readAsDataURL(file);
+      });
     }
 
     function WorkshopView(props) {
@@ -857,6 +1113,11 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       const [submitting, setSubmitting] = React.useState(false);
       const [error, setError] = React.useState('');
       const [showAdvanced, setShowAdvanced] = React.useState(false);
+      const [balance, setBalance] = React.useState(null);
+      const [balanceVersion, setBalanceVersion] = React.useState(0);
+      const [uploaded, setUploaded] = React.useState([]);
+      const [uploadBusy, setUploadBusy] = React.useState(false);
+      const [uploadError, setUploadError] = React.useState('');
 
       const loadSnapshot = React.useCallback(() => {
         api('/status').then((data) => { setSnapshot(data); }).catch((err) => setError(err.message));
@@ -913,6 +1174,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
               if (result.status === 'success') {
                 await loadModels();
                 if (result.localFile) setActivePath(result.localFile);
+                setBalanceVersion((value) => value + 1);
               }
             }
           } catch (err) {
@@ -939,8 +1201,35 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       const operationGroups = WORKSHOP_OPERATION_GROUPS.map((group) => ({ ...group, ids: group.ids.filter((id) => operationIds.includes(id)) })).filter((group) => group.ids.length);
       const groupedIds = new Set(operationGroups.flatMap((group) => group.ids));
       const extraOperationIds = operationIds.filter((id) => !groupedIds.has(id));
-      const fields = operationMeta.fields || [];
+      const generationChoices = [['text_to_3d', '文字'], ['image_to_3d', '单张图'], ['multiview_to_3d', '多张图']].filter(([id]) => operationIds.includes(id));
+      const imagePickerOperation = new Set(['image_to_3d', 'multiview_to_3d', 'profile_to_3d', 'image_to_splat']).has(currentOperation);
+      const fields = (operationMeta.fields || []).filter((field) => {
+        if ((field === 'imageUrl' || field === 'imageUrls') && imagePickerOperation) return false;
+        if (field === 'sourceTaskId' && imagePickerOperation) return false;
+        if (field === 'textureSize' && selectedProvider?.protocol === 'tencent' && !['texture', 'part', 'reduce_face'].includes(currentOperation)) return false;
+        const protocols = WORKSHOP_FIELD_PROTOCOLS[field];
+        return !protocols || !selectedProvider || protocols.includes(selectedProvider.protocol);
+      });
       const active = models.find((model) => model.path === activePath) || null;
+      const balanceText = balance?.supported ? `积分 ${balance.balance ?? '—'}` : (balance?.message || '积分暂不可查');
+      const estimate = estimateTaskCost(selectedProvider, currentOperation, form.values);
+      const estimateButtonText = estimate.amount !== null ? `预计消耗 ${estimate.amount} 积分` : estimate.text;
+      const loadBalance = React.useCallback(async () => {
+        if (!providerId) { setBalance(null); return; }
+        let lastError;
+        for (let attempt = 0; attempt < 2; attempt += 1) {
+          try {
+            const data = await api(`/workshop/balance?provider=${encodeURIComponent(providerId)}`);
+            setBalance(data);
+            return;
+          } catch (err) {
+            lastError = err;
+            if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 900));
+          }
+        }
+        setBalance({ ok: false, supported: false, message: lastError?.message || '积分暂不可查' });
+      }, [providerId]);
+      React.useEffect(() => { loadBalance(); }, [loadBalance, balanceVersion]);
       const visibleModels = models.filter((model) => {
         if (!search.trim()) return true;
         const query = search.trim().toLowerCase();
@@ -948,8 +1237,129 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       });
       const groupedModels = workspaces.map((workspace) => ({ ...workspace, models: visibleModels.filter((model) => model.workspacePath === workspace.path) })).filter((workspace) => workspace.models.length);
       const updateValue = (key, value) => setForm((current) => ({ ...current, values: { ...current.values, [key]: value } }));
+      const lastSourceModel = React.useRef('');
+      React.useEffect(() => {
+        if (!active || !WORKSHOP_SOURCE_OPERATIONS.has(currentOperation)) {
+          if (!active) lastSourceModel.current = '';
+          return;
+        }
+        if (active.provider && selectedProvider?.id && active.provider !== selectedProvider.id) return;
+        const changed = lastSourceModel.current !== active.path;
+        if (changed) lastSourceModel.current = active.path;
+        setForm((current) => {
+          const next = { ...current.values };
+          let touched = false;
+          if (changed || !next.sourceTaskId) {
+            if (active.taskId) { next.sourceTaskId = active.taskId; touched = true; }
+          }
+          if (changed || !next.modelUrl) {
+            if (active.modelUrl) { next.modelUrl = active.modelUrl; touched = true; }
+          }
+          return touched ? { ...current, values: next } : current;
+        });
+      }, [active?.path, currentOperation, selectedProvider?.id]);
+      const selectModel = (model) => {
+        setActivePath(model.path);
+        if (WORKSHOP_SOURCE_OPERATIONS.has(currentOperation) && model.provider && providers.some((provider) => provider.id === model.provider)) {
+          setForm((current) => ({ ...current, providerId: model.provider, model: model.model || current.model }));
+        }
+      };
+      const pickImages = async (files) => {
+        const total = currentOperation === 'multiview_to_3d' ? 4 : 1;
+        const picked = (files || []).filter((file) => /^image\//.test(file.type)).slice(0, total);
+        if (!picked.length) return;
+        if (currentOperation === 'multiview_to_3d' && selectedProvider?.protocol !== 'tripo') {
+          setUploadError('当前供应商的多图生成只支持粘贴图片链接');
+          return;
+        }
+        setUploadBusy(true);
+        setUploadError('');
+        try {
+          const results = [];
+          for (const file of picked) {
+            const dataUrl = await fileToDataUrl(file);
+            const data = await api('/workshop/upload', {
+              providerId,
+              fileName: file.name,
+              mediaType: file.type,
+              data: dataUrl,
+            });
+            results.push({ name: file.name, size: file.size, previewUrl: dataUrl, ...data });
+          }
+          setUploaded(results);
+          setForm((current) => {
+            const values = { ...current.values, imageUrl: '', imageUrls: '', imageBase64: undefined, imageFileToken: undefined, imageFileTokens: undefined };
+            if (selectedProvider?.protocol === 'tripo') {
+              if (currentOperation === 'multiview_to_3d') values.imageFileTokens = results.map((file) => file.fileToken).filter(Boolean);
+              else values.imageFileToken = results[0]?.fileToken;
+            } else {
+              values.imageBase64 = results[0]?.dataUrl;
+            }
+            return { ...current, values };
+          });
+        } catch (err) {
+          setUploadError(err.message);
+          setUploaded([]);
+          setForm((current) => ({ ...current, values: { ...current.values, imageFileToken: undefined, imageFileTokens: undefined, imageBase64: undefined } }));
+        } finally {
+          setUploadBusy(false);
+        }
+      };
+      const removeUploaded = (index) => {
+        const next = uploaded.filter((_, itemIndex) => itemIndex !== index);
+        setUploaded(next);
+        setForm((current) => {
+          const values = { ...current.values };
+          if (selectedProvider?.protocol === 'tripo') {
+            if (currentOperation === 'multiview_to_3d') values.imageFileTokens = next.map((file) => file.fileToken).filter(Boolean);
+            else values.imageFileToken = next[0]?.fileToken;
+          } else {
+            values.imageBase64 = next[0]?.dataUrl;
+          }
+          return { ...current, values };
+        });
+      };
+      const setImageUrlText = (value) => {
+        setUploaded([]);
+        setForm((current) => ({ ...current, values: { ...current.values, imageUrl: value, imageBase64: undefined, imageFileToken: undefined } }));
+      };
+      const setImageUrlsText = (value) => {
+        setUploaded([]);
+        setForm((current) => ({ ...current, values: { ...current.values, imageUrls: value, imageFileTokens: undefined } }));
+      };
+      const setMultiviewSlot = (slotId, item) => setForm((current) => ({
+        ...current,
+        values: { ...current.values, multiviewSlots: { ...(current.values.multiviewSlots || {}), [slotId]: item } },
+      }));
+      const clearMultiviewSlot = (slotId) => setForm((current) => {
+        const next = { ...(current.values.multiviewSlots || {}) };
+        delete next[slotId];
+        return { ...current, values: { ...current.values, multiviewSlots: next } };
+      });
+      const pickMultiviewFile = async (slotId, file) => {
+        if (!slotId || !file) return;
+        setUploadBusy(true);
+        setUploadError('');
+        try {
+          const dataUrl = await fileToDataUrl(file);
+          const data = await api('/workshop/upload', { providerId, fileName: file.name, mediaType: file.type, data: dataUrl });
+          setMultiviewSlot(slotId, {
+            name: file.name,
+            previewUrl: dataUrl,
+            ...(data.fileToken ? { fileToken: data.fileToken } : { dataUrl: data.dataUrl || dataUrl }),
+          });
+        } catch (err) {
+          setUploadError(err.message);
+        } finally {
+          setUploadBusy(false);
+        }
+      };
+      const pickMultiviewUrl = (slotId, url) => setMultiviewSlot(slotId, { name: '图片链接', url, previewUrl: url });
       const chooseProvider = (id) => {
         const provider = providers.find((item) => item.id === id);
+        setUploaded([]);
+        setUploadError('');
+        setBalance(null);
         setForm((current) => ({ ...current, providerId: id, model: provider?.defaultModel || provider?.models?.[0] || '', operation: provider?.operations?.includes('text_to_3d') ? 'text_to_3d' : (provider?.operations?.[0] || ''), values: {} }));
       };
       const useActiveAsSource = () => {
@@ -970,15 +1380,26 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
             if (values[field] === undefined || values[field] === '') {
               if (field === 'format' || field === 'outFormat') values[field] = 'GLB';
               if (field === 'segType') values[field] = 'model';
+              if (field === 'pbr') values[field] = true;
             }
           }
           if (typeof values.imageUrls === 'string') values.imageUrls = values.imageUrls.split(/\r?\n/).map((value) => value.trim()).filter(Boolean);
           if (typeof values.animations === 'string') values.animations = values.animations.split(/[\n,]/).map((value) => value.trim()).filter(Boolean);
-          for (const key of ['faceLimit', 'duration', 'motionType']) {
+          for (const key of ['faceLimit', 'faceCount', 'duration', 'motionType']) {
             if (values[key] !== undefined && values[key] !== '') values[key] = Number(values[key]);
           }
           if (Array.isArray(values.imageUrls) && !values.imageUrls.length) delete values.imageUrls;
           if (Array.isArray(values.animations) && !values.animations.length) delete values.animations;
+          if (['image_to_3d', 'multiview_to_3d', 'profile_to_3d'].includes(currentOperation)) {
+            const slots = values.multiviewSlots || {};
+            const filledSlots = Object.values(slots).filter((slot) => slot && (slot.fileToken || slot.url || slot.dataUrl));
+            const hasImage = values.imageUrl || values.imageFileToken || values.imageBase64 || values.imageUrls?.length || values.imageFileTokens?.length || filledSlots.length;
+            if (!hasImage) throw new Error('请先选择本地图片，或填写图片链接');
+            if (currentOperation === 'multiview_to_3d') {
+              if (!slots.front) throw new Error('多视角生成至少需要「前」视图');
+              if (filledSlots.length < 2) throw new Error('多视角生成至少需要 2 张不同视角的图片');
+            }
+          }
           const data = await api('/workshop/generate', {
             providerId,
             model: currentModel,
@@ -1017,18 +1438,22 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
           !notice && !loading && !visibleModels.length ? h('div', { className: 'dsh-3d-ws-empty' }, '当前范围还没有 3D 模型。\n右侧可以直接发起生成。') : null,
           groupedModels.map((workspace) => h('div', { key: workspace.path, className: 'dsh-3d-ws-group' },
             h('div', { className: 'dsh-3d-ws-group-title', title: workspace.path }, workspace.title || workspace.path),
-            workspace.models.map((model) => h('button', {
-              key: model.path,
-              type: 'button',
-              title: model.path,
-              className: `dsh-3d-ws-item${model.path === activePath ? ' dsh-3d-ws-item-active' : ''}`,
-              onClick: () => setActivePath(model.path),
-            },
-              h('span', { className: 'dsh-3d-ws-item-icon' }, h('svg', { width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' }, h('path', { d: 'M12 2 21 7 12 12 3 7Z' }), h('path', { d: 'M3 7v10l9 5 9-5V7' }), h('path', { d: 'M12 12v10' }))),
-              h('span', { className: 'dsh-3d-ws-item-main' },
-                h('span', { className: 'dsh-3d-ws-item-name' }, model.name),
-                h('span', { className: 'dsh-3d-ws-item-meta' }, [model.providerLabel || '本地模型', model.operation || '', formatWorkshopTime(model.updatedAt)].filter(Boolean).join(' · ')))))))),
-      );
+            h('div', { className: 'dsh-3d-ws-grid' }, workspace.models.map((model) => {
+              const detail = [model.name, model.providerLabel || '本地模型', WORKSHOP_OPERATION_LABELS[model.operation] || model.operation, formatWorkshopTime(model.updatedAt), formatBytes(model.bytes)].filter(Boolean).join('\n');
+              return h('button', {
+                key: model.path,
+                type: 'button',
+                title: detail,
+                'aria-label': detail,
+                className: `dsh-3d-ws-item${model.path === activePath ? ' dsh-3d-ws-item-active' : ''}`,
+                onClick: () => selectModel(model),
+              },
+                h('span', { className: 'dsh-3d-ws-thumb' },
+                  model.thumbnailUrl
+                    ? h('img', { src: model.thumbnailUrl, alt: '', loading: 'lazy', referrerPolicy: 'no-referrer', onError: (event) => { event.currentTarget.style.display = 'none'; } })
+                    : h('svg', { width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' }, h('path', { d: 'M12 2 21 7 12 12 3 7Z' }), h('path', { d: 'M3 7v10l9 5 9-5V7' }), h('path', { d: 'M12 12v10' }))));
+            })))),
+      ));
       const center = h('main', { className: 'dsh-3d-ws-center' },
         h('div', { className: 'dsh-3d-ws-viewerbar' },
           h('span', { className: 'dsh-3d-ws-viewername', title: active?.path || '' }, active?.name || '主预览视口'),
@@ -1039,7 +1464,10 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         active ? h('div', { className: 'dsh-3d-ws-statusbar' }, h('span', null, active.workspaceTitle || ''), h('span', null, active.taskId ? `任务 ${active.taskId}` : '本地文件'), h('span', null, active.operation || '')) : null,
       );
       const right = h('aside', { className: 'dsh-3d-ws-right' },
-        h('div', { className: 'dsh-3d-ws-pane-head' }, h('span', { className: 'dsh-3d-ws-pane-title' }, '生成 3D'), h('span', { className: 'dsh-3d-ws-spacer' }), snapshot ? h('span', { className: 'dsh-3d-ws-sub' }, `${providers.filter((provider) => provider.configured).length}/${providers.length} 已配置`) : null),
+        h('div', { className: 'dsh-3d-ws-pane-head' },
+          h('span', { className: 'dsh-3d-ws-pane-title' }, '生成 3D'),
+          h('span', { className: 'dsh-3d-ws-spacer' }),
+          h('span', { className: 'dsh-3d-ws-balance', title: balance?.message || '' }, balanceText)),
         h('div', { className: 'dsh-3d-ws-panel' },
           h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, '供应商'),
             h('select', { className: 'dsh-3d-ws-select', value: providerId, onChange: (event) => chooseProvider(event.target.value) },
@@ -1047,24 +1475,61 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
           h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, '模型'),
             h('select', { className: 'dsh-3d-ws-select', value: currentModel, onChange: (event) => setForm((current) => ({ ...current, model: event.target.value })) },
               modelOptions.length ? modelOptions.map((model) => h('option', { key: model, value: model }, modelLabel(selectedProvider, model))) : h('option', { value: '' }, '没有模型'))),
-          h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, '操作'),
-            h('select', { className: 'dsh-3d-ws-select', value: currentOperation, onChange: (event) => setForm((current) => ({ ...current, operation: event.target.value })) },
-              operationGroups.map((group) => h('optgroup', { key: group.label, label: group.label }, group.ids.map((id) => h('option', { key: id, value: id }, snapshot?.operations?.[id]?.label || id)))),
-              extraOperationIds.length ? h('optgroup', { label: '其他' }, extraOperationIds.map((id) => h('option', { key: id, value: id }, snapshot?.operations?.[id]?.label || id))) : null)),
+          h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, '任务类型'),
+            h('select', { className: 'dsh-3d-ws-select', title: operationMeta.description || '', value: currentOperation, onChange: (event) => { setUploaded([]); setUploadError(''); setForm((current) => ({ ...current, operation: event.target.value, values: { ...current.values, multiviewSlots: undefined } })); } },
+              operationGroups.map((group) => h('optgroup', { key: group.label, label: group.label }, group.ids.map((id) => h('option', { key: id, value: id }, WORKSHOP_OPERATION_LABELS[id] || snapshot?.operations?.[id]?.label || id)))),
+              extraOperationIds.length ? h('optgroup', { label: '其他' }, extraOperationIds.map((id) => h('option', { key: id, value: id }, WORKSHOP_OPERATION_LABELS[id] || snapshot?.operations?.[id]?.label || id))) : null)),
+          operationMeta.description ? h('div', { className: 'dsh-3d-ws-hintline', title: operationMeta.description }, operationMeta.description) : null,
+          WORKSHOP_GENERATION_OPERATIONS.has(currentOperation) && generationChoices.length ? h('div', { className: 'dsh-3d-ws-segment' }, generationChoices.map(([id, label]) => h('button', {
+            key: id,
+            type: 'button',
+            title: WORKSHOP_MODE_HELP[id],
+            className: `dsh-3d-ws-segment-btn${currentOperation === id ? ' dsh-3d-ws-segment-btn-active' : ''}`,
+            onClick: () => { setUploaded([]); setUploadError(''); setForm((current) => ({ ...current, operation: id, values: { ...current.values, imageUrl: '', imageUrls: '', imageBase64: undefined, imageFileToken: undefined, imageFileTokens: undefined, multiviewSlots: undefined } })); },
+          }, label))) : null,
           !selectedProvider?.configured ? h('div', { className: 'dsh-3d-ws-error' }, '该供应商还没有配置密钥，请先到设置 → 3D 生成中配置。') : null,
           WORKSHOP_SOURCE_OPERATIONS.has(currentOperation) ? h('div', { className: 'dsh-3d-ws-source' },
-            h('div', { className: 'dsh-3d-ws-source-title' }, '源模型'),
+            h('div', { className: 'dsh-3d-ws-source-title' }, '要修改的模型'),
             h('div', { className: 'dsh-3d-ws-source-name', title: active?.path || '' }, active ? active.name : '先在左侧选择模型'),
             h('div', { className: 'dsh-3d-ws-source-actions' },
-              h('button', { type: 'button', className: 'dsh-3d-ws-secondary', disabled: !active || (!active.taskId && !active.modelUrl), onClick: useActiveAsSource }, '填入选中模型'),
+              h('button', { type: 'button', className: 'dsh-3d-ws-secondary', disabled: !active || (!active.taskId && !active.modelUrl), onClick: useActiveAsSource }, '重新填入模型信息'),
               active?.taskId ? h('span', { className: 'dsh-3d-ws-sub' }, `任务 ${active.taskId}`) : null)) : null,
-          fields.map((field) => h(WorkshopField, { key: field, field, value: form.values[field], onChange: (value) => updateValue(field, value) })),
-          h('button', { type: 'button', className: 'dsh-3d-ws-secondary', onClick: () => setShowAdvanced((value) => !value) }, showAdvanced ? '收起高级参数' : '高级参数'),
+          imagePickerOperation ? (currentOperation === 'multiview_to_3d'
+            ? h(WorkshopMultiViewPicker, {
+              slots: workshopViewSlots(selectedProvider, currentModel),
+              value: form.values.multiviewSlots,
+              busy: uploadBusy,
+              error: uploadError,
+              localUpload: ['tripo', 'tencent'].includes(selectedProvider?.protocol),
+              onPickFile: pickMultiviewFile,
+              onPickUrl: pickMultiviewUrl,
+              onClear: clearMultiviewSlot,
+            })
+            : h(WorkshopImagePicker, {
+              multiple: false,
+              provider: selectedProvider,
+              operation: currentOperation,
+              uploaded,
+              busy: uploadBusy,
+              error: uploadError,
+              onPick: pickImages,
+              onClear: removeUploaded,
+              urlValue: form.values.imageUrl,
+              onUrlChange: setImageUrlText,
+            })) : null,
+          fields.map((field) => h(WorkshopField, {
+            key: field,
+            field,
+            value: form.values[field],
+            onChange: (value) => updateValue(field, value),
+            options: field === 'faceCount' ? workshopFaceCountOptions(selectedProvider, currentModel) : (field === 'modelVersion' ? workshopModelVersionOptions(currentOperation) : undefined),
+          })),
+          h('button', { type: 'button', className: 'dsh-3d-ws-secondary', onClick: () => setShowAdvanced((value) => !value) }, showAdvanced ? '收起更多参数' : '更多参数'),
           showAdvanced && !fields.includes('parameters') ? h(WorkshopField, { field: 'parameters', value: form.values.parameters, onChange: (value) => updateValue('parameters', value) }) : null,
-          h('button', { type: 'button', className: 'dsh-3d-ws-submit', onClick: submit, disabled: submitting || !selectedProvider?.configured || !currentModel || !currentOperation }, submitting ? '提交中…' : '开始生成'),
+          h('button', { type: 'button', className: 'dsh-3d-ws-submit', onClick: submit, title: estimate.note, disabled: submitting || !selectedProvider?.configured || !currentModel || !currentOperation }, submitting ? '提交中…' : `${WORKSHOP_GENERATION_OPERATIONS.has(currentOperation) ? '开始生成' : '开始处理'}（${estimateButtonText}）`),
           error ? h('div', { className: 'dsh-3d-ws-error' }, error) : null,
           job ? h('div', { className: 'dsh-3d-ws-job' },
-            h('div', { className: 'dsh-3d-ws-job-head' }, h('span', { className: 'dsh-3d-ws-job-status' }, workshopJobLabel(job.status)), h('span', null, job.providerLabel || job.provider || ''), h('span', null, job.operation || ''), job.taskId ? h('span', { className: 'dsh-3d-ws-sub' }, job.taskId) : null),
+            h('div', { className: 'dsh-3d-ws-job-head' }, h('span', { className: 'dsh-3d-ws-job-status' }, workshopJobLabel(job.status)), h('span', null, job.providerLabel || job.provider || ''), h('span', null, WORKSHOP_OPERATION_LABELS[job.operation] || job.operation || ''), job.taskId ? h('span', { className: 'dsh-3d-ws-sub' }, job.taskId) : null),
             typeof job.progress === 'number' ? h('div', { className: 'dsh-3d-ws-progress' }, h('i', { style: { width: `${Math.max(4, Math.min(100, job.progress))}%` } })) : null,
             job.error ? h('div', { className: 'dsh-3d-ws-error' }, job.error) : null,
             job.status === 'success' && job.localFile ? h('div', { className: 'dsh-3d-ws-success' }, `已保存：${String(job.localFile).split(/[\\\\/]/).pop()}`) : null) : null,

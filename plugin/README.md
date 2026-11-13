@@ -32,7 +32,7 @@ dsh plugin --profile desktop add "https://github.com/OMEN111111/dsh-tripo-suppor
 dsh plugin --profile desktop add "."
 
 # 或从打包文件安装
-dsh plugin --profile desktop add ".\dist\dsh-tripo-support-0.1.7.tgz"
+dsh plugin --profile desktop add ".\dist\dsh-tripo-support-0.1.8.tgz"
 ```
 
 安装完成后从托盘完整退出并重新打开 DSH。插件只把行插入 profile 的 bundle 列表；设置与凭据在插件自己的页面管理。
@@ -133,9 +133,9 @@ https://<你的 DSH 公网地址>/plugins/dsh-tripo-support/webhook/tripo-offici
 
 对话顶部的 `3D 工坊` 页签提供完整工作台：
 
-- **左侧模型库**：切换「当前工作区 / 全部工作区」，扫描工作区 `3d-output` 下的 GLB/GLTF/FBX/OBJ/STL/USDZ，支持搜索和刷新。
+- **左侧模型库**：切换「当前工作区 / 全部工作区」，以圆角缩略图卡片展示工作区 `3d-output` 下的 GLB/GLTF/FBX/OBJ/STL/USDZ，支持搜索和刷新。
 - **中间预览视口**：颜色、法线、粗糙度、金属度、线框、白膜模式；Maya 式操作 `Alt+左键` 旋转、`Alt+中键` 平移、`Alt+右键/滚轮` 缩放、`F` 聚焦。
-- **右侧生成面板**：选择供应商、模型和操作，填写提示词/图片 URL/源任务等参数后直接提交。支持当前供应商公开的全部操作（文生 3D、图生 3D、多视图、贴图、分割、重拓扑、UV、补洞、转换、绑骨、动画重定向等）。
+- **右侧生成面板**：选择供应商、模型和操作，填写提示词/图片/源模型等参数后直接提交。支持单张图、多张图和本地图片上传；显示账户剩余积分；面数、贴图尺寸、分部件生成、模型精度等高级选项使用下拉菜单或开关。支持当前供应商公开的全部操作（文字/图片/多视图 3D、贴图、分割、重拓扑、UV、补洞、转换、绑骨、动画重定向等）。
 - 通过工坊发起的任务会轮询到完成并下载到当前工作区 `3d-output`，完成后自动刷新模型列表。
 
 ## 安全

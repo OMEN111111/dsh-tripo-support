@@ -12,7 +12,7 @@ Tripo, Meshy, Hyper3D and Tencent Hunyuan3D async 3D providers for DeepSeek Harn
 - **模型目录**：控制实际可调用模型，并为每个模型设置仅用于显示的别名。
 - **模型测试**：选择供应商后测试具体模型。
 - **对话框 3D 胶囊**：切换厂商和模型，不覆盖 DSH 原生 LLM 选择器。
-- **3D 工坊页签**：对话顶部独立工作台，左侧浏览当前/全部工作区已生成模型，中间预览并切换颜色、法线、粗糙度、金属度、线框和白膜，右侧直接选供应商/模型/操作发起生成；预览视口支持 Maya 式 Alt+鼠标旋转、平移、缩放。
+- **3D 工坊页签**：对话顶部独立工作台。左侧以缩略图浏览当前/全部工作区已生成模型；中间预览并切换颜色、法线、粗糙度、金属度、线框和白膜，支持 Maya 式 Alt+鼠标旋转、平移、缩放；右侧直接选供应商/模型/操作发起生成，支持单图/多图本地文件、账户积分、面数、贴图尺寸、分部件生成等选项。
 - **多通道预览**：对话内 3D 结果卡片支持颜色、法线、粗糙度、金属度、线框和白膜模式。
 - **单次生成约束**：Agent 每个用户轮次最多创建一个 3D 生成任务，禁止自动对比生成、重试或追加 DCC/修改操作；结果必须反馈给用户后停止。
 - **插件内更新**：设置 → 3D 生成 → 插件更新，检查 GitHub Release 并确认更新。
@@ -36,7 +36,7 @@ Tripo, Meshy, Hyper3D and Tencent Hunyuan3D async 3D providers for DeepSeek Harn
 dsh plugin --profile desktop add "https://github.com/OMEN111111/dsh-tripo-support.git"
 ```
 
-或使用 Release 中的 `dsh-tripo-support-0.1.7.tgz`。
+或使用 Release 中的 `dsh-tripo-support-0.1.8.tgz`。
 
 安装后完整退出并重新打开 DSH。
 

@@ -22,6 +22,7 @@ export const inject = ['tools'];
 
 const ROUTE_PREFIX = '/plugins/dsh-tripo-support';
 const MAX_WAIT_MS = 10 * 60 * 1000;
+const MAX_BODY_BYTES = 30 * 1024 * 1024;
 
 function dshHome() {
   return process.env.DSH_HOME || join(homedir(), '.dsh');
@@ -164,6 +165,7 @@ export function apply(ctx, config = {}) {
           model: task?.model,
           taskId: task?.taskId,
           modelUrl: task?.modelUrl,
+          thumbnailUrl: /^https?:/i.test(String(task?.previewUrl || '')) ? task.previewUrl : undefined,
           status: task?.status,
         });
       }
@@ -186,6 +188,50 @@ export function apply(ctx, config = {}) {
       groups.push({ ...workspace, models: await scanWorkspaceModels(workspace) });
     }
     return { workspaces: groups, models: groups.flatMap((workspace) => workspace.models) };
+  };
+
+  const workshopBalance = async (providerId) => {
+    const provider = await providerOrThrow(String(providerId || ''));
+    if (!['tripo', 'meshy', 'hyper'].includes(provider.protocol)) {
+      return { ok: true, supported: false, provider: provider.id, message: '暂不支持查询积分' };
+    }
+    const secrets = await providers.secrets(provider);
+    ensure(secrets.apiKey, `${provider.label} 还没有配置 API Key`);
+    const request = buildTestRequest(provider, secrets);
+    const { response, json } = await fetchJson(request.url, { method: request.method, headers: request.headers, body: request.body, signal: AbortSignal.timeout(10000) });
+    if (response.status === 401 || response.status === 403) throw new Error(`API Key 无效（HTTP ${response.status}）`);
+    ensure(response.ok, `查询积分失败：HTTP ${response.status}`);
+    const balance = provider.protocol === 'tripo' ? (json.data?.balance ?? json.balance) : json.balance;
+    return { ok: true, supported: true, provider: provider.id, balance: balance ?? null };
+  };
+
+  const workshopUpload = async ({ providerId, fileName, mediaType, data }) => {
+    const provider = await providerOrThrow(String(providerId || ''));
+    const secrets = await providers.secrets(provider);
+    const raw = String(data || '');
+    const base64 = raw.replace(/^data:[^;]+;base64,/, '');
+    const bytes = Buffer.from(base64, 'base64');
+    ensure(bytes.length > 0, '图片内容为空');
+    ensure(bytes.length <= 20 * 1024 * 1024, '图片不能超过 20MB');
+    const contentType = String(mediaType || 'image/png');
+    if (provider.protocol === 'tripo') {
+      ensure(secrets.apiKey, `${provider.label} 还没有配置 API Key`);
+      const form = new FormData();
+      form.set('file', new Blob([bytes], { type: contentType }), String(fileName || 'image.png'));
+      const response = await fetch(`${provider.baseURL.replace(/\/+$/, '')}/files`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${secrets.apiKey}` },
+        body: form,
+        signal: AbortSignal.timeout(30000),
+      });
+      const json = await response.json().catch(() => ({}));
+      ensure(response.ok && json.code === 0 && json.data?.file_token, `${provider.label} 上传图片失败：${json.message || `HTTP ${response.status}`}`);
+      return { ok: true, provider: provider.id, kind: 'file_token', fileToken: json.data.file_token, fileName: String(fileName || 'image.png') };
+    }
+    if (provider.protocol === 'hyper' || provider.protocol === 'tencent') {
+      return { ok: true, provider: provider.id, kind: 'data_url', dataUrl: raw.startsWith('data:') ? raw : `data:${contentType};base64,${base64}`, fileName: String(fileName || 'image.png') };
+    }
+    throw new Error(`${provider.label} 的接口需要公网图片链接，暂不支持本地图片上传`);
   };
 
   const generationTurns = new Map();
@@ -951,6 +997,9 @@ export function apply(ctx, config = {}) {
         const snapshot = await workshopSnapshot({ scope: url.searchParams.get('scope') || 'current', path: url.searchParams.get('path') || '' });
         return send(200, { ok: true, ...snapshot });
       }
+      if (req.method === 'GET' && path === '/workshop/balance') {
+        return send(200, await workshopBalance(url.searchParams.get('provider') || ''));
+      }
       if (req.method === 'GET' && path === '/workshop/model') {
         const requested = String(url.searchParams.get('path') || '');
         ensure(requested, '缺少模型路径');
@@ -986,7 +1035,7 @@ export function apply(ctx, config = {}) {
       let bytes = 0;
       for await (const chunk of req) {
         bytes += chunk.length;
-        if (bytes > 2 * 1024 * 1024) return send(413, { ok: false, error: 'request too large' });
+        if (bytes > MAX_BODY_BYTES) return send(413, { ok: false, error: 'request too large' });
         chunks.push(chunk);
       }
       const text = Buffer.concat(chunks).toString('utf8');
@@ -1025,6 +1074,9 @@ export function apply(ctx, config = {}) {
       if (path === '/provider/official') return send(200, { ok: true, provider: await providers.addOfficial(String(body.presetId)) });
       if (path === '/provider/update') return send(200, { ok: true, provider: await providers.update(body) });
       if (path === '/provider/delete') return send(200, await providers.remove(String(body.providerId)));
+      if (path === '/workshop/upload') {
+        return send(200, await workshopUpload(body));
+      }
       if (path === '/workshop/generate') {
         const providerId = String(body.providerId || '');
         const operation = String(body.operation || '');
