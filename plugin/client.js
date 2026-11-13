@@ -90,15 +90,15 @@ textarea.dsh-3d-input{height:auto;min-height:52px;padding:7px 8px;resize:vertica
 
 const WORKSHOP_CSS = `
 .dsh-3d-ws{--dsh-3d-accent:#4c78ff;--dsh-3d-accent-soft:rgba(76,120,255,.12);--dsw-alias-brand-primary:#4c78ff;--dsw-alias-brand-primary-soft:rgba(76,120,255,.12);display:flex;flex-direction:column;height:100%;min-height:0;background:var(--dsw-alias-bg-base,#f6f7f9);color:var(--dsw-alias-label-primary,#1f2328);font-size:13px;overflow:hidden}
-.dsh-3d-ws-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.2));background:var(--dsw-alias-bg-layer-1,#fff);flex:none}
+.dsh-3d-ws-head{position:relative;z-index:1;display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.2));background:var(--dsw-alias-bg-layer-1,#fff);flex:none}
 .dsh-3d-ws-title{font-size:14px;font-weight:650;letter-spacing:.01em}
 .dsh-3d-ws-sub{font-size:11.5px;color:var(--dsw-alias-label-secondary,#6b7280);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dsh-3d-ws-spacer{flex:1}
 .dsh-3d-ws-body{display:grid;grid-template-columns:236px minmax(280px,1fr) 340px;gap:0;min-height:0;flex:1}
-.dsh-3d-ws-left,.dsh-3d-ws-right{display:flex;flex-direction:column;min-height:0;background:var(--dsw-alias-bg-layer-1,#fff)}
+.dsh-3d-ws-left,.dsh-3d-ws-right{position:relative;z-index:1;display:flex;flex-direction:column;min-height:0;background:var(--dsw-alias-bg-layer-1,#fff)}
 .dsh-3d-ws-left{border-right:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.2))}
 .dsh-3d-ws-right{border-left:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.2));overflow-y:auto}
-.dsh-3d-ws-center{display:flex;flex-direction:column;min-width:0;min-height:0;background:#10141a}
+.dsh-3d-ws-center{position:relative;z-index:1;display:flex;flex-direction:column;min-width:0;min-height:0;background:#10141a}
 .dsh-3d-ws-pane-head{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.2));flex:none}
 .dsh-3d-ws-pane-title{font-size:12px;font-weight:600;color:var(--dsw-alias-label-primary,#111827)}
 .dsh-3d-ws-scope{display:flex;gap:2px;padding:8px 10px 4px;flex:none}
