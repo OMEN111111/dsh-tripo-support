@@ -1,9 +1,9 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir, realpath, stat } from 'node:fs/promises';
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
-import { join } from 'node:path';
+import { basename, dirname, extname, join, resolve } from 'node:path';
 import { homedir } from 'node:os';
 import { ProviderStore } from './lib/state.js';
-import { TaskStore } from './lib/tasks.js';
+import { TaskStore, mimeFor } from './lib/tasks.js';
 import {
   OPERATIONS,
   PROTOCOL_LABELS,
@@ -11,6 +11,7 @@ import {
   buildDownloadRequest,
   buildQueryRequest,
   buildTestRequest,
+  operationsFor,
   parseCreateResponse,
   parseDownloadResponse,
   parseTaskResponse,
@@ -53,6 +54,15 @@ function ensure(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+const WORKSHOP_MODEL_EXTENSIONS = new Set(['.glb', '.gltf', '.fbx', '.obj', '.stl', '.usdz']);
+const previewableModel = (file) => ['.glb', '.gltf'].includes(extname(file).toLowerCase());
+const pathKey = (value) => resolve(String(value || '')).replace(/\\/g, '/').toLowerCase();
+const isWithin = (child, root) => {
+  const c = pathKey(child);
+  const r = pathKey(root).replace(/\/+$/, '');
+  return c === r || c.startsWith(`${r}/`);
+};
+
 export function apply(ctx, config = {}) {
   const root = join(dshHome(), 'tripo-support');
   const credentials = {
@@ -80,6 +90,103 @@ export function apply(ctx, config = {}) {
 
   const providers = new ProviderStore({ file: join(root, 'state.json'), credentials });
   const tasks = new TaskStore({ file: join(root, 'tasks.json'), previewFile: join(root, 'previews.json') });
+
+  const workspaceRecords = async () => {
+    await tasks.load();
+    const found = new Map();
+    const registry = ctx.get('workspaceRegistry');
+    if (registry && typeof registry.list === 'function') {
+      for (const workspace of registry.list()) {
+        if (!workspace?.path) continue;
+        found.set(pathKey(workspace.path), {
+          id: String(workspace.id || workspace.workspaceId || pathKey(workspace.path)),
+          title: String(workspace.title || basename(String(workspace.path)) || '工作区'),
+          path: String(workspace.path),
+        });
+      }
+    }
+    // Keep old task outputs discoverable even when the workspace registration was removed.
+    for (const task of tasks.list()) {
+      if (!task.file) continue;
+      const outputDir = dirname(task.file);
+      if (basename(outputDir).toLowerCase() !== '3d-output') continue;
+      const workspacePath = dirname(outputDir);
+      if (!found.has(pathKey(workspacePath))) {
+        found.set(pathKey(workspacePath), {
+          id: `task-${pathKey(workspacePath)}`,
+          title: basename(workspacePath) || '工作区',
+          path: workspacePath,
+        });
+      }
+    }
+    return [...found.values()];
+  };
+
+  const allowedWorkspace = async (workspacePath) => {
+    const wanted = pathKey(workspacePath);
+    return (await workspaceRecords()).find((workspace) => pathKey(workspace.path) === wanted);
+  };
+
+  const taskForFile = (file) => {
+    const key = pathKey(file);
+    return tasks.list().find((task) => task.file && pathKey(task.file) === key);
+  };
+
+  const scanWorkspaceModels = async (workspace) => {
+    const outputDirectory = join(workspace.path, '3d-output');
+    const models = [];
+    const walk = async (directory, depth = 0) => {
+      let entries;
+      try { entries = await readdir(directory, { withFileTypes: true }); } catch { return; }
+      for (const entry of entries) {
+        const file = join(directory, entry.name);
+        if (entry.isDirectory()) {
+          if (depth < 2) await walk(file, depth + 1);
+          continue;
+        }
+        if (!entry.isFile() || !WORKSHOP_MODEL_EXTENSIONS.has(extname(entry.name).toLowerCase())) continue;
+        let info;
+        try { info = await stat(file); } catch { continue; }
+        const task = taskForFile(file);
+        models.push({
+          id: pathKey(file),
+          name: entry.name,
+          path: file,
+          workspaceId: workspace.id,
+          workspaceTitle: workspace.title,
+          workspacePath: workspace.path,
+          bytes: info.size,
+          updatedAt: info.mtime.toISOString(),
+          previewable: previewableModel(file),
+          provider: task?.providerId,
+          providerLabel: task?.providerLabel || task?.providerId,
+          operation: task?.operation,
+          model: task?.model,
+          taskId: task?.taskId,
+          modelUrl: task?.modelUrl,
+          status: task?.status,
+        });
+      }
+    };
+    await walk(outputDirectory);
+    models.sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
+    return models;
+  };
+
+  const workshopSnapshot = async ({ scope = 'current', path } = {}) => {
+    const workspaces = await workspaceRecords();
+    let selected = workspaces;
+    if (scope !== 'all') {
+      const current = workspaces.find((workspace) => pathKey(workspace.path) === pathKey(path));
+      ensure(current, '当前工作区不在已注册工作区列表中');
+      selected = [current];
+    }
+    const groups = [];
+    for (const workspace of selected) {
+      groups.push({ ...workspace, models: await scanWorkspaceModels(workspace) });
+    }
+    return { workspaces: groups, models: groups.flatMap((workspace) => workspace.models) };
+  };
 
   const generationTurns = new Map();
   ctx.effect(() => {
@@ -227,14 +334,17 @@ export function apply(ctx, config = {}) {
     return { models: catalog, source: 'catalog', message: `服务未提供模型列表，返回当前目录${lastError ? `（${lastError.message}）` : ''}` };
   };
 
-  const status = async () => ({
-    ok: true,
-    providers: await providers.list(),
-    operations: OPERATIONS,
-    protocols: PROTOCOL_LABELS,
-    selection: await providers.selection(),
-    presets: await providers.presets(),
-  });
+  const status = async () => {
+    await tasks.load();
+    return {
+      ok: true,
+      providers: await providers.list(),
+      operations: OPERATIONS,
+      protocols: PROTOCOL_LABELS,
+      selection: await providers.selection(),
+      presets: await providers.presets(),
+    };
+  };
 
   const testProvider = async (providerId, model) => {
     const started = Date.now();
@@ -303,11 +413,12 @@ export function apply(ctx, config = {}) {
     let saved;
     let preview;
     if (parsed.status === 'success' && download && parsed.modelUrl) {
-      saved = await tasks.download(parsed.modelUrl, outputDirectory || outputDir(), { providerId, taskId });
+      saved = await tasks.download(parsed.modelUrl, outputDirectory || record?.outputDirectory || outputDir(), { providerId, taskId });
       preview = await tasks.registerPreview(saved.file, { providerId, taskId, mediaType: saved.mediaType });
     }
     const next = {
       ...(record || { providerId, taskId, operation: op, providerLabel: provider.label, model: provider.defaultModel }),
+      ...(outputDirectory ? { outputDirectory } : {}),
       status: parsed.status,
       progress: parsed.progress ?? record?.progress ?? 0,
       modelUrl: parsed.modelUrl,
@@ -836,6 +947,26 @@ export function apply(ctx, config = {}) {
         res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8', 'Content-Length': script.length, 'Cache-Control': 'public, max-age=86400' });
         return res.end(script);
       }
+      if (req.method === 'GET' && path === '/workshop/models') {
+        const snapshot = await workshopSnapshot({ scope: url.searchParams.get('scope') || 'current', path: url.searchParams.get('path') || '' });
+        return send(200, { ok: true, ...snapshot });
+      }
+      if (req.method === 'GET' && path === '/workshop/model') {
+        const requested = String(url.searchParams.get('path') || '');
+        ensure(requested, '缺少模型路径');
+        const absolute = resolve(requested);
+        ensure(WORKSHOP_MODEL_EXTENSIONS.has(extname(absolute).toLowerCase()), '不支持的模型格式');
+        const workspaces = await workspaceRecords();
+        const allowed = workspaces.some((workspace) => isWithin(absolute, join(workspace.path, '3d-output')));
+        ensure(allowed, '模型不在工作区的 3d-output 目录中');
+        const real = await realpath(absolute);
+        ensure(workspaces.some((workspace) => isWithin(real, join(workspace.path, '3d-output'))), '模型路径不在工作区中');
+        const info = await stat(real);
+        ensure(info.isFile(), '模型文件不存在');
+        const file = await readFile(real);
+        res.writeHead(200, { 'Content-Type': mimeFor(real), 'Content-Length': file.length, 'Cache-Control': 'private, max-age=60' });
+        return res.end(file);
+      }
       const modelMatch = path.match(/^\/model\/([^/]+)$/);
       if (req.method === 'GET' && modelMatch) {
         const preview = tasks.resolvePreview(decodeURIComponent(modelMatch[1]));
@@ -894,6 +1025,40 @@ export function apply(ctx, config = {}) {
       if (path === '/provider/official') return send(200, { ok: true, provider: await providers.addOfficial(String(body.presetId)) });
       if (path === '/provider/update') return send(200, { ok: true, provider: await providers.update(body) });
       if (path === '/provider/delete') return send(200, await providers.remove(String(body.providerId)));
+      if (path === '/workshop/generate') {
+        const providerId = String(body.providerId || '');
+        const operation = String(body.operation || '');
+        const provider = await providerOrThrow(providerId);
+        ensure(operationsFor(provider.protocol).includes(operation), `${provider.label} 不支持操作 ${operation}`);
+        let outputDirectory = outputDir();
+        if (body.workspacePath) {
+          const workspace = await allowedWorkspace(String(body.workspacePath));
+          ensure(workspace, '生成目标工作区不存在');
+          outputDirectory = join(workspace.path, '3d-output');
+        }
+        const args = {
+          ...(body.args && typeof body.args === 'object' ? body.args : {}),
+          model: body.model ? String(body.model) : provider.defaultModel,
+        };
+        if (provider.protocol === 'tencent' && operation === 'convert') {
+          const result = await runOperation({ providerId, operation, args, outputDirectory });
+          return send(200, { ok: true, result: { ...result, previewUrl: previewURL(result.previewId) } });
+        }
+        const created = await createTask({ providerId, operation, args });
+        await tasks.patch(providerId, created.created.taskId, { outputDirectory });
+        return send(200, {
+          ok: true,
+          task: {
+            provider: providerId,
+            providerLabel: provider.label,
+            operation,
+            model: created.record.model,
+            taskId: created.created.taskId,
+            status: created.created.status,
+            outputDirectory,
+          },
+        });
+      }
       if (path === '/operation') {
         const result = await runOperation({
           providerId: String(body.providerId),

@@ -32,18 +32,24 @@ export class TaskStore {
     this.tasks = new Map();
     this.previews = new Map();
     this.loaded = false;
+    this.loadPromise = undefined;
   }
 
-  async load() {
-    if (this.loaded) return;
-    this.loaded = true;
-    try {
-      const raw = JSON.parse(await readFile(this.file, 'utf8'));
-      for (const task of raw.tasks || []) this.tasks.set(`${task.providerId}:${task.taskId}`, task);
-      for (const preview of raw.previews || []) this.previews.set(preview.id, preview);
-    } catch {
-      /* first run */
-    }
+  load() {
+    if (this.loaded) return Promise.resolve();
+    if (this.loadPromise) return this.loadPromise;
+    this.loadPromise = (async () => {
+      try {
+        const raw = JSON.parse(await readFile(this.file, 'utf8'));
+        for (const task of raw.tasks || []) this.tasks.set(`${task.providerId}:${task.taskId}`, task);
+        for (const preview of raw.previews || []) this.previews.set(preview.id, preview);
+      } catch {
+        /* first run */
+      } finally {
+        this.loaded = true;
+      }
+    })();
+    return this.loadPromise;
   }
 
   async save() {

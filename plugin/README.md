@@ -7,6 +7,7 @@
 - **设置 → 3D 生成页面**：官方渠道 / 第三方渠道、API Key / SecretId+SecretKey、Base URL 与模型目录（官方预填，可高级覆盖）。
 - **对话框工具条 3D 模型选择器**：独立于原生 LLM 模型选择器，不破坏 DSH 聊天模型体系。
 - **对话内 3D 预览**：生成完成后在对话中自动出现独立的 `model-viewer` 结果卡片，不需要展开工具调用；支持旋转、缩放。
+- **3D 工坊页签**：对话顶部的独立工作台，左侧按当前/全部工作区浏览模型，中间主视口支持六种通道预览和 Maya 式 Alt+鼠标操作，右侧直接选供应商、模型和操作发起生成。
 - **异步任务**：创建任务 → 轮询 → 下载到当前 Session 工作区的 `3d-output/`。
 - **插件更新检查**：在「设置 → 3D 生成 → 插件更新」中检查 GitHub 最新版本，确认后可更新。
 - **完整操作集**：
@@ -31,7 +32,7 @@ dsh plugin --profile desktop add "https://github.com/OMEN111111/dsh-tripo-suppor
 dsh plugin --profile desktop add "."
 
 # 或从打包文件安装
-dsh plugin --profile desktop add ".\dist\dsh-tripo-support-0.1.5.tgz"
+dsh plugin --profile desktop add ".\dist\dsh-tripo-support-0.1.6.tgz"
 ```
 
 安装完成后从托盘完整退出并重新打开 DSH。插件只把行插入 profile 的 bundle 列表；设置与凭据在插件自己的页面管理。
@@ -127,6 +128,15 @@ https://<你的 DSH 公网地址>/plugins/dsh-tripo-support/webhook/tripo-offici
 - 查看器支持 **颜色、法线、粗糙度、金属度、线框、白膜** 六种显示模式。
 - 支持拖拽旋转、滚轮缩放和自动旋转；three.js 资源随插件打包，不依赖 CDN。
 - 任务失败或模型缺失时，卡片显示明确错误，不伪造预览。
+
+## 3D 工坊
+
+对话顶部的 `3D 工坊` 页签提供完整工作台：
+
+- **左侧模型库**：切换「当前工作区 / 全部工作区」，扫描工作区 `3d-output` 下的 GLB/GLTF/FBX/OBJ/STL/USDZ，支持搜索和刷新。
+- **中间预览视口**：颜色、法线、粗糙度、金属度、线框、白膜模式；Maya 式操作 `Alt+左键` 旋转、`Alt+中键` 平移、`Alt+右键/滚轮` 缩放、`F` 聚焦。
+- **右侧生成面板**：选择供应商、模型和操作，填写提示词/图片 URL/源任务等参数后直接提交。支持当前供应商公开的全部操作（文生 3D、图生 3D、多视图、贴图、分割、重拓扑、UV、补洞、转换、绑骨、动画重定向等）。
+- 通过工坊发起的任务会轮询到完成并下载到当前工作区 `3d-output`，完成后自动刷新模型列表。
 
 ## 安全
 

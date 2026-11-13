@@ -88,6 +88,90 @@ textarea.dsh-3d-input{height:auto;min-height:52px;padding:7px 8px;resize:vertica
 .dsh-3d-tool-chip{display:inline-flex;align-items:center;padding:1px 6px;border:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.24));border-radius:4px;color:var(--dsw-alias-label-secondary,#6b7280);font-size:10.5px}
 `;
 
+const WORKSHOP_CSS = `
+.dsh-3d-ws{--dsh-3d-accent:#4c78ff;--dsh-3d-accent-soft:rgba(76,120,255,.12);--dsw-alias-brand-primary:#4c78ff;--dsw-alias-brand-primary-soft:rgba(76,120,255,.12);display:flex;flex-direction:column;height:100%;min-height:0;background:var(--dsw-alias-bg-base,#f6f7f9);color:var(--dsw-alias-label-primary,#1f2328);font-size:13px;overflow:hidden}
+.dsh-3d-ws-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.2));background:var(--dsw-alias-bg-layer-1,#fff);flex:none}
+.dsh-3d-ws-title{font-size:14px;font-weight:650;letter-spacing:.01em}
+.dsh-3d-ws-sub{font-size:11.5px;color:var(--dsw-alias-label-secondary,#6b7280);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dsh-3d-ws-spacer{flex:1}
+.dsh-3d-ws-body{display:grid;grid-template-columns:236px minmax(280px,1fr) 340px;gap:0;min-height:0;flex:1}
+.dsh-3d-ws-left,.dsh-3d-ws-right{display:flex;flex-direction:column;min-height:0;background:var(--dsw-alias-bg-layer-1,#fff)}
+.dsh-3d-ws-left{border-right:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.2))}
+.dsh-3d-ws-right{border-left:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.2));overflow-y:auto}
+.dsh-3d-ws-center{display:flex;flex-direction:column;min-width:0;min-height:0;background:#10141a}
+.dsh-3d-ws-pane-head{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.2));flex:none}
+.dsh-3d-ws-pane-title{font-size:12px;font-weight:600;color:var(--dsw-alias-label-primary,#111827)}
+.dsh-3d-ws-scope{display:flex;gap:2px;padding:8px 10px 4px;flex:none}
+.dsh-3d-ws-scope-btn{flex:1;appearance:none;border:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.25));background:transparent;color:var(--dsw-alias-label-secondary,#6b7280);font:inherit;font-size:11.5px;line-height:24px;padding:0 6px;cursor:pointer}
+.dsh-3d-ws-scope-btn:first-child{border-radius:6px 0 0 6px}
+.dsh-3d-ws-scope-btn:last-child{border-radius:0 6px 6px 0}
+.dsh-3d-ws-scope-btn-active{background:var(--dsw-alias-brand-primary-soft,rgba(76,120,255,.12));border-color:var(--dsw-alias-brand-primary,#4c78ff);color:var(--dsw-alias-brand-primary,#4c78ff);font-weight:600}
+.dsh-3d-ws-search{margin:6px 10px 8px;height:28px;box-sizing:border-box;width:calc(100% - 20px);border:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.25));border-radius:6px;background:var(--dsw-alias-bg-base,#fff);color:var(--dsw-alias-label-primary,#1f2328);font:inherit;font-size:12px;padding:0 8px;outline:none}
+.dsh-3d-ws-search:focus{border-color:var(--dsw-alias-brand-primary,#4c78ff)}
+.dsh-3d-ws-list{flex:1;overflow-y:auto;padding:0 8px 10px;min-height:0}
+.dsh-3d-ws-group{margin-top:8px}
+.dsh-3d-ws-group-title{font-size:10.5px;font-weight:600;color:var(--dsw-alias-label-tertiary,#6b7280);padding:3px 4px 5px;text-transform:uppercase;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dsh-3d-ws-item{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:center;width:100%;padding:7px 6px;border:1px solid transparent;border-radius:7px;background:none;color:inherit;text-align:left;cursor:pointer;font:inherit}
+.dsh-3d-ws-item:hover{background:var(--dsw-alias-bg-layer-2,rgba(127,127,127,.07))}
+.dsh-3d-ws-item-active{background:var(--dsw-alias-brand-primary-soft,rgba(76,120,255,.12));border-color:var(--dsw-alias-brand-primary,#4c78ff)}
+.dsh-3d-ws-item-icon{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(76,120,255,.22),rgba(118,86,255,.12));color:var(--dsw-alias-brand-primary,#4c78ff)}
+.dsh-3d-ws-item-main{min-width:0;display:grid;gap:2px}
+.dsh-3d-ws-item-name{font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dsh-3d-ws-item-meta{font-size:10.5px;color:var(--dsw-alias-label-tertiary,#6b7280);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dsh-3d-ws-empty{padding:22px 12px;color:var(--dsw-alias-label-secondary,#6b7280);font-size:11.5px;line-height:1.55;text-align:center}
+.dsh-3d-ws-viewerbar{display:flex;align-items:center;gap:6px;padding:7px 10px;background:#151a21;border-bottom:1px solid rgba(255,255,255,.1);flex:none;flex-wrap:wrap}
+.dsh-3d-ws-viewername{min-width:0;max-width:34%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,.85);font-size:11.5px}
+.dsh-3d-ws-mode{appearance:none;border:1px solid rgba(255,255,255,.14);border-radius:5px;background:transparent;color:rgba(255,255,255,.66);font:inherit;font-size:11px;line-height:19px;padding:1px 7px;cursor:pointer}
+.dsh-3d-ws-mode:hover{background:rgba(255,255,255,.08);color:#fff}
+.dsh-3d-ws-mode-active{border-color:rgba(122,167,255,.8);background:rgba(91,131,255,.22);color:#dce8ff}
+.dsh-3d-ws-toolbtn{appearance:none;border:1px solid rgba(255,255,255,.16);border-radius:5px;background:rgba(255,255,255,.04);color:rgba(255,255,255,.75);font:inherit;font-size:11px;line-height:19px;padding:1px 7px;cursor:pointer}
+.dsh-3d-ws-toolbtn:hover{background:rgba(255,255,255,.1);color:#fff}
+.dsh-3d-ws-viewport{position:relative;flex:1;min-height:0;background:#10141a}
+.dsh-3d-ws-viewport dsh-3d-viewer{width:100%;height:100%;display:block;min-height:0;outline:none}
+.dsh-3d-ws-viewer-empty{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.45);font-size:12px;padding:24px;text-align:center}
+.dsh-3d-ws-hint{position:absolute;left:10px;right:10px;bottom:34px;color:rgba(255,255,255,.52);font-size:10.5px;line-height:1.5;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.dsh-3d-ws-viewport>.dsh-3d-ws-statusbar{position:absolute;left:0;right:0;bottom:0;background:rgba(21,26,33,.86);border-top:1px solid rgba(255,255,255,.08)}
+.dsh-3d-ws-viewer-error{position:absolute;inset:0;display:grid;place-items:center;color:#fca5a5;font-size:12px;padding:24px;text-align:center;background:rgba(16,20,26,.9)}
+.dsh-3d-ws-statusbar{display:flex;align-items:center;gap:10px;padding:6px 10px;background:#151a21;border-top:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.5);font-size:10.5px;flex:none;flex-wrap:wrap}
+.dsh-3d-ws-statusbar b{color:rgba(255,255,255,.78);font-weight:500}
+.dsh-3d-ws-panel{display:grid;gap:9px;padding:10px 12px 16px}
+.dsh-3d-ws-field{display:grid;gap:4px;min-width:0}
+.dsh-3d-ws-label{font-size:11px;color:var(--dsw-alias-label-secondary,#6b7280);display:flex;align-items:center;gap:6px}
+.dsh-3d-ws-label em{font-style:normal;color:var(--dsw-alias-label-tertiary,#9ca3af);font-size:10px}
+.dsh-3d-ws-input,.dsh-3d-ws-select,.dsh-3d-ws-textarea{box-sizing:border-box;width:100%;min-width:0;border:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.3));border-radius:6px;background:var(--dsw-alias-bg-base,#fff);color:var(--dsw-alias-label-primary,#1f2328);font:inherit;font-size:12px;outline:none}
+.dsh-3d-ws-input,.dsh-3d-ws-select{height:29px;padding:0 8px}
+.dsh-3d-ws-textarea{min-height:62px;padding:6px 8px;resize:vertical;line-height:1.45}
+.dsh-3d-ws-input:focus,.dsh-3d-ws-select:focus,.dsh-3d-ws-textarea:focus{border-color:var(--dsw-alias-brand-primary,#4c78ff);box-shadow:0 0 0 2px var(--dsw-alias-brand-primary-soft,rgba(76,120,255,.12))}
+.dsh-3d-ws-row{display:flex;gap:6px;align-items:center;min-width:0}
+.dsh-3d-ws-row>.dsh-3d-ws-input,.dsh-3d-ws-row>.dsh-3d-ws-select{flex:1;min-width:0;width:auto}
+.dsh-3d-ws-check{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dsw-alias-label-secondary,#4b5563);padding:2px 0}
+.dsh-3d-ws-check input{accent-color:var(--dsw-alias-brand-primary,#4c78ff)}
+.dsh-3d-ws-submit{appearance:none;border:1px solid var(--dsw-alias-brand-primary,#4c78ff);border-radius:7px;background:var(--dsw-alias-brand-primary,#4c78ff);color:#fff;font:inherit;font-size:12.5px;font-weight:600;line-height:32px;padding:0 12px;cursor:pointer}
+.dsh-3d-ws-submit:hover:not(:disabled){filter:brightness(1.05)}
+.dsh-3d-ws-submit:disabled{opacity:.55;cursor:default}
+.dsh-3d-ws-secondary{appearance:none;border:1px solid var(--dsw-alias-border-l2,rgba(127,127,127,.35));border-radius:6px;background:transparent;color:var(--dsw-alias-label-secondary,#4b5563);font:inherit;font-size:11px;line-height:22px;padding:0 8px;cursor:pointer;white-space:nowrap}
+.dsh-3d-ws-secondary:hover:not(:disabled){background:var(--dsw-alias-bg-layer-2,rgba(127,127,127,.07));color:var(--dsw-alias-label-primary,#1f2328)}
+.dsh-3d-ws-secondary:disabled{opacity:.45;cursor:default}
+.dsh-3d-ws-error{color:var(--dsw-alias-state-error-primary,#cf222e);font-size:11.5px;line-height:1.45;word-break:break-word}
+.dsh-3d-ws-success{color:var(--dsw-alias-state-success-primary,#16a34a);font-size:11.5px}
+.dsh-3d-ws-job{border:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.22));border-radius:8px;padding:8px 9px;display:grid;gap:5px;background:var(--dsw-alias-bg-layer-2,rgba(127,127,127,.04))}
+.dsh-3d-ws-job-head{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11.5px;color:var(--dsw-alias-label-secondary,#6b7280)}
+.dsh-3d-ws-job-status{font-weight:600;color:var(--dsw-alias-label-primary,#1f2328)}
+.dsh-3d-ws-progress{height:3px;border-radius:2px;background:var(--dsw-alias-border-l1,rgba(127,127,127,.18));overflow:hidden}
+.dsh-3d-ws-progress i{display:block;height:100%;background:var(--dsw-alias-brand-primary,#4c78ff);transition:width .3s}
+.dsh-3d-ws-divider{height:1px;background:var(--dsw-alias-border-l1,rgba(127,127,127,.18));margin:2px 0}
+.dsh-3d-ws-source{border:1px dashed var(--dsw-alias-border-l1,rgba(127,127,127,.3));border-radius:7px;padding:7px 8px;display:grid;gap:5px}
+.dsh-3d-ws-source-title{font-size:11px;font-weight:600;color:var(--dsw-alias-label-secondary,#6b7280)}
+.dsh-3d-ws-source-name{font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dsh-3d-ws-source-actions{display:flex;gap:6px;flex-wrap:wrap}
+@media (max-width: 980px){
+  .dsh-3d-ws-body{grid-template-columns:1fr;grid-template-rows:180px minmax(320px,1fr) auto;overflow-y:auto}
+  .dsh-3d-ws-left{border-right:0;border-bottom:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.2))}
+  .dsh-3d-ws-right{border-left:0;border-top:1px solid var(--dsw-alias-border-l1,rgba(127,127,127,.2))}
+  .dsh-3d-ws-center{min-height:360px}
+}
+`;
+
 const modelLabel = (provider, id) => provider?.modelCatalog?.find((item) => item.id === id)?.name || id;
     const protocolLabel = (protocol) => protocol === 'dashscope' ? 'DashScope 3D' : protocol === 'tencent' ? 'HY3D' : protocol === 'meshy' ? 'Meshy' : protocol === 'hyper' ? 'Hyper3D' : 'Tripo v3';
 const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencentcloudapi.com' : protocol === 'dashscope' ? 'https://cn-beijing.maas.qianwenaiapi.com/api/v1/services/aigc/video-generation/3d-generation' : protocol === 'meshy' ? 'https://api.meshy.ai' : protocol === 'hyper' ? 'https://api.hyper3d.com/api/v2' : 'https://openapi.tripo3d.ai/v3';
@@ -497,6 +581,505 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
           : h('div', { className: 'dsh-3d-muted', style: { height: `${height}px`, display: 'grid', placeItems: 'center' } }, '正在加载 3D 查看器…'),
         h('div', { className: 'dsh-3d-preview-src' }, src));
     }
+    const WORKSHOP_MODES = [['color', '颜色'], ['normal', '法线'], ['roughness', '粗糙度'], ['metallic', '金属度'], ['wireframe', '线框'], ['clay', '白膜']];
+    const WORKSHOP_FIELD_LABELS = {
+      prompt: '提示词', imageUrl: '图片 URL', imageUrls: '多视图图片 URL', sourceTaskId: '源任务 ID', modelUrl: '源模型 URL',
+      texturePrompt: '贴图提示词', pbr: '生成 PBR 材质', format: '输出格式', outFormat: '输出格式', modelVersion: '模型版本',
+      granularity: '分割粒度', segType: '分割类型', hint: '分割提示', faceLimit: '目标面数', quad: '四边面', smartUv: '智能 UV',
+      rigType: '骨骼类型', spec: '骨骼规格 / JSON', motionType: '动作类型', animations: '动作列表', template: '人物模板',
+      duration: '动作时长（秒）', size: '图片尺寸', parameters: '高级参数（JSON）',
+    };
+    const WORKSHOP_OPERATION_GROUPS = [
+      { label: '生成', ids: ['text_to_3d', 'image_to_3d', 'multiview_to_3d', 'profile_to_3d', 'image_to_splat'] },
+      { label: '纹理与拓扑', ids: ['texture', 'segment', 'smart_segment', 'retopology', 'uv', 'mesh_complete', 'reduce_face', 'part'] },
+      { label: '绑定与动画', ids: ['rig_check', 'auto_rig', 'animation_retarget', 'motion'] },
+      { label: '转换与参考图', ids: ['convert', 'text_to_image', 'image_to_image', 'image_to_multiview', 'edit_multiview'] },
+    ];
+    const WORKSHOP_SOURCE_OPERATIONS = new Set(['texture', 'segment', 'smart_segment', 'retopology', 'uv', 'mesh_complete', 'convert', 'rig_check', 'auto_rig', 'animation_retarget', 'part', 'reduce_face', 'motion']);
+
+    const formatBytes = (bytes) => {
+      const value = Number(bytes || 0);
+      if (!value) return '0 B';
+      if (value < 1024) return `${value} B`;
+      if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+      return `${(value / 1024 / 1024).toFixed(1)} MB`;
+    };
+    const formatWorkshopTime = (value) => {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+    };
+    const workshopJobLabel = (status) => ({ success: '已完成', failed: '失败', cancelled: '已取消', running: '生成中', queued: '排队中', unknown: '未知', timeout: '超时' }[status] || status || '准备中');
+
+    function readViewerStats(host) {
+      if (!host?.model) return null;
+      let meshes = 0;
+      let triangles = 0;
+      host.model.traverse((object) => {
+        if (!object?.isMesh) return;
+        meshes += 1;
+        const geometry = object.geometry;
+        const count = geometry?.index?.count || geometry?.attributes?.position?.count || 0;
+        triangles += count / 3;
+      });
+      return { meshes, triangles: Math.round(triangles) };
+    }
+
+    function setupMayaControls(host) {
+      if (!host || host.__dsh3dMaya) return;
+      host.__dsh3dMaya = true;
+      const camera = () => host.camera;
+      const target = () => host.controls?.target;
+      const controls = host.controls;
+      if (controls) {
+        controls.enabled = false;
+        controls.enableDamping = false;
+        controls.autoRotate = false;
+      }
+      const frame = () => {
+        if (typeof host.fit === 'function') host.fit();
+        const cam = camera();
+        const aim = target();
+        if (cam && aim) cam.lookAt(aim);
+      };
+      const reset = () => {
+        const cam = camera();
+        const aim = target();
+        if (!cam || !aim) return;
+        frame();
+        cam.lookAt(aim);
+      };
+      const pan = (dx, dy) => {
+        const cam = camera();
+        const aim = target();
+        if (!cam || !aim) return;
+        const height = Math.max(1, host.clientHeight || 500);
+        const distance = cam.position.distanceTo(aim) || 1;
+        const scale = (2 * Math.tan((cam.fov || 35) * Math.PI / 360) * distance) / height;
+        const right = cam.position.clone().set(1, 0, 0).applyQuaternion(cam.quaternion).multiplyScalar(-dx * scale);
+        const up = cam.position.clone().set(0, 1, 0).applyQuaternion(cam.quaternion).multiplyScalar(dy * scale);
+        const move = right.add(up);
+        aim.add(move);
+        cam.position.add(move);
+        cam.lookAt(aim);
+      };
+      const orbit = (dx, dy) => {
+        const cam = camera();
+        const aim = target();
+        if (!cam || !aim) return;
+        const offset = cam.position.clone().sub(aim);
+        const radius = offset.length();
+        if (!radius) return;
+        const theta = Math.atan2(offset.x, offset.z) - dx * 0.0075;
+        const phi = Math.max(0.025, Math.min(Math.PI - 0.025, Math.acos(Math.max(-1, Math.min(1, offset.y / radius))) - dy * 0.0075));
+        const sinPhi = Math.sin(phi);
+        cam.position.set(
+          aim.x + radius * sinPhi * Math.sin(theta),
+          aim.y + radius * Math.cos(phi),
+          aim.z + radius * sinPhi * Math.cos(theta),
+        );
+        cam.lookAt(aim);
+      };
+      const dolly = (amount) => {
+        const cam = camera();
+        const aim = target();
+        if (!cam || !aim) return;
+        const offset = cam.position.clone().sub(aim);
+        const length = offset.length();
+        if (!length) return;
+        const next = Math.max(0.01, length * Math.exp(amount));
+        offset.multiplyScalar(next / length);
+        cam.position.copy(aim).add(offset);
+        cam.lookAt(aim);
+      };
+      let drag;
+      try { host.tabIndex = 0; } catch { /* ignore */ }
+      const onPointerDown = (event) => {
+        try { host.focus?.({ preventScroll: true }); } catch { /* ignore */ }
+        if (!event.altKey || event.button < 0 || event.button > 2) return;
+        drag = { id: event.pointerId, x: event.clientX, y: event.clientY, action: event.button === 0 ? 'orbit' : event.button === 1 ? 'pan' : 'dolly' };
+        try { host.setPointerCapture?.(event.pointerId); } catch { /* ignore */ }
+        event.preventDefault();
+        event.stopPropagation();
+      };
+      const onPointerMove = (event) => {
+        if (!drag || drag.id !== event.pointerId) return;
+        const dx = event.clientX - drag.x;
+        const dy = event.clientY - drag.y;
+        drag.x = event.clientX;
+        drag.y = event.clientY;
+        if (drag.action === 'orbit') orbit(dx, dy);
+        else if (drag.action === 'pan') pan(dx, dy);
+        else dolly(-dx * 0.01 + dy * 0.01);
+        event.preventDefault();
+        event.stopPropagation();
+      };
+      const onPointerUp = (event) => {
+        if (!drag || drag.id !== event.pointerId) return;
+        drag = undefined;
+        try { host.releasePointerCapture?.(event.pointerId); } catch { /* ignore */ }
+        event.preventDefault();
+        event.stopPropagation();
+      };
+      const onWheel = (event) => {
+        if (!camera()) return;
+        dolly(event.deltaY * 0.0012);
+        event.preventDefault();
+        event.stopPropagation();
+      };
+      const onContextMenu = (event) => { if (event.altKey) event.preventDefault(); };
+      const onKeyDown = (event) => {
+        if (event.key !== 'f' && event.key !== 'F') return;
+        const tag = String(event.target?.tagName || '').toLowerCase();
+        if (tag === 'input' || tag === 'textarea' || event.target?.isContentEditable) return;
+        event.preventDefault();
+        reset();
+      };
+      host.addEventListener('pointerdown', onPointerDown, true);
+      host.addEventListener('pointermove', onPointerMove, true);
+      host.addEventListener('pointerup', onPointerUp, true);
+      host.addEventListener('pointercancel', onPointerUp, true);
+      host.addEventListener('wheel', onWheel, { capture: true, passive: false });
+      host.addEventListener('contextmenu', onContextMenu, true);
+      host.addEventListener('keydown', onKeyDown, true);
+      host.__dsh3dMayaCleanup = () => {
+        host.removeEventListener('pointerdown', onPointerDown, true);
+        host.removeEventListener('pointermove', onPointerMove, true);
+        host.removeEventListener('pointerup', onPointerUp, true);
+        host.removeEventListener('pointercancel', onPointerUp, true);
+        host.removeEventListener('wheel', onWheel, true);
+        host.removeEventListener('contextmenu', onContextMenu, true);
+        host.removeEventListener('keydown', onKeyDown, true);
+        delete host.__dsh3dMaya;
+      };
+      host.__dsh3dFrame = reset;
+    }
+
+    function WorkshopViewer({ item, mode, onLoaded }) {
+      const ready = useViewer3D();
+      const hostRef = React.useRef(null);
+      const [error, setError] = React.useState('');
+      const [stats, setStats] = React.useState(null);
+      const src = item ? `${API}/workshop/model?path=${encodeURIComponent(item.path)}` : '';
+      React.useEffect(() => {
+        setError('');
+        setStats(null);
+      }, [src]);
+      React.useEffect(() => {
+        const host = hostRef.current;
+        if (!ready || !host || !src) return undefined;
+        const loaded = () => {
+          setError('');
+          setStats(readViewerStats(host));
+          setupMayaControls(host);
+          onLoaded?.();
+        };
+        const failed = (event) => setError(event?.detail || '模型加载失败');
+        host.addEventListener('viewer-loaded', loaded);
+        host.addEventListener('viewer-error', failed);
+        const timer = setTimeout(() => { if (host.ready) loaded(); }, 30);
+        return () => {
+          clearTimeout(timer);
+          host.removeEventListener('viewer-loaded', loaded);
+          host.removeEventListener('viewer-error', failed);
+          host.__dsh3dMayaCleanup?.();
+        };
+      }, [ready, src]);
+      React.useEffect(() => {
+        if (hostRef.current && mode) hostRef.current.setAttribute('mode', mode);
+      }, [mode]);
+      if (!item) return h('div', { className: 'dsh-3d-ws-viewer-empty' }, '从左侧选择一个模型预览');
+      if (item.previewable === false) {
+        return h('div', { className: 'dsh-3d-ws-viewport' },
+          h('div', { className: 'dsh-3d-ws-viewer-empty' },
+            h('div', null, `${item.name} 暂不支持内嵌预览。`),
+            h('a', { href: src, download: item.name, style: { color: '#9fc0ff', marginTop: '8px', display: 'inline-block' } }, '下载模型文件')),
+        );
+      }
+      return h('div', { className: 'dsh-3d-ws-viewport' },
+        ready ? h('dsh-3d-viewer', { key: src, ref: hostRef, src, mode, 'auto-rotate': 'false' }) : h('div', { className: 'dsh-3d-ws-viewer-empty' }, '正在加载 3D 查看器…'),
+        error ? h('div', { className: 'dsh-3d-ws-viewer-error' }, `预览失败：${error}`) : null,
+        h('div', { className: 'dsh-3d-ws-hint' }, 'Maya 操作：Alt+左键旋转 · Alt+中键平移 · Alt+右键/滚轮缩放 · F 聚焦'),
+        item && stats ? h('div', { className: 'dsh-3d-ws-statusbar' }, h('span', null, `${stats.meshes} 个网格`), h('span', null, `${stats.triangles.toLocaleString('zh-CN')} 三角面`), h('span', null, formatBytes(item.bytes))) : null,
+      );
+    }
+
+    function WorkshopField({ field, value, onChange }) {
+      const label = WORKSHOP_FIELD_LABELS[field] || field;
+      if (field === 'pbr' || field === 'quad' || field === 'smartUv') {
+        return h('label', { className: 'dsh-3d-ws-check' }, h('input', { type: 'checkbox', checked: Boolean(value), onChange: (event) => onChange(event.target.checked) }), label);
+      }
+      if (field === 'format' || field === 'outFormat') {
+        const options = field === 'format' ? ['GLB', 'FBX', 'OBJ', 'USDZ', 'STL'] : ['GLB', 'FBX', 'OBJ', 'USDZ'];
+        return h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, label),
+          h('select', { className: 'dsh-3d-ws-select', value: value || options[0], onChange: (event) => onChange(event.target.value) }, options.map((option) => h('option', { key: option, value: option }, option))));
+      }
+      if (field === 'segType') {
+        return h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, label),
+          h('select', { className: 'dsh-3d-ws-select', value: value || 'model', onChange: (event) => onChange(event.target.value) }, h('option', { value: 'model' }, '模型'), h('option', { value: 'image' }, '图片')));
+      }
+      if (field === 'faceLimit' || field === 'duration' || field === 'motionType') {
+        return h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, label),
+          h('input', { className: 'dsh-3d-ws-input', type: 'number', min: field === 'duration' ? 1 : undefined, max: field === 'duration' ? 12 : undefined, value: value ?? '', onChange: (event) => onChange(event.target.value) }));
+      }
+      if (field === 'prompt' || field === 'texturePrompt' || field === 'hint' || field === 'spec' || field === 'animations' || field === 'imageUrls' || field === 'parameters') {
+        const placeholder = field === 'imageUrls' ? '每行一个图片 URL（2-4 张）' : field === 'animations' ? '每行一个动作名称，或逗号分隔' : field === 'parameters' ? '协议专用参数，JSON 对象' : field === 'prompt' ? '描述你想生成的 3D 模型…' : '';
+        return h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, label),
+          h('textarea', { className: 'dsh-3d-ws-textarea', value: value ?? '', placeholder, onChange: (event) => onChange(event.target.value) }));
+      }
+      return h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, label),
+        h('input', { className: 'dsh-3d-ws-input', value: value ?? '', placeholder: field === 'sourceTaskId' ? '填写源任务 ID，或使用左侧选中的模型' : field === 'imageUrl' ? 'https://…' : '', onChange: (event) => onChange(event.target.value) }));
+    }
+
+    function WorkshopView(props) {
+      const { sessionId, useSessions, useWorkspaces } = props;
+      const sessions = useSessions ? useSessions((snapshot) => snapshot) : null;
+      const workspaceState = useWorkspaces ? useWorkspaces((snapshot) => snapshot) : null;
+      const cwd = sessionId && sessions?.byId ? sessions.byId[sessionId]?.cwd || '' : '';
+      const workspaceItems = workspaceState?.items || [];
+      const sessionWorkspace = workspaceItems.find((workspace) => Array.isArray(workspace.sessionIds) && workspace.sessionIds.includes(sessionId));
+      const currentPath = sessionWorkspace?.path || workspaceItems.find((workspace) => workspace.path === cwd)?.path || cwd || workspaceItems[0]?.path || '';
+      const [scope, setScope] = React.useState(() => {
+        try { return localStorage.getItem('dsh-3d-workshop-scope') === 'all' ? 'all' : 'current'; } catch { return 'current'; }
+      });
+      const effectiveScope = scope === 'current' && !currentPath ? 'all' : scope;
+      const [snapshot, setSnapshot] = React.useState(null);
+      const [workspaces, setWorkspaces] = React.useState([]);
+      const [models, setModels] = React.useState([]);
+      const [activePath, setActivePath] = React.useState('');
+      const [search, setSearch] = React.useState('');
+      const [loading, setLoading] = React.useState(false);
+      const [notice, setNotice] = React.useState('');
+      const [mode, setMode] = React.useState('color');
+      const [form, setForm] = React.useState({ providerId: '', model: '', operation: 'text_to_3d', values: {} });
+      const [job, setJob] = React.useState(null);
+      const [submitting, setSubmitting] = React.useState(false);
+      const [error, setError] = React.useState('');
+      const [showAdvanced, setShowAdvanced] = React.useState(false);
+
+      const loadSnapshot = React.useCallback(() => {
+        api('/status').then((data) => { setSnapshot(data); }).catch((err) => setError(err.message));
+      }, []);
+      const loadModels = React.useCallback(async () => {
+        setLoading(true);
+        try {
+          const query = new URLSearchParams({ scope: effectiveScope });
+          if (effectiveScope === 'current' && currentPath) query.set('path', currentPath);
+          const data = await api(`/workshop/models?${query.toString()}`);
+          setWorkspaces(data.workspaces || []);
+          setModels(data.models || []);
+          setNotice('');
+        } catch (err) {
+          setNotice(err.message);
+        } finally {
+          setLoading(false);
+        }
+      }, [effectiveScope, currentPath]);
+      React.useEffect(() => { loadSnapshot(); }, [loadSnapshot]);
+      React.useEffect(() => {
+        const reload = () => loadSnapshot();
+        window.addEventListener('dsh-3d-providers-changed', reload);
+        return () => window.removeEventListener('dsh-3d-providers-changed', reload);
+      }, [loadSnapshot]);
+      React.useEffect(() => { loadModels(); }, [loadModels]);
+      React.useEffect(() => {
+        try { localStorage.setItem('dsh-3d-workshop-scope', scope); } catch { /* ignore */ }
+      }, [scope]);
+      React.useEffect(() => {
+        const seat = document.querySelector('[data-composer-seat]');
+        if (!seat) return undefined;
+        const previous = seat.style.display;
+        seat.style.display = 'none';
+        return () => { seat.style.display = previous; };
+      }, []);
+      React.useEffect(() => {
+        if (models.length && !models.some((model) => model.path === activePath)) setActivePath(models[0].path);
+        if (!models.length && activePath) setActivePath('');
+      }, [models, activePath]);
+      React.useEffect(() => {
+        if (!job?.taskId || !job?.provider || ['success', 'failed', 'cancelled', 'unknown', 'timeout'].includes(job.status)) return undefined;
+        let active = true;
+        let failures = 0;
+        const timer = setInterval(async () => {
+          try {
+            const data = await api(`/task?provider=${encodeURIComponent(job.provider)}&taskId=${encodeURIComponent(job.taskId)}&operation=${encodeURIComponent(job.operation || '')}`);
+            if (!active) return;
+            failures = 0;
+            const result = data.result || {};
+            setJob((current) => ({ ...current, ...result, status: result.status || current.status }));
+            if (['success', 'failed', 'cancelled', 'unknown', 'timeout'].includes(result.status)) {
+              clearInterval(timer);
+              if (result.status === 'success') {
+                await loadModels();
+                if (result.localFile) setActivePath(result.localFile);
+              }
+            }
+          } catch (err) {
+            if (!active) return;
+            failures += 1;
+            setJob((current) => ({ ...current, error: err.message }));
+            if (failures >= 3) clearInterval(timer);
+          }
+        }, 2200);
+        return () => { active = false; clearInterval(timer); };
+      }, [job?.taskId, job?.provider, job?.operation, job?.status, loadModels]);
+
+      const providers = snapshot?.providers || [];
+      const selectedProvider = providers.find((provider) => provider.id === form.providerId)
+        || providers.find((provider) => provider.id === snapshot?.selection?.providerId)
+        || providers.find((provider) => provider.configured)
+        || providers[0];
+      const providerId = selectedProvider?.id || '';
+      const modelOptions = selectedProvider?.models || [];
+      const currentModel = modelOptions.includes(form.model) ? form.model : (selectedProvider?.defaultModel || modelOptions[0] || '');
+      const operationIds = selectedProvider?.operations || [];
+      const currentOperation = operationIds.includes(form.operation) ? form.operation : (operationIds.includes('text_to_3d') ? 'text_to_3d' : operationIds[0] || '');
+      const operationMeta = snapshot?.operations?.[currentOperation] || { label: currentOperation, fields: [] };
+      const operationGroups = WORKSHOP_OPERATION_GROUPS.map((group) => ({ ...group, ids: group.ids.filter((id) => operationIds.includes(id)) })).filter((group) => group.ids.length);
+      const groupedIds = new Set(operationGroups.flatMap((group) => group.ids));
+      const extraOperationIds = operationIds.filter((id) => !groupedIds.has(id));
+      const fields = operationMeta.fields || [];
+      const active = models.find((model) => model.path === activePath) || null;
+      const visibleModels = models.filter((model) => {
+        if (!search.trim()) return true;
+        const query = search.trim().toLowerCase();
+        return [model.name, model.providerLabel, model.operation, model.workspaceTitle].filter(Boolean).some((value) => String(value).toLowerCase().includes(query));
+      });
+      const groupedModels = workspaces.map((workspace) => ({ ...workspace, models: visibleModels.filter((model) => model.workspacePath === workspace.path) })).filter((workspace) => workspace.models.length);
+      const updateValue = (key, value) => setForm((current) => ({ ...current, values: { ...current.values, [key]: value } }));
+      const chooseProvider = (id) => {
+        const provider = providers.find((item) => item.id === id);
+        setForm((current) => ({ ...current, providerId: id, model: provider?.defaultModel || provider?.models?.[0] || '', operation: provider?.operations?.includes('text_to_3d') ? 'text_to_3d' : (provider?.operations?.[0] || ''), values: {} }));
+      };
+      const useActiveAsSource = () => {
+        if (!active) return;
+        setForm((current) => ({ ...current, values: { ...current.values, ...(active.taskId ? { sourceTaskId: active.taskId } : {}), ...(active.modelUrl ? { modelUrl: active.modelUrl } : {}) } }));
+      };
+      const submit = async () => {
+        if (!selectedProvider || !currentOperation) return;
+        setSubmitting(true);
+        setError('');
+        setJob(null);
+        try {
+          let parameters;
+          if (form.values.parameters && String(form.values.parameters).trim()) parameters = JSON.parse(String(form.values.parameters));
+          const values = { ...form.values };
+          delete values.parameters;
+          for (const field of fields) {
+            if (values[field] === undefined || values[field] === '') {
+              if (field === 'format' || field === 'outFormat') values[field] = 'GLB';
+              if (field === 'segType') values[field] = 'model';
+            }
+          }
+          if (typeof values.imageUrls === 'string') values.imageUrls = values.imageUrls.split(/\r?\n/).map((value) => value.trim()).filter(Boolean);
+          if (typeof values.animations === 'string') values.animations = values.animations.split(/[\n,]/).map((value) => value.trim()).filter(Boolean);
+          for (const key of ['faceLimit', 'duration', 'motionType']) {
+            if (values[key] !== undefined && values[key] !== '') values[key] = Number(values[key]);
+          }
+          if (Array.isArray(values.imageUrls) && !values.imageUrls.length) delete values.imageUrls;
+          if (Array.isArray(values.animations) && !values.animations.length) delete values.animations;
+          const data = await api('/workshop/generate', {
+            providerId,
+            model: currentModel,
+            operation: currentOperation,
+            args: { ...values, ...(parameters ? { parameters } : {}) },
+            workspacePath: currentPath || workspaces[0]?.path || '',
+          });
+          if (data.result) {
+            setJob({ ...data.result, status: data.result.status || 'success' });
+            await loadModels();
+            if (data.result.localFile) setActivePath(data.result.localFile);
+          } else if (data.task) {
+            setJob({ ...data.task, status: data.task.status || 'queued' });
+          }
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setSubmitting(false);
+        }
+      };
+      const scopeButton = (id, label) => h('button', {
+        type: 'button',
+        className: `dsh-3d-ws-scope-btn${effectiveScope === id ? ' dsh-3d-ws-scope-btn-active' : ''}`,
+        onClick: () => { if (id === 'current' && !currentPath) { setNotice('当前会话还没有工作区，已显示全部工作区。'); return; } setScope(id); },
+      }, label);
+      const hostRefocus = () => {
+        const host = document.querySelector('.dsh-3d-ws-viewport dsh-3d-viewer');
+        host?.__dsh3dFrame?.();
+      };
+      const left = h('aside', { className: 'dsh-3d-ws-left' },
+        h('div', { className: 'dsh-3d-ws-pane-head' }, h('span', { className: 'dsh-3d-ws-pane-title' }, '已生成模型'), h('span', { className: 'dsh-3d-ws-spacer' }), h('button', { type: 'button', className: 'dsh-3d-ws-secondary', onClick: loadModels, disabled: loading }, loading ? '刷新中' : '刷新')),
+        h('div', { className: 'dsh-3d-ws-scope' }, scopeButton('current', '当前工作区'), scopeButton('all', '全部工作区')),
+        h('input', { className: 'dsh-3d-ws-search', value: search, placeholder: '搜索模型 / 供应商', onChange: (event) => setSearch(event.target.value) }),
+        h('div', { className: 'dsh-3d-ws-list' },
+          notice ? h('div', { className: 'dsh-3d-ws-empty' }, notice) : null,
+          !notice && !loading && !visibleModels.length ? h('div', { className: 'dsh-3d-ws-empty' }, '当前范围还没有 3D 模型。\n右侧可以直接发起生成。') : null,
+          groupedModels.map((workspace) => h('div', { key: workspace.path, className: 'dsh-3d-ws-group' },
+            h('div', { className: 'dsh-3d-ws-group-title', title: workspace.path }, workspace.title || workspace.path),
+            workspace.models.map((model) => h('button', {
+              key: model.path,
+              type: 'button',
+              title: model.path,
+              className: `dsh-3d-ws-item${model.path === activePath ? ' dsh-3d-ws-item-active' : ''}`,
+              onClick: () => setActivePath(model.path),
+            },
+              h('span', { className: 'dsh-3d-ws-item-icon' }, h('svg', { width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' }, h('path', { d: 'M12 2 21 7 12 12 3 7Z' }), h('path', { d: 'M3 7v10l9 5 9-5V7' }), h('path', { d: 'M12 12v10' }))),
+              h('span', { className: 'dsh-3d-ws-item-main' },
+                h('span', { className: 'dsh-3d-ws-item-name' }, model.name),
+                h('span', { className: 'dsh-3d-ws-item-meta' }, [model.providerLabel || '本地模型', model.operation || '', formatWorkshopTime(model.updatedAt)].filter(Boolean).join(' · ')))))))),
+      );
+      const center = h('main', { className: 'dsh-3d-ws-center' },
+        h('div', { className: 'dsh-3d-ws-viewerbar' },
+          h('span', { className: 'dsh-3d-ws-viewername', title: active?.path || '' }, active?.name || '主预览视口'),
+          h('span', { className: 'dsh-3d-ws-spacer' }),
+          WORKSHOP_MODES.map(([id, label]) => h('button', { key: id, type: 'button', className: `dsh-3d-ws-mode${mode === id ? ' dsh-3d-ws-mode-active' : ''}`, onClick: () => setMode(id) }, label)),
+          h('button', { type: 'button', className: 'dsh-3d-ws-toolbtn', onClick: () => hostRefocus(), disabled: !active }, '聚焦')),
+        h(WorkshopViewer, { item: active, mode, onLoaded: () => {} }),
+        active ? h('div', { className: 'dsh-3d-ws-statusbar' }, h('span', null, active.workspaceTitle || ''), h('span', null, active.taskId ? `任务 ${active.taskId}` : '本地文件'), h('span', null, active.operation || '')) : null,
+      );
+      const right = h('aside', { className: 'dsh-3d-ws-right' },
+        h('div', { className: 'dsh-3d-ws-pane-head' }, h('span', { className: 'dsh-3d-ws-pane-title' }, '生成 3D'), h('span', { className: 'dsh-3d-ws-spacer' }), snapshot ? h('span', { className: 'dsh-3d-ws-sub' }, `${providers.filter((provider) => provider.configured).length}/${providers.length} 已配置`) : null),
+        h('div', { className: 'dsh-3d-ws-panel' },
+          h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, '供应商'),
+            h('select', { className: 'dsh-3d-ws-select', value: providerId, onChange: (event) => chooseProvider(event.target.value) },
+              providers.length ? providers.map((provider) => h('option', { key: provider.id, value: provider.id }, `${provider.label}${provider.configured ? '' : '（未配置）'}`)) : h('option', { value: '' }, '没有可用供应商'))),
+          h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, '模型'),
+            h('select', { className: 'dsh-3d-ws-select', value: currentModel, onChange: (event) => setForm((current) => ({ ...current, model: event.target.value })) },
+              modelOptions.length ? modelOptions.map((model) => h('option', { key: model, value: model }, modelLabel(selectedProvider, model))) : h('option', { value: '' }, '没有模型'))),
+          h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, '操作'),
+            h('select', { className: 'dsh-3d-ws-select', value: currentOperation, onChange: (event) => setForm((current) => ({ ...current, operation: event.target.value })) },
+              operationGroups.map((group) => h('optgroup', { key: group.label, label: group.label }, group.ids.map((id) => h('option', { key: id, value: id }, snapshot?.operations?.[id]?.label || id)))),
+              extraOperationIds.length ? h('optgroup', { label: '其他' }, extraOperationIds.map((id) => h('option', { key: id, value: id }, snapshot?.operations?.[id]?.label || id))) : null)),
+          !selectedProvider?.configured ? h('div', { className: 'dsh-3d-ws-error' }, '该供应商还没有配置密钥，请先到设置 → 3D 生成中配置。') : null,
+          WORKSHOP_SOURCE_OPERATIONS.has(currentOperation) ? h('div', { className: 'dsh-3d-ws-source' },
+            h('div', { className: 'dsh-3d-ws-source-title' }, '源模型'),
+            h('div', { className: 'dsh-3d-ws-source-name', title: active?.path || '' }, active ? active.name : '先在左侧选择模型'),
+            h('div', { className: 'dsh-3d-ws-source-actions' },
+              h('button', { type: 'button', className: 'dsh-3d-ws-secondary', disabled: !active || (!active.taskId && !active.modelUrl), onClick: useActiveAsSource }, '填入选中模型'),
+              active?.taskId ? h('span', { className: 'dsh-3d-ws-sub' }, `任务 ${active.taskId}`) : null)) : null,
+          fields.map((field) => h(WorkshopField, { key: field, field, value: form.values[field], onChange: (value) => updateValue(field, value) })),
+          h('button', { type: 'button', className: 'dsh-3d-ws-secondary', onClick: () => setShowAdvanced((value) => !value) }, showAdvanced ? '收起高级参数' : '高级参数'),
+          showAdvanced && !fields.includes('parameters') ? h(WorkshopField, { field: 'parameters', value: form.values.parameters, onChange: (value) => updateValue('parameters', value) }) : null,
+          h('button', { type: 'button', className: 'dsh-3d-ws-submit', onClick: submit, disabled: submitting || !selectedProvider?.configured || !currentModel || !currentOperation }, submitting ? '提交中…' : '开始生成'),
+          error ? h('div', { className: 'dsh-3d-ws-error' }, error) : null,
+          job ? h('div', { className: 'dsh-3d-ws-job' },
+            h('div', { className: 'dsh-3d-ws-job-head' }, h('span', { className: 'dsh-3d-ws-job-status' }, workshopJobLabel(job.status)), h('span', null, job.providerLabel || job.provider || ''), h('span', null, job.operation || ''), job.taskId ? h('span', { className: 'dsh-3d-ws-sub' }, job.taskId) : null),
+            typeof job.progress === 'number' ? h('div', { className: 'dsh-3d-ws-progress' }, h('i', { style: { width: `${Math.max(4, Math.min(100, job.progress))}%` } })) : null,
+            job.error ? h('div', { className: 'dsh-3d-ws-error' }, job.error) : null,
+            job.status === 'success' && job.localFile ? h('div', { className: 'dsh-3d-ws-success' }, `已保存：${String(job.localFile).split(/[\\\\/]/).pop()}`) : null) : null,
+        ),
+      );
+      return h('div', { className: 'dsh-3d-ws' },
+        h('div', { className: 'dsh-3d-ws-head' },
+          h('span', { className: 'dsh-3d-ws-title' }, '3D 工坊'),
+          h('span', { className: 'dsh-3d-ws-sub' }, `${visibleModels.length} 个模型`),
+          h('span', { className: 'dsh-3d-ws-spacer' }),
+          h('span', { className: 'dsh-3d-ws-sub' }, currentPath || '全部工作区')),
+        h('div', { className: 'dsh-3d-ws-body' }, left, center, right),
+      );
+    }
+
     function ChatResultNode(props) {
       const initial = props.node?.data?.result || null;
       const [result, setResult] = React.useState(initial);
@@ -510,14 +1093,22 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         if (!result?.taskId || !result?.provider) return;
         if (['success', 'failed', 'cancelled', 'unknown', 'timeout'].includes(status)) return;
         let cancelled = false;
+        let failures = 0;
         const timer = setInterval(async () => {
           try {
             const data = await api(`/task?provider=${encodeURIComponent(result.provider)}&taskId=${encodeURIComponent(result.taskId)}&operation=${encodeURIComponent(result.operation || '')}`);
             if (cancelled) return;
+            failures = 0;
             setStatus(data.result.status);
             setResult((current) => ({ ...current, ...data.result, previewUrl: data.result.previewUrl || current?.previewUrl }));
             if (['success', 'failed', 'cancelled', 'unknown'].includes(data.result.status)) clearInterval(timer);
-          } catch { /* keep polling; the tool view also reports errors */ }
+          } catch {
+            failures += 1;
+            if (failures >= 3) {
+              clearInterval(timer);
+              setResult((current) => (current ? { ...current, error: current.error || '任务查询失败' } : current));
+            }
+          }
         }, 2500);
         return () => { cancelled = true; clearInterval(timer); };
       }, [result?.taskId, result?.provider, result?.operation, status]);
@@ -560,14 +1151,22 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       React.useEffect(() => {
         if (!result?.taskId || !result?.provider || ['success', 'failed', 'cancelled'].includes(status)) return;
         let cancelled = false;
+        let failures = 0;
         const timer = setInterval(async () => {
           try {
             const data = await api(`/task?provider=${encodeURIComponent(result.provider)}&taskId=${encodeURIComponent(result.taskId)}&operation=${encodeURIComponent(result.operation || '')}`);
             if (cancelled) return;
+            failures = 0;
             setStatus(data.result.status);
             if (data.result.previewUrl) setPreview(data.result.previewUrl);
             if (['success', 'failed', 'cancelled', 'unknown'].includes(data.result.status)) clearInterval(timer);
-          } catch { /* keep polling */ }
+          } catch {
+            failures += 1;
+            if (failures >= 3) {
+              clearInterval(timer);
+              setResult((current) => (current ? { ...current, error: current.error || '任务查询失败' } : current));
+            }
+          }
         }, 2500);
         return () => { cancelled = true; clearInterval(timer); };
       }, [result?.taskId, result?.provider, result?.operation, status]);
@@ -630,7 +1229,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         ctx.effect(() => {
           const style = document.createElement('style');
           style.dataset.plugin = 'dsh-tripo-support';
-          style.textContent = CSS;
+          style.textContent = `${CSS}\n${WORKSHOP_CSS}`;
           document.head.appendChild(style);
           return () => style.remove();
         }, 'dsh-tripo-support: styles');
@@ -650,6 +1249,12 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
           id: 'dsh-tripo-support-3d-model',
           order: 30,
         }, ModelPill));
+        ctx.slots.inject('conversation.view', () => ctx.slots.register({
+          name: 'conversation.view',
+          id: 'dsh-tripo-workshop',
+          order: 26,
+          label: () => '3D 工坊',
+        }, WorkshopView));
         for (const key of ['create_3d_task', 'run_3d_operation', 'generate_3d', 'wait_3d_task']) {
           ctx.slots.inject('tool.call.toolview', () => ctx.slots.register({ name: 'tool.call.toolview', key }, ToolPreview));
         }

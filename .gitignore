@@ -41,3 +41,6 @@ dist/
 .agent/
 3d-output/
 outputs/
+
+# Local project memory (not published)
+AGENTS.md
