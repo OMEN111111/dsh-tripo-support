@@ -1,5 +1,5 @@
 - insert:
-    - id: tripo-support
-      name: dsh-tripo-support
+    - id: model-gen
+      name: dsh-model-gen
       config:
         workspaceDir: ''

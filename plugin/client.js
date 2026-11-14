@@ -1,11 +1,11 @@
 window.__ModuleLoader__.load({
-  id: 'dsh-tripo-support',
+  id: 'dsh-model-gen',
   factory(require) {
     const React = require('react');
     const ReactDOM = (() => { try { return require('react-dom'); } catch { return null; } })();
     const h = React.createElement;
-    const API = '/plugins/dsh-tripo-support';
-    const notifyProvidersChanged = () => { try { window.dispatchEvent(new CustomEvent('dsh-3d-providers-changed')); } catch { /* ignore */ } };
+    const API = '/plugins/dsh-model-gen';
+    const notifyProvidersChanged = () => { try { window.dispatchEvent(new CustomEvent('dsh-model-gen-providers-changed')); } catch { /* ignore */ } };
 
     const CSS = `
 .dsh-3d-settings{display:grid;gap:18px;color:var(--dsw-alias-label-primary,#1f2328);font-size:13px}
@@ -130,7 +130,7 @@ const WORKSHOP_CSS = `
 .dsh-3d-ws-item:hover{background:var(--dsw-alias-bg-layer-2,rgba(127,127,127,.07))}
 .dsh-3d-ws-item-active{border-color:var(--dsw-alias-brand-primary,#4c78ff);box-shadow:0 0 0 2px var(--dsw-alias-brand-primary-soft,rgba(76,120,255,.12))}
 .dsh-3d-ws-thumb{width:100%;height:100%;border-radius:12px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(145deg,rgba(76,120,255,.22),rgba(118,86,255,.12));color:var(--dsw-alias-brand-primary,#4c78ff)}
-.dsh-3d-ws-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.dsh-3d-ws-thumb img{width:100%;height:100%;object-fit:contain;display:block;background:var(--dsw-alias-bg-layer-2,rgba(127,127,127,.06))}
 .dsh-3d-ws-item-icon{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(76,120,255,.22),rgba(118,86,255,.12));color:var(--dsw-alias-brand-primary,#4c78ff)}
 .dsh-3d-ws-slot-grid{display:grid;gap:6px}
 .dsh-3d-ws-slot{position:relative;aspect-ratio:1/1;border:1px dashed var(--dsw-alias-border-l2,rgba(127,127,127,.35));border-radius:8px;background:var(--dsw-alias-bg-layer-2,rgba(127,127,127,.04));overflow:hidden;display:grid;place-items:center;cursor:pointer;min-width:0}
@@ -433,7 +433,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       return h('div', { className: 'dsh-3d-card' },
           h('div', { className: 'dsh-3d-row' },
             h('span', { className: `dsh-3d-dot${check?.updateAvailable ? '' : ' dsh-3d-dot-ok'}` }),
-            h('span', { className: 'dsh-3d-name' }, 'dsh-tripo-support'),
+            h('span', { className: 'dsh-3d-name' }, 'dsh-model-gen'),
             h('span', { className: 'dsh-3d-spacer' }),
             h('span', { className: 'dsh-3d-badge' }, check ? `当前 ${check.current}` : '检查中')),
           check ? h('div', { className: 'dsh-3d-grid' },
@@ -500,7 +500,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
           setExpandedProviderId((current) => current || selected);
         } catch (e) { setError(e.message); }
       }, []);
-      React.useEffect(() => { reload(); const onChange = () => reload(); window.addEventListener('dsh-3d-providers-changed', onChange); return () => window.removeEventListener('dsh-3d-providers-changed', onChange); }, [reload]);
+      React.useEffect(() => { reload(); const onChange = () => reload(); window.addEventListener('dsh-model-gen-providers-changed', onChange); return () => window.removeEventListener('dsh-model-gen-providers-changed', onChange); }, [reload]);
       React.useEffect(() => {
         if (!open) { setMenuStyle(null); return; }
         const place = () => {
@@ -725,8 +725,17 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
     const workshopModelVersionOptions = (operation) => operation === 'segment'
       ? [['', '自动'], ['v2.0-20260430', '语义分割 v2'], ['v1.0-20250506', '几何分割 v1']]
       : WORKSHOP_SELECT_OPTIONS.modelVersion;
-    const estimateTaskCost = (provider, operation, values = {}) => {
+    const estimateTaskCost = (provider, operation, values = {}, history = []) => {
       const fallback = (text, note) => ({ amount: null, text, note });
+      const sameProvider = (sample) => sample.providerId === provider?.id
+        || (String(provider?.id || '').startsWith('qwenai') && String(sample.providerId || '').startsWith('qwenai'));
+      const sample = [...history]
+        .filter((item) => sameProvider(item) && item.operation === operation && Number.isFinite(Number(item.credits)))
+        .sort((a, b) => String(a.recordedAt || '').localeCompare(String(b.recordedAt || '')))
+        .at(-1);
+      const historyEstimate = sample
+        ? { amount: Number(sample.credits), text: `本次任务预计消耗 ${Number(sample.credits)} 积分（参考最近实际扣费）`, note: '参考该供应商最近一次成功任务的实际扣费；本次以账单为准。' }
+        : null;
       if (!provider) return fallback('按实际计费', '请选择供应商');
       if (provider.protocol === 'tripo' && !provider.custom) {
         let amount;
@@ -760,17 +769,27 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
           }[operation];
         }
         if (Number.isFinite(amount)) return { amount, text: `本次任务预计消耗 ${amount} 积分`, note: '参考 Tripo 官网报价；实际以账户扣费为准。' };
-        return fallback('按实际计费', '该操作暂无公开固定报价，实际以供应商扣费为准。');
+        return historyEstimate || fallback('按实际计费', '该操作暂无公开固定报价，实际以供应商扣费为准。');
       }
       if (provider.protocol === 'meshy' && !provider.custom) {
         const amount = WORKSHOP_GENERATION_OPERATIONS.has(operation) ? 20 : operation === 'texture' ? (values.textureSize === '8192' ? 15 : 10) : null;
         if (amount !== null) return { amount, text: `本次任务预计消耗 ${amount} 积分`, note: '参考 Meshy API 定价；实际以账户扣费为准。' };
-        return fallback('按实际计费', '该操作暂无公开固定积分报价，实际以 Meshy 扣费为准。');
+        return historyEstimate || fallback('按实际计费', '该操作暂无公开固定积分报价，实际以 Meshy 扣费为准。');
       }
-      if (provider.protocol === 'tencent') return fallback('按腾讯云账单', '腾讯云按任务/资源实际计费，不使用积分。');
-      if (provider.protocol === 'hyper') return fallback('按订阅额度', 'Hyper3D 按订阅额度或实际扣减计费，不使用积分。');
-      if (provider.protocol === 'dashscope') return fallback('按百炼实际计费', '百炼 / qwenai 按平台实际账单计费，不使用积分。');
-      return fallback('按实际计费', '按当前网关实际计费。');
+      if (provider.protocol === 'tencent') {
+        if (WORKSHOP_GENERATION_OPERATIONS.has(operation)) {
+          const rapid = String(values.model || provider.defaultModel || '').toLowerCase().includes('rapid');
+          const amount = rapid ? 17 : 20;
+          return { amount, text: `本次任务预计消耗 ${amount} 积分`, note: rapid ? '腾讯云极速版生成约 17 积分（约 ¥1.8）；实际以积分包账单为准。' : '腾讯云专业版 Normal 生成约 20 积分（约 ¥2）；实际以积分包账单为准。' };
+        }
+        return historyEstimate || fallback('按腾讯云积分扣减', '腾讯云按积分包/账单实际扣减；该操作暂无公开固定积分值。');
+      }
+      if (provider.protocol === 'hyper') {
+        if (WORKSHOP_GENERATION_OPERATIONS.has(operation)) return { amount: null, text: '约 $0.50/模型', note: 'Hyper3D 按结果付费；订阅额度约 $0.50/模型，直接购买积分 $1.50/积分，实际以账户结算为准。' };
+        return historyEstimate || fallback('按订阅额度扣减', 'Hyper3D 按订阅额度或结果实际扣减。');
+      }
+      if (provider.protocol === 'dashscope') return historyEstimate || fallback('按百炼实际计费', '百炼 / qwenai 按平台实际账单计费；暂未找到公开的固定每次报价。');
+      return historyEstimate || fallback('按实际计费', '按当前网关实际计费。');
     };
 
     const formatBytes = (bytes) => {
@@ -1079,11 +1098,55 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       );
     }
 
+    function centerViewerForThumbnail(viewer) {
+      const camera = viewer.camera;
+      const model = viewer.model;
+      if (!camera || !model) return;
+      const Vector3 = camera.position.constructor;
+      const min = new Vector3(Infinity, Infinity, Infinity);
+      const max = new Vector3(-Infinity, -Infinity, -Infinity);
+      let found = false;
+      model.updateMatrixWorld(true);
+      model.traverse((object) => {
+        if (!object?.isMesh || !object.geometry) return;
+        const geometry = object.geometry;
+        if (!geometry.boundingBox) geometry.computeBoundingBox();
+        const box = geometry.boundingBox;
+        if (!box) return;
+        for (const x of [box.min.x, box.max.x]) {
+          for (const y of [box.min.y, box.max.y]) {
+            for (const z of [box.min.z, box.max.z]) {
+              const point = new Vector3(x, y, z);
+              object.localToWorld(point);
+              min.min(point);
+              max.max(point);
+              found = true;
+            }
+          }
+        }
+      });
+      if (!found) { viewer.fit(); return; }
+      const center = min.clone().add(max).multiplyScalar(0.5);
+      const size = max.clone().sub(min);
+      const distance = Math.max(size.x, size.y, size.z, 0.1) * 2.2;
+      const direction = new Vector3(0.85, 0.6, 1).normalize();
+      camera.position.copy(center).addScaledVector(direction, distance);
+      camera.near = Math.max(0.001, distance / 1000);
+      camera.far = Math.max(100, distance * 10);
+      camera.lookAt(center);
+      camera.updateProjectionMatrix();
+      if (viewer.controls) {
+        viewer.controls.target.copy(center);
+        viewer.controls.update();
+        camera.lookAt(center);
+      }
+    }
+
     function captureModelThumbnail(path) {
       return new Promise((resolve, reject) => {
         const element = document.createElement('dsh-3d-viewer');
         element.setAttribute('auto-rotate', 'false');
-        element.style.cssText = 'position:fixed;left:-10000px;top:0;width:160px;height:160px;display:block;';
+        element.style.cssText = 'position:fixed;left:-10000px;top:0;width:160px;height:160px;min-height:0!important;display:block;';
         let settled = false;
         const finish = (callback, value) => {
           if (settled) return;
@@ -1095,6 +1158,10 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         const timer = setTimeout(() => finish(reject, new Error('生成缩略图超时')), 60000);
         element.addEventListener('viewer-loaded', () => {
           try {
+            element.renderer.setSize(160, 160, false);
+            element.camera.aspect = 1;
+            element.camera.updateProjectionMatrix();
+            centerViewerForThumbnail(element);
             element.renderer.render(element.scene, element.camera);
             const data = element.renderer.domElement.toDataURL('image/jpeg', 0.78);
             if (!data || data === 'data:,') throw new Error('缩略图内容为空');
@@ -1173,8 +1240,8 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       React.useEffect(() => { loadSnapshot(); }, [loadSnapshot]);
       React.useEffect(() => {
         const reload = () => loadSnapshot();
-        window.addEventListener('dsh-3d-providers-changed', reload);
-        return () => window.removeEventListener('dsh-3d-providers-changed', reload);
+        window.addEventListener('dsh-model-gen-providers-changed', reload);
+        return () => window.removeEventListener('dsh-model-gen-providers-changed', reload);
       }, [loadSnapshot]);
       React.useEffect(() => { loadModels(); }, [loadModels]);
       const modelKey = models.map((model) => model.path).join('|');
@@ -1264,7 +1331,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       });
       const active = models.find((model) => model.path === activePath) || null;
       const balanceText = balance?.supported ? `积分 ${balance.balance ?? '—'}` : (balance?.message || '积分暂不可查');
-      const estimate = estimateTaskCost(selectedProvider, currentOperation, form.values);
+      const estimate = estimateTaskCost(selectedProvider, currentOperation, { ...form.values, model: currentModel }, snapshot?.creditSamples || []);
       const estimateButtonText = estimate.amount !== null ? `预计消耗 ${estimate.amount} 积分` : estimate.text;
       const loadBalance = React.useCallback(async () => {
         if (!providerId) { setBalance(null); return; }
@@ -1279,7 +1346,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
             if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 900));
           }
         }
-        setBalance({ ok: false, supported: false, message: lastError?.message || '积分暂不可查' });
+        setBalance({ ok: false, supported: false, message: '积分暂不可查', detail: lastError?.message || '' });
       }, [providerId]);
       React.useEffect(() => { loadBalance(); }, [loadBalance, balanceVersion]);
       const visibleModels = models.filter((model) => {
@@ -1521,7 +1588,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         h('div', { className: 'dsh-3d-ws-pane-head' },
           h('span', { className: 'dsh-3d-ws-pane-title' }, '生成 3D'),
           h('span', { className: 'dsh-3d-ws-spacer' }),
-          h('span', { className: 'dsh-3d-ws-balance', title: balance?.message || '' }, balanceText)),
+          h('span', { className: 'dsh-3d-ws-balance', title: balance?.detail || balance?.message || '' }, balanceText)),
         h('div', { className: 'dsh-3d-ws-panel' },
           h('label', { className: 'dsh-3d-ws-field' }, h('span', { className: 'dsh-3d-ws-label' }, '供应商'),
             h('select', { className: 'dsh-3d-ws-select', value: providerId, onChange: (event) => chooseProvider(event.target.value) },
@@ -1700,10 +1767,10 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         result.localFile ? h('div', { className: 'dsh-3d-muted' }, `已保存：${String(result.localFile).split(/[\\\\/]/).pop()}`) : null);
     }
 
-    const RESULT_NODE_KIND = 'dsh-tripo-result';
+    const RESULT_NODE_KIND = 'dsh-model-gen-result';
 
     function resultMeta(value) {
-      if (!value || typeof value !== 'object' || value.kind !== 'dsh-tripo-support') return null;
+      if (!value || typeof value !== 'object' || (value.kind !== 'dsh-model-gen' && value.kind !== 'dsh-tripo-support')) return null;
       if (!value.taskId && !value.previewUrl && !value.localFile) return null;
       return value;
     }
@@ -1722,7 +1789,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         start: (_context, match) => {
           const turn = match.event.data?.turn;
           const result = resultMeta(match.event.data?.meta);
-          if (typeof turn !== 'number' || !result) throw new Error('dsh-tripo-result requires a 3D tool result');
+          if (typeof turn !== 'number' || !result) throw new Error('dsh-model-gen-result requires a 3D tool result');
           return { turn, result, seq: match.event.seq };
         },
         update: (context) => context.state,
@@ -1747,30 +1814,30 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
       apply(ctx) {
         ctx.effect(() => {
           const style = document.createElement('style');
-          style.dataset.plugin = 'dsh-tripo-support';
+          style.dataset.plugin = 'dsh-model-gen';
           style.textContent = `${CSS}\n${WORKSHOP_CSS}`;
           document.head.appendChild(style);
           return () => style.remove();
-        }, 'dsh-tripo-support: styles');
+        }, 'dsh-model-gen: styles');
         ctx.slots.inject('settings.section', () => ctx.slots.register({
           name: 'settings.section',
-          id: 'tripo-support',
+          id: 'model-gen',
           order: 12,
           label: () => '3D 生成',
         }, SettingsPage));
         ctx.slots.inject('settings.section.icon', () => ctx.slots.register({
           name: 'settings.section.icon',
-          id: 'tripo-support',
+          id: 'model-gen',
           order: 12,
         }, SectionIcon));
         ctx.slots.inject('conversation.input.right', () => ctx.slots.register({
           name: 'conversation.input.right',
-          id: 'dsh-tripo-support-3d-model',
+          id: 'dsh-model-gen-3d-model',
           order: 30,
         }, ModelPill));
         ctx.slots.inject('conversation.view', () => ctx.slots.register({
           name: 'conversation.view',
-          id: 'dsh-tripo-workshop',
+          id: 'dsh-model-gen-workshop',
           order: 26,
           label: () => '3D 工坊',
         }, WorkshopView));
@@ -1780,7 +1847,7 @@ const defaultBase = (protocol) => protocol === 'tencent' ? 'https://ai3d.tencent
         ctx.inject(['uiConversation'], (owner) => {
           const uiConversation = owner.uiConversation || owner.get?.('uiConversation');
           if (!uiConversation?.events?.register) return;
-          owner.effect(() => uiConversation.events.register(create3DResultDefinition()), 'dsh-tripo-support: chat result node');
+          owner.effect(() => uiConversation.events.register(create3DResultDefinition()), 'dsh-model-gen: chat result node');
           owner.slots.inject('conversation.chat.node', () => owner.slots.register({ name: 'conversation.chat.node', key: RESULT_NODE_KIND }, ChatResultNode));
         });
       },

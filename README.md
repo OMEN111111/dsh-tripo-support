@@ -1,4 +1,4 @@
-# dsh-tripo-support
+# dsh-model-gen
 
 **让 DeepSeek Harness（DSH）直接管理并调用 Tripo、Meshy、Hyper3D、腾讯混元3D（HY3D）以及兼容的第三方异步 3D 生成服务。**
 
@@ -33,10 +33,12 @@ Tripo, Meshy, Hyper3D and Tencent Hunyuan3D async 3D providers for DeepSeek Harn
 ## 安装
 
 ```powershell
-dsh plugin --profile desktop add "https://github.com/OMEN111111/dsh-tripo-support.git"
+# 从旧名称升级时先移除旧包，再安装新包
+dsh plugin --profile desktop remove dsh-tripo-support
+dsh plugin --profile desktop add "https://github.com/OMEN111111/dsh-model-gen.git"
 ```
 
-或使用 Release 中的 `dsh-tripo-support-0.1.8.tgz`。
+或使用 Release 中的 `dsh-model-gen-0.2.0.tgz`。
 
 安装后完整退出并重新打开 DSH。
 

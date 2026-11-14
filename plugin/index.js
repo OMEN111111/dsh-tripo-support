@@ -1,3 +1,4 @@
+import { copyFileSync, existsSync, mkdirSync } from 'node:fs';
 import { readFile, readdir, realpath, stat } from 'node:fs/promises';
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { basename, dirname, extname, join, resolve } from 'node:path';
@@ -20,7 +21,8 @@ import {
 
 export const inject = ['tools'];
 
-const ROUTE_PREFIX = '/plugins/dsh-tripo-support';
+const ROUTE_PREFIX = '/plugins/dsh-model-gen';
+const LEGACY_ROUTE_PREFIX = '/plugins/dsh-tripo-support';
 const MAX_WAIT_MS = 10 * 60 * 1000;
 const MAX_BODY_BYTES = 30 * 1024 * 1024;
 
@@ -66,7 +68,20 @@ const isWithin = (child, root) => {
 };
 
 export function apply(ctx, config = {}) {
-  const root = join(dshHome(), 'tripo-support');
+  const root = join(dshHome(), 'model-gen');
+  const legacyRoot = join(dshHome(), 'tripo-support');
+  try {
+    mkdirSync(root, { recursive: true });
+    if (existsSync(legacyRoot)) {
+      for (const file of ['state.json', 'tasks.json', 'previews.json']) {
+        const target = join(root, file);
+        const source = join(legacyRoot, file);
+        if (!existsSync(target) && existsSync(source)) copyFileSync(source, target);
+      }
+    }
+  } catch {
+    /* keep the new directory usable even if migration is blocked */
+  }
   const credentials = {
     async resolve(ref) {
       const service = ctx.get('credentials');
@@ -244,7 +259,7 @@ export function apply(ctx, config = {}) {
       if (id) generationTurns.set(id, 0);
     });
     return () => dispose?.();
-  }, 'dsh-tripo-support: reset one-shot generation per user turn');
+  }, 'dsh-model-gen: reset one-shot generation per user turn');
   ctx.tools.guard((execution) => {
     const generationOps = new Set(['text_to_3d', 'image_to_3d', 'multiview_to_3d']);
     const name = String(execution.name || '');
@@ -259,17 +274,17 @@ export function apply(ctx, config = {}) {
   });
   ctx.inject(['systemPrompt'], (scoped) => {
     scoped.effect(() => scoped.systemPrompt.section({
-      name: 'dsh-tripo-support/3d-policy',
+      name: 'dsh-model-gen/3d-policy',
       order: 46,
       text: [
-        '3D generation policy (dsh-tripo-support):',
+        '3D generation policy (dsh-model-gen):',
         '- Do only what the user explicitly asked for. If the user asks to generate a model, create exactly one 3D generation task and stop; do not add texture, retopology, rigging, segmentation, conversion, DCC/procedural modeling, or any other step unless the user explicitly requests that separate step.',
         '- If the user asks for a material/texture, topology, rigging or another post-process, perform only that operation on the referenced model; do not also regenerate or remesh it.',
         '- Never retry automatically. If the result is unsatisfactory, report what was produced and stop; ask the user whether to retry and what to change.',
         '- Never switch provider, model, or operation silently. If the requested operation needs another model in the same provider (for example qwenai Tripo texture/rig/topology models), explain the choice and ask; only after explicit user approval call select_3d_model.',
         '- Report every task result to the user, including failures, before doing anything else.',
       ].join('\n'),
-    }), 'dsh-tripo-support: 3D policy');
+    }), 'dsh-model-gen: 3D policy');
   });
 
   const outputDir = () => (config.workspaceDir ? String(config.workspaceDir) : join(root, 'output'));
@@ -280,7 +295,7 @@ export function apply(ctx, config = {}) {
     return provider;
   };
 
-  const updateRepo = String(config.updateRepo || 'OMEN111111/dsh-tripo-support');
+  const updateRepo = String(config.updateRepo || 'OMEN111111/dsh-model-gen');
 
   const versionParts = (value) => String(value || '0').replace(/^v/i, '').split('-')[0].split('.').map((part) => Number.parseInt(part, 10) || 0);
   const compareVersions = (left, right) => {
@@ -323,7 +338,7 @@ export function apply(ctx, config = {}) {
     let lastError;
     for (const attempt of fallback) {
       try {
-        const response = await fetch(attempt.url, { redirect: 'follow', headers: { 'User-Agent': 'dsh-tripo-support' }, signal: AbortSignal.timeout(8000) });
+        const response = await fetch(attempt.url, { redirect: 'follow', headers: { 'User-Agent': 'dsh-model-gen' }, signal: AbortSignal.timeout(8000) });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const parsed = await attempt.parse(response);
         if (parsed.latest) { found = parsed; break; }
@@ -338,8 +353,8 @@ export function apply(ctx, config = {}) {
       releaseUrl: found.releaseUrl || `https://github.com/${updateRepo}/releases`,
       notes: '',
       publishedAt: '',
-      assetUrl: `https://github.com/${updateRepo}/releases/download/v${latest}/dsh-tripo-support-${latest}.tgz`,
-      installSpec: `https://github.com/${updateRepo}/releases/download/v${latest}/dsh-tripo-support-${latest}.tgz`,
+      assetUrl: `https://github.com/${updateRepo}/releases/download/v${latest}/dsh-model-gen-${latest}.tgz`,
+      installSpec: `https://github.com/${updateRepo}/releases/download/v${latest}/dsh-model-gen-${latest}.tgz`,
     };
   };
 
@@ -362,7 +377,7 @@ export function apply(ctx, config = {}) {
     let lastError;
     for (const url of candidates) {
       try {
-        const response = await fetch(url, { headers: { Authorization: `Bearer ${secrets.apiKey}`, Accept: 'application/json', 'User-Agent': 'dsh-tripo-support' }, signal: AbortSignal.timeout(10000) });
+        const response = await fetch(url, { headers: { Authorization: `Bearer ${secrets.apiKey}`, Accept: 'application/json', 'User-Agent': 'dsh-model-gen' }, signal: AbortSignal.timeout(10000) });
         if (response.status === 401 || response.status === 403) throw new Error(`API Key 无效（HTTP ${response.status}）`);
         if (!response.ok) { lastError = new Error(`HTTP ${response.status}`); continue; }
         const json = await response.json();
@@ -392,6 +407,10 @@ export function apply(ctx, config = {}) {
       protocols: PROTOCOL_LABELS,
       selection: await providers.selection(),
       presets: await providers.presets(),
+      creditSamples: tasks.list()
+        .filter((task) => task.status === 'success' && task.credits !== undefined && task.credits !== null)
+        .slice(-30)
+        .map((task) => ({ providerId: task.providerId, operation: task.operation, credits: task.credits, recordedAt: task.updatedAt || task.createdAt })),
     };
   };
 
@@ -586,7 +605,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
+      presentationMeta: (_args, value) => ({ kind: 'dsh-model-gen', ...value }),
     },
     async execute() {
       const snapshot = await status();
@@ -610,7 +629,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
+      presentationMeta: (_args, value) => ({ kind: 'dsh-model-gen', ...value }),
     },
     async execute() {
       const list = tasks.list().slice(-50).reverse().map((task) => ({ provider: task.providerId, providerLabel: task.providerLabel, operation: task.operation, model: task.model, taskId: task.taskId, status: task.status, file: task.file, previewId: task.previewId, updatedAt: task.updatedAt }));
@@ -625,7 +644,7 @@ export function apply(ctx, config = {}) {
     output: {
       schema: { type: 'object', properties: { summary: { type: 'string' }, tasks: { type: 'array', items: { type: 'object', additionalProperties: true } }, missed: { type: 'array', items: { type: 'string' } } }, required: ['summary', 'tasks'], additionalProperties: true },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
+      presentationMeta: (_args, value) => ({ kind: 'dsh-model-gen', ...value }),
     },
     async execute(args) {
       const providerId = String(args.provider || 'tripo-official');
@@ -663,7 +682,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support-selection', ...value }),
+      presentationMeta: (_args, value) => ({ kind: 'dsh-model-gen-selection', ...value }),
     },
     async execute(args) {
       ensure(args.userApproved === true, '切换 3D 模型需要用户明确同意');
@@ -729,7 +748,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
+      presentationMeta: (_args, value) => ({ kind: 'dsh-model-gen', ...value }),
     },
     async execute(args, exec) {
       const outputDirectory = await sessionOutputDir(ctx, exec, outputDir());
@@ -780,7 +799,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
+      presentationMeta: (_args, value) => ({ kind: 'dsh-model-gen', ...value }),
     },
     async execute(args, exec) {
       const result = await queryTask({
@@ -824,7 +843,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
+      presentationMeta: (_args, value) => ({ kind: 'dsh-model-gen', ...value }),
     },
     async execute(args, exec) {
       const result = await waitTask({
@@ -899,7 +918,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
+      presentationMeta: (_args, value) => ({ kind: 'dsh-model-gen', ...value }),
     },
     timeoutMs: 600000,
     async execute(args, exec) {
@@ -947,7 +966,7 @@ export function apply(ctx, config = {}) {
         additionalProperties: true,
       },
       render: (_args, value) => [{ type: 'text', text: value.summary }],
-      presentationMeta: (_args, value) => ({ kind: 'dsh-tripo-support', ...value }),
+      presentationMeta: (_args, value) => ({ kind: 'dsh-model-gen', ...value }),
     },
     timeoutMs: 600000,
     async execute(args, exec) {
@@ -978,7 +997,8 @@ export function apply(ctx, config = {}) {
       return;
     }
     const url = new URL(req.url || '/', 'http://localhost');
-    const path = url.pathname.slice(ROUTE_PREFIX.length) || '/';
+    const routePrefix = url.pathname.startsWith(ROUTE_PREFIX) ? ROUTE_PREFIX : (url.pathname.startsWith(LEGACY_ROUTE_PREFIX) ? LEGACY_ROUTE_PREFIX : ROUTE_PREFIX);
+    const path = url.pathname.slice(routePrefix.length) || '/';
     const send = (code, body) => {
       res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
       res.end(JSON.stringify(body));
@@ -1048,7 +1068,7 @@ export function apply(ctx, config = {}) {
         ensure(check.updateAvailable, '当前已是最新版本');
         const manager = ctx.get('pluginManager');
         ensure(manager?.installBundle, '当前 DSH 没有提供插件管理服务');
-        const requestId = `dsh-tripo-support-${randomUUID()}`;
+        const requestId = `dsh-model-gen-${randomUUID()}`;
         const result = await manager.installBundle(check.installSpec, { enabled: true, saveExact: true, requestId });
         return send(200, { ok: true, check, result });
       }
@@ -1140,7 +1160,14 @@ export function apply(ctx, config = {}) {
   ctx.inject(['webServer'], (webCtx) => {
     const webServer = webCtx.get('webServer');
     if (!webServer) return;
-    webCtx.effect(() => webServer.register({ kind: 'prefix', path: ROUTE_PREFIX, handler }), 'dsh-tripo-support: routes');
+    webCtx.effect(() => {
+      const disposeCurrent = webServer.register({ kind: 'prefix', path: ROUTE_PREFIX, handler });
+      const disposeLegacy = webServer.register({ kind: 'prefix', path: LEGACY_ROUTE_PREFIX, handler });
+      return () => {
+        disposeCurrent?.();
+        disposeLegacy?.();
+      };
+    }, 'dsh-model-gen: routes');
   });
 }
 

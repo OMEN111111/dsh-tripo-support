@@ -1,6 +1,6 @@
 {
-  "name": "dsh-tripo-support",
-  "version": "0.1.8",
+  "name": "dsh-model-gen",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Tripo, Meshy, Hyper3D, DashScope/qianwenai and Tencent Hunyuan3D async 3D providers for DeepSeek Harness, with in-chat 3D preview and a 3D workshop.",
@@ -8,11 +8,11 @@
   "author": "OMEN111111",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OMEN111111/dsh-tripo-support.git"
+    "url": "https://github.com/OMEN111111/dsh-model-gen.git"
   },
-  "homepage": "https://github.com/OMEN111111/dsh-tripo-support",
+  "homepage": "https://github.com/OMEN111111/dsh-model-gen",
   "bugs": {
-    "url": "https://github.com/OMEN111111/dsh-tripo-support/issues"
+    "url": "https://github.com/OMEN111111/dsh-model-gen/issues"
   },
   "exports": {
     ".": "./plugin/index.js",
@@ -43,6 +43,6 @@
   },
   "engines": {
     "node": ">=22.19.0",
-    "dsh": ">=0.2.2-rc.1 <0.3.0"
+    "dsh": ">=0.2.2-rc.3 <0.3.0"
   }
 }

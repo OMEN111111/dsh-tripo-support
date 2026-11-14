@@ -1,4 +1,4 @@
-# dsh-tripo-support
+# dsh-model-gen
 
 在 DeepSeek Harness（DSH）的「设置 → 3D 生成」中管理 Tripo、Meshy、Hyper3D、腾讯混元3D 以及兼容的第三方异步 3D 服务，并让 Agent 在项目里生成、预览和继续处理 3D 模型。
 
@@ -26,13 +26,15 @@ Copy-Item "$env:USERPROFILE\.dsh\profiles\desktop\cordis.patch.yml" `
   "$env:USERPROFILE\.dsh\profiles\desktop\cordis.patch.yml.bak-before-tripo"
 
 # 从 GitHub 仓库根安装（仓库根已声明 dsh.bundle.patch）
-dsh plugin --profile desktop add "https://github.com/OMEN111111/dsh-tripo-support.git"
+# 从旧名称升级时先移除旧包，再安装新包
+dsh plugin --profile desktop remove dsh-tripo-support
+dsh plugin --profile desktop add "https://github.com/OMEN111111/dsh-model-gen.git"
 
 # 或从本地仓库根目录安装
 dsh plugin --profile desktop add "."
 
 # 或从打包文件安装
-dsh plugin --profile desktop add ".\dist\dsh-tripo-support-0.1.8.tgz"
+dsh plugin --profile desktop add ".\dist\dsh-model-gen-0.2.0.tgz"
 ```
 
 安装完成后从托盘完整退出并重新打开 DSH。插件只把行插入 profile 的 bundle 列表；设置与凭据在插件自己的页面管理。
@@ -117,7 +119,7 @@ HY3D 官方地址使用 SecretId + SecretKey（TC3）。若使用接受 Bearer �
 在 Tripo 控制台 Settings → Webhooks 添加：
 
 ```
-https://<你的 DSH 公网地址>/plugins/dsh-tripo-support/webhook/tripo-official
+https://<你的 DSH 公网地址>/plugins/dsh-model-gen/webhook/tripo-official
 ```
 
 把控制台显示的 `whsec_...` 填到对应服务卡片的「Webhook Secret」并保存。插件会校验 `Tripo-Webhook-Signature` 的 HMAC-SHA256，并更新本地任务状态。
@@ -150,7 +152,7 @@ https://<你的 DSH 公网地址>/plugins/dsh-tripo-support/webhook/tripo-offici
 - 未使用真实 Tripo / Meshy / Hyper3D / 腾讯云 key 做付费联调；正式上线前需要用户提供低额度 key 做一次最小任务。
 - 第三方混元3D 的具体协议未提供样例；当前覆盖 DashScope 兼容路径。
 - `model-viewer` 依赖 WebGL；无 WebGL 的环境会降级为下载。
-- DSH 0.2.x 插件 API 可能变化；本版本声明兼容 `>=0.2.2-rc.1 <0.3.0`，首选基线为 0.2.2-rc.2。
+- DSH 0.2.x 插件 API 可能变化；本版本声明兼容 `>=0.2.2-rc.3 <0.3.0`，当前基线为 0.2.2-rc.3。
 
 ## 第三方资源
 
